@@ -1,51 +1,62 @@
 package ai.timefold.solver.core.impl.domain.variable;
 
-import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Objects;
 
 import ai.timefold.solver.core.api.score.director.ScoreDirector;
+import ai.timefold.solver.core.impl.domain.valuerange.descriptor.FromSolutionValueRangeDescriptor;
 import ai.timefold.solver.core.impl.domain.variable.descriptor.ListVariableDescriptor;
 import ai.timefold.solver.core.impl.heuristic.selector.list.ElementLocation;
 import ai.timefold.solver.core.impl.heuristic.selector.list.LocationInList;
+import ai.timefold.solver.core.impl.util.CollectionUtils;
 
 final class ExternalizedListVariableStateSupply<Solution_>
         implements ListVariableStateSupply<Solution_> {
 
     private final ListVariableDescriptor<Solution_> sourceVariableDescriptor;
+    private final ValueCounter<Solution_> valueCounter;
     private Map<Object, LocationInList> elementLocationMap;
-    private int unassignedCount;
+    private int assignedCount;
 
     public ExternalizedListVariableStateSupply(ListVariableDescriptor<Solution_> sourceVariableDescriptor) {
         this.sourceVariableDescriptor = sourceVariableDescriptor;
+        this.valueCounter = sourceVariableDescriptor.getValueRangeDescriptor() instanceof FromSolutionValueRangeDescriptor
+                ? new FromSolutionValueCounter<>(sourceVariableDescriptor)
+                : new FromEntityValueCounter<>(sourceVariableDescriptor);
     }
 
     @Override
     public void resetWorkingSolution(ScoreDirector<Solution_> scoreDirector) {
         var workingSolution = scoreDirector.getWorkingSolution();
+        valueCounter.resetWorkingSolution(workingSolution);
         if (elementLocationMap == null) {
-            elementLocationMap = new IdentityHashMap<>((int) sourceVariableDescriptor.getValueRangeSize(workingSolution, null));
+            // Value count will only be present here if the value range is on the solution.
+            // Otherwise the values will be counted per entity and the map will grow as necessary.
+            var valueCount = valueCounter.getCount();
+            elementLocationMap = CollectionUtils.newIdentityHashMap(valueCount == 0 ? 16 : valueCount);
         } else {
             elementLocationMap.clear();
         }
-        // Start with everything unassigned.
-        unassignedCount = (int) sourceVariableDescriptor.getValueRangeSize(workingSolution, null);
+        assignedCount = 0;
         // Will run over all entities and unmark all present elements as unassigned.
         sourceVariableDescriptor.getEntityDescriptor().visitAllEntities(workingSolution, this::insert);
     }
 
     private void insert(Object entity) {
+        valueCounter.addEntity(entity);
         var assignedElements = sourceVariableDescriptor.getValue(entity);
         var index = 0;
         for (var element : assignedElements) {
-            var oldLocation = elementLocationMap.put(element, new LocationInList(entity, index));
+            var newLocation = new LocationInList(entity, index);
+            var oldLocation = elementLocationMap.put(element, newLocation);
             if (oldLocation != null) {
                 throw new IllegalStateException(
                         "The supply (%s) is corrupted, because the element (%s) at index (%d) already exists (%s)."
                                 .formatted(this, element, index, oldLocation));
             }
             index++;
-            unassignedCount--;
+            assignedCount++;
+            System.out.println("inserted: " + element + " at index: " + newLocation + " for " + assignedCount);
         }
     }
 
@@ -77,6 +88,7 @@ final class ExternalizedListVariableStateSupply<Solution_>
     }
 
     private void retract(Object entity) {
+        valueCounter.removeEntity(entity);
         var assignedElements = sourceVariableDescriptor.getValue(entity);
         for (var index = 0; index < assignedElements.size(); index++) {
             var element = assignedElements.get(index);
@@ -92,7 +104,8 @@ final class ExternalizedListVariableStateSupply<Solution_>
                         "The supply (%s) is corrupted, because the element (%s) at index (%d) had an old index (%d) which is not the current index (%d)."
                                 .formatted(this, element, index, oldIndex, index));
             }
-            unassignedCount++;
+            assignedCount--;
+            System.out.println("removed: " + element + " at index: " + oldElementLocation + " for " + assignedCount);
         }
     }
 
@@ -104,7 +117,8 @@ final class ExternalizedListVariableStateSupply<Solution_>
                     "The supply (%s) is corrupted, because the element (%s) did not exist before unassigning."
                             .formatted(this, element));
         }
-        unassignedCount++;
+        assignedCount--;
+        System.out.println("unassigned: " + element + " at index: " + oldLocation + " for " + assignedCount);
     }
 
     @Override
@@ -124,7 +138,8 @@ final class ExternalizedListVariableStateSupply<Solution_>
             var newLocation = new LocationInList(entity, index);
             var oldLocation = elementLocationMap.put(element, newLocation);
             if (oldLocation == null) {
-                unassignedCount--;
+                assignedCount++;
+                System.out.println("updated: " + element + " at index: " + newLocation + " for " + assignedCount);
             } else if (index >= toIndex && newLocation.equals(oldLocation)) {
                 // Location is unchanged and we are past the part of the list that changed.
                 return;
@@ -165,7 +180,7 @@ final class ExternalizedListVariableStateSupply<Solution_>
 
     @Override
     public int getUnassignedCount() {
-        return unassignedCount;
+        return valueCounter.getCount() - assignedCount;
     }
 
     @Override
