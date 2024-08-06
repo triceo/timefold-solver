@@ -6,9 +6,11 @@ import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import ai.timefold.solver.core.api.domain.solution.PlanningSolution;
+import ai.timefold.solver.core.api.domain.valuerange.ValueRange;
 import ai.timefold.solver.core.api.domain.valuerange.ValueRangeProvider;
 import ai.timefold.solver.core.api.domain.variable.PlanningListVariable;
 import ai.timefold.solver.core.api.domain.variable.PlanningVariable;
@@ -17,9 +19,8 @@ import ai.timefold.solver.core.config.util.ConfigUtils;
 import ai.timefold.solver.core.impl.domain.common.accessor.MemberAccessor;
 import ai.timefold.solver.core.impl.domain.entity.descriptor.EntityDescriptor;
 import ai.timefold.solver.core.impl.domain.policy.DescriptorPolicy;
-import ai.timefold.solver.core.impl.domain.valuerange.descriptor.CompositeValueRangeDescriptor;
-import ai.timefold.solver.core.impl.domain.valuerange.descriptor.FromEntityPropertyValueRangeDescriptor;
-import ai.timefold.solver.core.impl.domain.valuerange.descriptor.FromSolutionPropertyValueRangeDescriptor;
+import ai.timefold.solver.core.impl.domain.valuerange.descriptor.FromEntityValueRangeDescriptor;
+import ai.timefold.solver.core.impl.domain.valuerange.descriptor.FromSolutionValueRangeDescriptor;
 import ai.timefold.solver.core.impl.domain.valuerange.descriptor.ValueRangeDescriptor;
 import ai.timefold.solver.core.impl.heuristic.selector.common.decorator.ComparatorSelectionSorter;
 import ai.timefold.solver.core.impl.heuristic.selector.common.decorator.SelectionSorter;
@@ -85,7 +86,7 @@ public abstract class GenuineVariableDescriptor<Solution_> extends VariableDescr
         if (valueRangeDescriptorList.size() == 1) {
             valueRangeDescriptor = valueRangeDescriptorList.get(0);
         } else {
-            valueRangeDescriptor = new CompositeValueRangeDescriptor<>(this, addNullInValueRange, valueRangeDescriptorList);
+            valueRangeDescriptor = ValueRangeDescriptor.compose(this, addNullInValueRange, valueRangeDescriptorList);
         }
     }
 
@@ -154,9 +155,9 @@ public abstract class GenuineVariableDescriptor<Solution_> extends VariableDescr
     private ValueRangeDescriptor<Solution_> buildValueRangeDescriptor(DescriptorPolicy descriptorPolicy,
             MemberAccessor valueRangeProviderMemberAccessor, boolean addNullInValueRange) {
         if (descriptorPolicy.isFromSolutionValueRangeProvider(valueRangeProviderMemberAccessor)) {
-            return new FromSolutionPropertyValueRangeDescriptor<>(this, addNullInValueRange, valueRangeProviderMemberAccessor);
+            return ValueRangeDescriptor.fromSolution(this, valueRangeProviderMemberAccessor, addNullInValueRange);
         } else if (descriptorPolicy.isFromEntityValueRangeProvider(valueRangeProviderMemberAccessor)) {
-            return new FromEntityPropertyValueRangeDescriptor<>(this, addNullInValueRange, valueRangeProviderMemberAccessor);
+            return ValueRangeDescriptor.fromEntity(this, valueRangeProviderMemberAccessor, addNullInValueRange);
         } else {
             throw new IllegalStateException("Impossible state: member accessor (" + valueRangeProviderMemberAccessor
                     + ") is not a value range provider.");
@@ -213,7 +214,7 @@ public abstract class GenuineVariableDescriptor<Solution_> extends VariableDescr
     }
 
     public boolean isValueRangeEntityIndependent() {
-        return valueRangeDescriptor.isEntityIndependent();
+        return valueRangeDescriptor instanceof FromSolutionValueRangeDescriptor;
     }
 
     // ************************************************************************
@@ -249,8 +250,23 @@ public abstract class GenuineVariableDescriptor<Solution_> extends VariableDescr
         return decreasingStrengthSorter;
     }
 
+    @SuppressWarnings("unchecked")
+    public <T> ValueRange<T> getValueRange(Solution_ solution, Object entity) {
+        if (valueRangeDescriptor instanceof FromSolutionValueRangeDescriptor<Solution_> fromSolutionValueRangeDescriptor) {
+            return (ValueRange<T>) fromSolutionValueRangeDescriptor.extractValueRange(solution);
+        } else {
+            var fromEntityValueRangeDescriptor = (FromEntityValueRangeDescriptor<Solution_>) valueRangeDescriptor;
+            return (ValueRange<T>) fromEntityValueRangeDescriptor.extractValueRange(solution, Objects.requireNonNull(entity));
+        }
+    }
+
     public long getValueRangeSize(Solution_ solution, Object entity) {
-        return valueRangeDescriptor.extractValueRangeSize(solution, entity);
+        if (valueRangeDescriptor instanceof FromSolutionValueRangeDescriptor<Solution_> fromSolutionValueRangeDescriptor) {
+            return fromSolutionValueRangeDescriptor.extractValueRangeSize(solution);
+        } else {
+            var fromEntityValueRangeDescriptor = (FromEntityValueRangeDescriptor<Solution_>) valueRangeDescriptor;
+            return fromEntityValueRangeDescriptor.extractValueRangeSize(solution, Objects.requireNonNull(entity));
+        }
     }
 
     @Override

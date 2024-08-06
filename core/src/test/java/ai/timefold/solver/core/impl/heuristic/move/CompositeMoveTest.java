@@ -214,6 +214,7 @@ class CompositeMoveTest {
         assertThat(e2.getValue()).isSameAs(v2);
 
         var scoreDirector = mockScoreDirector(variableDescriptor.getEntityDescriptor().getSolutionDescriptor());
+        when(scoreDirector.getWorkingSolution()).thenReturn(solution);
         var undoMove = move.doMove(scoreDirector);
 
         assertThat(e1.getValue()).isSameAs(v3);

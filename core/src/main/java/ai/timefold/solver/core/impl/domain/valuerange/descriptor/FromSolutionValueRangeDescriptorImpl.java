@@ -8,34 +8,18 @@ import ai.timefold.solver.core.impl.domain.variable.descriptor.GenuineVariableDe
 /**
  * @param <Solution_> the solution type, the class with the {@link PlanningSolution} annotation
  */
-public class FromSolutionPropertyValueRangeDescriptor<Solution_>
+final class FromSolutionValueRangeDescriptorImpl<Solution_>
         extends AbstractFromPropertyValueRangeDescriptor<Solution_>
-        implements EntityIndependentValueRangeDescriptor<Solution_> {
+        implements FromSolutionValueRangeDescriptor<Solution_> {
 
-    public FromSolutionPropertyValueRangeDescriptor(
-            GenuineVariableDescriptor<Solution_> variableDescriptor, boolean addNullInValueRange,
-            MemberAccessor memberAccessor) {
-        super(variableDescriptor, addNullInValueRange, memberAccessor);
+    public FromSolutionValueRangeDescriptorImpl(GenuineVariableDescriptor<Solution_> variableDescriptor,
+            MemberAccessor memberAccessor, boolean addNullInValueRange) {
+        super(variableDescriptor, memberAccessor, addNullInValueRange);
     }
 
     // ************************************************************************
     // Worker methods
     // ************************************************************************
-
-    @Override
-    public boolean isEntityIndependent() {
-        return true;
-    }
-
-    @Override
-    public ValueRange<?> extractValueRange(Solution_ solution, Object entity) {
-        return readValueRange(solution);
-    }
-
-    @Override
-    public long extractValueRangeSize(Solution_ solution, Object entity) {
-        return readValueRangeSize(solution);
-    }
 
     @Override
     public ValueRange<?> extractValueRange(Solution_ solution) {

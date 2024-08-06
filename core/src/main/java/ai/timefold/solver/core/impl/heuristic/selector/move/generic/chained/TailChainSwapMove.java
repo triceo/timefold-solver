@@ -8,7 +8,6 @@ import java.util.Objects;
 import ai.timefold.solver.core.api.domain.solution.PlanningSolution;
 import ai.timefold.solver.core.api.domain.valuerange.ValueRange;
 import ai.timefold.solver.core.api.score.director.ScoreDirector;
-import ai.timefold.solver.core.impl.domain.valuerange.descriptor.ValueRangeDescriptor;
 import ai.timefold.solver.core.impl.domain.variable.anchor.AnchorVariableSupply;
 import ai.timefold.solver.core.impl.domain.variable.descriptor.GenuineVariableDescriptor;
 import ai.timefold.solver.core.impl.domain.variable.inverserelation.SingletonInverseVariableSupply;
@@ -171,21 +170,13 @@ public class TailChainSwapMove<Solution_> extends AbstractMove<Solution_> {
                 return false;
             }
         }
-        if (!variableDescriptor.isValueRangeEntityIndependent()) {
-            ValueRangeDescriptor<Solution_> valueRangeDescriptor = variableDescriptor.getValueRangeDescriptor();
-            Solution_ workingSolution = scoreDirector.getWorkingSolution();
-            if (rightEntity != null) {
-                ValueRange rightValueRange = valueRangeDescriptor.extractValueRange(workingSolution, rightEntity);
-                if (!rightValueRange.contains(leftValue)) {
-                    return false;
-                }
-            }
-            ValueRange leftValueRange = valueRangeDescriptor.extractValueRange(workingSolution, leftEntity);
-            if (!leftValueRange.contains(rightValue)) {
-                return false;
-            }
+        Solution_ workingSolution = scoreDirector.getWorkingSolution();
+        ValueRange<Object> rightValueRange = variableDescriptor.getValueRange(workingSolution, rightEntity);
+        if (!rightValueRange.contains(leftValue)) {
+            return false;
         }
-        return true;
+        ValueRange<Object> leftValueRange = variableDescriptor.getValueRange(workingSolution, leftEntity);
+        return leftValueRange.contains(rightValue);
     }
 
     @Override

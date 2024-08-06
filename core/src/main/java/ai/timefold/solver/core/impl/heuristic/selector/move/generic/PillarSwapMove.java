@@ -8,7 +8,6 @@ import java.util.Objects;
 import ai.timefold.solver.core.api.domain.solution.PlanningSolution;
 import ai.timefold.solver.core.api.domain.valuerange.ValueRange;
 import ai.timefold.solver.core.api.score.director.ScoreDirector;
-import ai.timefold.solver.core.impl.domain.valuerange.descriptor.ValueRangeDescriptor;
 import ai.timefold.solver.core.impl.domain.variable.descriptor.GenuineVariableDescriptor;
 import ai.timefold.solver.core.impl.heuristic.move.AbstractMove;
 import ai.timefold.solver.core.impl.heuristic.move.Move;
@@ -62,20 +61,17 @@ public class PillarSwapMove<Solution_> extends AbstractMove<Solution_> {
             Object rightValue = variableDescriptor.getValue(rightPillar.get(0));
             if (!Objects.equals(leftValue, rightValue)) {
                 movable = true;
-                if (!variableDescriptor.isValueRangeEntityIndependent()) {
-                    ValueRangeDescriptor<Solution_> valueRangeDescriptor = variableDescriptor.getValueRangeDescriptor();
-                    Solution_ workingSolution = scoreDirector.getWorkingSolution();
-                    for (Object rightEntity : rightPillar) {
-                        ValueRange rightValueRange = valueRangeDescriptor.extractValueRange(workingSolution, rightEntity);
-                        if (!rightValueRange.contains(leftValue)) {
-                            return false;
-                        }
+                Solution_ workingSolution = scoreDirector.getWorkingSolution();
+                for (Object rightEntity : rightPillar) {
+                    ValueRange<Object> rightValueRange = variableDescriptor.getValueRange(workingSolution, rightEntity);
+                    if (!rightValueRange.contains(leftValue)) {
+                        return false;
                     }
-                    for (Object leftEntity : leftPillar) {
-                        ValueRange leftValueRange = valueRangeDescriptor.extractValueRange(workingSolution, leftEntity);
-                        if (!leftValueRange.contains(rightValue)) {
-                            return false;
-                        }
+                }
+                for (Object leftEntity : leftPillar) {
+                    ValueRange<Object> leftValueRange = variableDescriptor.getValueRange(workingSolution, leftEntity);
+                    if (!leftValueRange.contains(rightValue)) {
+                        return false;
                     }
                 }
             }

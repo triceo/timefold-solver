@@ -13,7 +13,8 @@ import ai.timefold.solver.core.config.heuristic.selector.value.ValueSelectorConf
 import ai.timefold.solver.core.enterprise.TimefoldSolverEnterpriseService;
 import ai.timefold.solver.core.impl.domain.entity.descriptor.EntityDescriptor;
 import ai.timefold.solver.core.impl.domain.solution.descriptor.SolutionDescriptor;
-import ai.timefold.solver.core.impl.domain.valuerange.descriptor.EntityIndependentValueRangeDescriptor;
+import ai.timefold.solver.core.impl.domain.valuerange.descriptor.FromEntityValueRangeDescriptor;
+import ai.timefold.solver.core.impl.domain.valuerange.descriptor.FromSolutionValueRangeDescriptor;
 import ai.timefold.solver.core.impl.domain.valuerange.descriptor.ValueRangeDescriptor;
 import ai.timefold.solver.core.impl.domain.variable.descriptor.BasicVariableDescriptor;
 import ai.timefold.solver.core.impl.domain.variable.descriptor.GenuineVariableDescriptor;
@@ -217,13 +218,12 @@ public class ValueSelectorFactory<Solution_>
             throw new IllegalArgumentException("The minimumCacheType (" + minimumCacheType
                     + ") is not yet supported. Please use " + SelectionCacheType.PHASE + " instead.");
         }
-        if (valueRangeDescriptor.isEntityIndependent()) {
-            return new FromSolutionPropertyValueSelector<>(
-                    (EntityIndependentValueRangeDescriptor<Solution_>) valueRangeDescriptor, minimumCacheType,
-                    randomSelection);
+        if (valueRangeDescriptor instanceof FromSolutionValueRangeDescriptor<Solution_> fromSolutionValueRangeDescriptor) {
+            return new FromSolutionPropertyValueSelector<>(fromSolutionValueRangeDescriptor, minimumCacheType, randomSelection);
         } else {
             // TODO Do not allow PHASE cache on FromEntityPropertyValueSelector, except if the moveSelector is PHASE cached too.
-            return new FromEntityPropertyValueSelector<>(valueRangeDescriptor, randomSelection);
+            return new FromEntityPropertyValueSelector<>((FromEntityValueRangeDescriptor<Solution_>) valueRangeDescriptor,
+                    randomSelection);
         }
     }
 

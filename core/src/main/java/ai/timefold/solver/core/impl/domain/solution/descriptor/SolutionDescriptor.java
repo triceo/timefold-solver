@@ -63,7 +63,8 @@ import ai.timefold.solver.core.impl.domain.solution.OverridesBasedConstraintWeig
 import ai.timefold.solver.core.impl.domain.solution.cloner.FieldAccessingSolutionCloner;
 import ai.timefold.solver.core.impl.domain.solution.cloner.gizmo.GizmoSolutionCloner;
 import ai.timefold.solver.core.impl.domain.solution.cloner.gizmo.GizmoSolutionClonerFactory;
-import ai.timefold.solver.core.impl.domain.valuerange.descriptor.EntityIndependentValueRangeDescriptor;
+import ai.timefold.solver.core.impl.domain.valuerange.descriptor.FromEntityValueRangeDescriptor;
+import ai.timefold.solver.core.impl.domain.valuerange.descriptor.FromSolutionValueRangeDescriptor;
 import ai.timefold.solver.core.impl.domain.variable.descriptor.GenuineVariableDescriptor;
 import ai.timefold.solver.core.impl.domain.variable.descriptor.ListVariableDescriptor;
 import ai.timefold.solver.core.impl.domain.variable.descriptor.ShadowVariableDescriptor;
@@ -1038,15 +1039,14 @@ public class SolutionDescriptor<Solution_> {
         MutableLong out = new MutableLong();
         for (var variableDescriptor : genuineVariableDescriptorSet) {
             var valueRangeDescriptor = variableDescriptor.getValueRangeDescriptor();
-            if (valueRangeDescriptor.isEntityIndependent()) {
-                var entityIndependentVariableDescriptor =
-                        (EntityIndependentValueRangeDescriptor<Solution_>) valueRangeDescriptor;
-                out.add(entityIndependentVariableDescriptor.extractValueRangeSize(solution));
+            if (valueRangeDescriptor instanceof FromSolutionValueRangeDescriptor<Solution_> fromSolutionValueRangeDescriptor) {
+                out.add(fromSolutionValueRangeDescriptor.extractValueRangeSize(solution));
             } else {
+                var fromEntityValueRangeDescriptor = (FromEntityValueRangeDescriptor<Solution_>) valueRangeDescriptor;
                 visitEntitiesByEntityClass(solution,
                         variableDescriptor.getEntityDescriptor().getEntityClass(),
                         entity -> {
-                            out.add(valueRangeDescriptor.extractValueRangeSize(solution, entity));
+                            out.add(fromEntityValueRangeDescriptor.extractValueRangeSize(solution, entity));
                             return false;
                         });
             }

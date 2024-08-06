@@ -21,8 +21,9 @@ import ai.timefold.solver.core.impl.domain.variable.descriptor.GenuineVariableDe
 /**
  * @param <Solution_> the solution type, the class with the {@link PlanningSolution} annotation
  */
-public abstract class AbstractFromPropertyValueRangeDescriptor<Solution_>
-        extends AbstractValueRangeDescriptor<Solution_> {
+abstract sealed class AbstractFromPropertyValueRangeDescriptor<Solution_>
+        extends AbstractValueRangeDescriptor<Solution_>
+        permits FromEntityValueRangeDescriptorImpl, FromSolutionValueRangeDescriptorImpl {
 
     protected final MemberAccessor memberAccessor;
     protected boolean collectionWrapping;
@@ -30,8 +31,7 @@ public abstract class AbstractFromPropertyValueRangeDescriptor<Solution_>
     protected boolean countable;
 
     public AbstractFromPropertyValueRangeDescriptor(GenuineVariableDescriptor<Solution_> variableDescriptor,
-            boolean addNullInValueRange,
-            MemberAccessor memberAccessor) {
+            MemberAccessor memberAccessor, boolean addNullInValueRange) {
         super(variableDescriptor, addNullInValueRange);
         this.memberAccessor = memberAccessor;
         ValueRangeProvider valueRangeProviderAnnotation = memberAccessor.getAnnotation(ValueRangeProvider.class);

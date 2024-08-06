@@ -10,7 +10,9 @@ import ai.timefold.solver.core.impl.domain.variable.descriptor.GenuineVariableDe
 /**
  * @param <Solution_> the solution type, the class with the {@link PlanningSolution} annotation
  */
-public abstract class AbstractValueRangeDescriptor<Solution_> implements ValueRangeDescriptor<Solution_> {
+abstract sealed class AbstractValueRangeDescriptor<Solution_>
+        implements ValueRangeDescriptor<Solution_>
+        permits AbstractFromPropertyValueRangeDescriptor, CompositeValueRangeDescriptor {
 
     protected final GenuineVariableDescriptor<Solution_> variableDescriptor;
     protected final boolean addNullInValueRange;
