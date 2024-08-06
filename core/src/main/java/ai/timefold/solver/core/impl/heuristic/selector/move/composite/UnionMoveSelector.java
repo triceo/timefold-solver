@@ -1,15 +1,15 @@
 package ai.timefold.solver.core.impl.heuristic.selector.move.composite;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import ai.timefold.solver.core.api.score.director.ScoreDirector;
 import ai.timefold.solver.core.impl.heuristic.move.Move;
 import ai.timefold.solver.core.impl.heuristic.selector.common.decorator.SelectionProbabilityWeightFactory;
 import ai.timefold.solver.core.impl.heuristic.selector.move.MoveSelector;
 import ai.timefold.solver.core.impl.phase.scope.AbstractStepScope;
+import ai.timefold.solver.core.impl.util.MergedIterator;
 
 /**
  * A {@link CompositeMoveSelector} that unions 2 or more {@link MoveSelector}s.
@@ -89,17 +89,17 @@ public class UnionMoveSelector<Solution_> extends CompositeMoveSelector<Solution
     @Override
     public Iterator<Move<Solution_>> iterator() {
         if (!randomSelection) {
-            Stream<Move<Solution_>> stream = Stream.empty();
-            for (MoveSelector<Solution_> moveSelector : childMoveSelectorList) {
-                stream = Stream.concat(stream, toStream(moveSelector));
+            var iteratorList = new ArrayList<Iterator<Move<Solution_>>>(childMoveSelectorList.size());
+            for (var moves : childMoveSelectorList) {
+                iteratorList.add(moves.iterator());
             }
-            return stream.iterator();
+            return new MergedIterator<>(iteratorList);
         } else if (selectorProbabilityWeightFactory == null) {
             return new UniformRandomUnionMoveIterator<>(childMoveSelectorList, workingRandom);
         } else {
             return new BiasedRandomUnionMoveIterator<>(childMoveSelectorList,
                     moveSelector -> {
-                        double weight = selectorProbabilityWeightFactory.createProbabilityWeight(scoreDirector, moveSelector);
+                        var weight = selectorProbabilityWeightFactory.createProbabilityWeight(scoreDirector, moveSelector);
                         if (weight < 0.0) {
                             throw new IllegalStateException(
                                     "The selectorProbabilityWeightFactory (" + selectorProbabilityWeightFactory
@@ -108,10 +108,6 @@ public class UnionMoveSelector<Solution_> extends CompositeMoveSelector<Solution
                         return weight;
                     }, workingRandom);
         }
-    }
-
-    private static <Solution_> Stream<Move<Solution_>> toStream(MoveSelector<Solution_> moveSelector) {
-        return StreamSupport.stream(moveSelector.spliterator(), false);
     }
 
     @Override

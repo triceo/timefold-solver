@@ -54,7 +54,6 @@ final class ExternalizedListVariableStateSupply<Solution_>
             }
             index++;
             assignedCount++;
-            System.out.println("inserted: " + element + " at index: " + newLocation + " for " + assignedCount);
         }
     }
 
@@ -103,7 +102,6 @@ final class ExternalizedListVariableStateSupply<Solution_>
                                 .formatted(this, element, index, oldIndex, index));
             }
             assignedCount--;
-            System.out.println("removed: " + element + " at index: " + oldElementLocation + " for " + assignedCount);
         }
     }
 
@@ -116,7 +114,6 @@ final class ExternalizedListVariableStateSupply<Solution_>
                             .formatted(this, element));
         }
         assignedCount--;
-        System.out.println("unassigned: " + element + " at index: " + oldLocation + " for " + assignedCount);
     }
 
     @Override
@@ -137,7 +134,6 @@ final class ExternalizedListVariableStateSupply<Solution_>
             var oldLocation = elementLocationMap.put(element, newLocation);
             if (oldLocation == null) {
                 assignedCount++;
-                System.out.println("updated: " + element + " at index: " + newLocation + " for " + assignedCount);
             } else if (index >= toIndex && newLocation.equals(oldLocation)) {
                 // Location is unchanged and we are past the part of the list that changed.
                 return;

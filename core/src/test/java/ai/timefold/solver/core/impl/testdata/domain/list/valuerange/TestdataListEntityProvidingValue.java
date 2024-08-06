@@ -10,7 +10,8 @@ import ai.timefold.solver.core.impl.testdata.domain.TestdataObject;
 public class TestdataListEntityProvidingValue extends TestdataObject {
 
     public static EntityDescriptor<TestdataListEntityProvidingSolution> buildEntityDescriptor() {
-        return TestdataListEntityProvidingSolution.buildSolutionDescriptor().findEntityDescriptorOrFail(TestdataListEntityProvidingValue.class);
+        return TestdataListEntityProvidingSolution.buildSolutionDescriptor()
+                .findEntityDescriptorOrFail(TestdataListEntityProvidingValue.class);
     }
 
     @InverseRelationShadowVariable(sourceVariableName = "valueList")

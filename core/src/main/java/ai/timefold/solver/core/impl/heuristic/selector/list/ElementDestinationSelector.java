@@ -2,6 +2,7 @@ package ai.timefold.solver.core.impl.heuristic.selector.list;
 
 import static ai.timefold.solver.core.impl.heuristic.selector.move.generic.list.ListChangeMoveSelector.filterPinnedListPlanningVariableValuesWithIndex;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Objects;
@@ -17,6 +18,9 @@ import ai.timefold.solver.core.impl.heuristic.selector.AbstractSelector;
 import ai.timefold.solver.core.impl.heuristic.selector.entity.EntitySelector;
 import ai.timefold.solver.core.impl.heuristic.selector.value.EntityIndependentValueSelector;
 import ai.timefold.solver.core.impl.solver.scope.SolverScope;
+import ai.timefold.solver.core.impl.util.MappingIterator;
+import ai.timefold.solver.core.impl.util.MergedIterator;
+import ai.timefold.solver.core.impl.util.SkippingIterator;
 
 /**
  * Selects destinations for list variable change moves. The destination specifies a future position in a list variable,
@@ -97,24 +101,32 @@ public class ElementDestinationSelector<Solution_> extends AbstractSelector<Solu
             if (entitySelector.getSize() == 0) {
                 return Collections.emptyIterator();
             }
+            var iteratorList = new ArrayList<Iterator<ElementLocation>>(3);
             // Start with the first unpinned value of each entity, or zero if no pinning.
             // Entity selector is guaranteed to return only unpinned entities.
-            Stream<ElementLocation> stream = StreamSupport.stream(entitySelector.spliterator(), false)
-                    .map(entity -> ElementLocation.of(entity, listVariableDescriptor.getFirstUnpinnedIndex(entity)));
+            var unpinnedValueIterator = new MappingIterator<Object, ElementLocation>(entitySelector.iterator(),
+                    entity -> ElementLocation.of(entity, listVariableDescriptor.getFirstUnpinnedIndex(entity)));
+            iteratorList.add(unpinnedValueIterator);
+
             // Filter guarantees that we only get values that are actually in one of the lists.
             // Value selector guarantees only unpinned values.
-            stream = Stream.concat(stream,
-                    StreamSupport.stream(getEffectiveValueSelector().spliterator(), false)
-                            .map(v -> listVariableStateSupply.getLocationInList(v))
-                            .flatMap(elementLocation -> elementLocation instanceof LocationInList locationInList
-                                    ? Stream.of(locationInList)
-                                    : Stream.empty())
-                            .map(locationInList -> ElementLocation.of(locationInList.entity(), locationInList.index() + 1)));
-            // If the list variable allows unassigned values, add the option of unassigning.
+            var elementLocations = new MappingIterator<>(getEffectiveValueSelector().iterator(),
+                    v -> listVariableStateSupply.getLocationInList(v));
+            var onlyAssignedLocations = new SkippingIterator<>(elementLocations,
+                    elementLocation -> elementLocation instanceof UnassignedLocation);
+            var positionsAfterValues = new MappingIterator<ElementLocation, ElementLocation>(onlyAssignedLocations,
+                    elementLocation -> {
+                        var locationInList = (LocationInList) elementLocation;
+                        return ElementLocation.of(locationInList.entity(), locationInList.index() + 1);
+                    });
+            iteratorList.add(positionsAfterValues);
+
             if (listVariableDescriptor.allowsUnassignedValues()) {
-                stream = Stream.concat(stream, Stream.of(ElementLocation.unassigned()));
+                // If the list variable allows unassigned values, add the option of unassigning.
+                iteratorList.add(Collections.<ElementLocation> singleton(ElementLocation.unassigned()).iterator());
             }
-            return stream.iterator();
+
+            return new MergedIterator<>(iteratorList);
         }
     }
 

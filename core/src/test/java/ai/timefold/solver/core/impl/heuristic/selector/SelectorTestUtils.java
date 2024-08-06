@@ -71,7 +71,6 @@ public class SelectorTestUtils {
         final List<Object> entityList = Arrays.asList(entities);
         when(entitySelector.iterator()).thenAnswer(invocation -> entityList.iterator());
         when(entitySelector.listIterator()).thenAnswer(invocation -> entityList.listIterator());
-        when(entitySelector.spliterator()).thenAnswer(invocation -> entityList.spliterator());
         for (int i = 0; i < entityList.size(); i++) {
             final int index = i;
             when(entitySelector.listIterator(index)).thenAnswer(invocation -> entityList.listIterator(index));
@@ -144,7 +143,6 @@ public class SelectorTestUtils {
         when(valueSelector.iterator(any())).thenAnswer(invocation -> valueList.iterator());
         when(valueSelector.endingIterator(any())).thenAnswer(invocation -> valueList.iterator());
         when(valueSelector.iterator()).thenAnswer(invocation -> valueList.iterator());
-        when(valueSelector.spliterator()).thenAnswer(invocation -> valueList.spliterator());
         when(valueSelector.isCountable()).thenReturn(true);
         when(valueSelector.isNeverEnding()).thenReturn(false);
         when(valueSelector.getSize(any())).thenReturn((long) valueList.size());
@@ -191,7 +189,6 @@ public class SelectorTestUtils {
         MoveSelector<Solution_> moveSelector = mock(MoveSelector.class);
         final List<Move<Solution_>> moveList = Arrays.asList(moves);
         when(moveSelector.iterator()).thenAnswer(invocation -> moveList.iterator());
-        when(moveSelector.spliterator()).thenAnswer(invocation -> moveList.spliterator());
         when(moveSelector.isCountable()).thenReturn(true);
         when(moveSelector.isNeverEnding()).thenReturn(false);
         when(moveSelector.getCacheType()).thenReturn(SelectionCacheType.JUST_IN_TIME);

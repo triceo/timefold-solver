@@ -6,12 +6,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import ai.timefold.solver.core.config.heuristic.selector.entity.pillar.SubPillarConfigPolicy;
 import ai.timefold.solver.core.impl.domain.variable.descriptor.GenuineVariableDescriptor;
@@ -19,6 +16,7 @@ import ai.timefold.solver.core.impl.domain.variable.supply.Demand;
 import ai.timefold.solver.core.impl.domain.variable.supply.SupplyManager;
 import ai.timefold.solver.core.impl.heuristic.selector.entity.EntitySelector;
 import ai.timefold.solver.core.impl.util.MemoizingSupply;
+import ai.timefold.solver.core.impl.util.SortingIterator;
 
 public final class PillarDemand<Solution_> implements Demand<MemoizingSupply<List<List<Object>>>> {
 
@@ -36,30 +34,29 @@ public final class PillarDemand<Solution_> implements Demand<MemoizingSupply<Lis
     @Override
     public MemoizingSupply<List<List<Object>>> createExternalizedSupply(SupplyManager supplyManager) {
         Supplier<List<List<Object>>> supplier = () -> {
-            long entitySize = entitySelector.getSize();
+            var entitySize = entitySelector.getSize();
             if (entitySize > Integer.MAX_VALUE) {
                 throw new IllegalStateException("The selector (" + this + ") has an entitySelector ("
                         + entitySelector + ") with entitySize (" + entitySize
                         + ") which is higher than Integer.MAX_VALUE.");
             }
-            Stream<Object> entities = StreamSupport.stream(entitySelector.spliterator(), false);
-            Comparator<?> comparator = subpillarConfigPolicy.getEntityComparator();
+            var comparator = subpillarConfigPolicy.getEntityComparator();
+            var iterator = entitySelector.iterator();
             if (comparator != null) {
-                /*
-                 * The entity selection will be sorted. This will result in all the pillars being sorted without having to
-                 * sort them individually later.
-                 */
-                entities = entities.sorted((Comparator<? super Object>) comparator);
+                // The entity selection will be sorted.
+                // This will result in all the pillars being sorted without having to sort them individually later.
+                iterator = new SortingIterator<>(iterator, (Comparator<Object>) comparator);
             }
             // Create all the pillars from a stream of entities; if sorted, the pillars will be sequential.
-            Map<List<Object>, List<Object>> valueStateToPillarMap = new LinkedHashMap<>((int) entitySize);
-            int variableCount = variableDescriptors.size();
-            entities.forEach(entity -> {
+            var valueStateToPillarMap = new LinkedHashMap<List<Object>, List<Object>>((int) entitySize);
+            var variableCount = variableDescriptors.size();
+            while (iterator.hasNext()) {
+                Object entity = iterator.next();
                 List<Object> valueState = variableCount == 1 ? getSingleVariableValueState(entity, variableDescriptors)
                         : getMultiVariableValueState(entity, variableDescriptors, variableCount);
                 List<Object> pillar = valueStateToPillarMap.computeIfAbsent(valueState, key -> new ArrayList<>());
                 pillar.add(entity);
-            });
+            }
             // Store the cache. Exclude pillars of size lower than the minimumSubPillarSize, as we shouldn't select those.
             Collection<List<Object>> pillarLists = valueStateToPillarMap.values();
             int minimumSubPillarSize = subpillarConfigPolicy.getMinimumSubPillarSize();
@@ -105,4 +102,5 @@ public final class PillarDemand<Solution_> implements Demand<MemoizingSupply<Lis
     public int hashCode() {
         return Objects.hash(entitySelector, variableDescriptors, subpillarConfigPolicy);
     }
+
 }

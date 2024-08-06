@@ -1,5 +1,6 @@
 package ai.timefold.solver.core.impl.heuristic.selector.value.decorator;
 
+import ai.timefold.solver.core.impl.domain.variable.ListVariableStateSupply;
 import ai.timefold.solver.core.impl.heuristic.selector.list.ElementDestinationSelector;
 import ai.timefold.solver.core.impl.heuristic.selector.list.LocationInList;
 import ai.timefold.solver.core.impl.heuristic.selector.value.EntityIndependentValueSelector;
@@ -17,10 +18,14 @@ public final class AssignedListValueSelector<Solution_> extends AbstractInverseE
 
     @Override
     protected boolean valueFilter(Object value) {
+        return rejectUnassignedValues(listVariableStateSupply, value);
+    }
+
+    static boolean rejectUnassignedValues(ListVariableStateSupply<?> listVariableStateSupply, Object value) {
         if (listVariableStateSupply.getUnassignedCount() == 0) {
-            return true; // Avoid hash lookup.
+            return false;
         }
-        return listVariableStateSupply.isAssigned(value);
+        return !listVariableStateSupply.isAssigned(value);
     }
 
     @Override

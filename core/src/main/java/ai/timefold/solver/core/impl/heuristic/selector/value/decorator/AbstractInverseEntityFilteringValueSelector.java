@@ -2,8 +2,6 @@ package ai.timefold.solver.core.impl.heuristic.selector.value.decorator;
 
 import java.util.Iterator;
 import java.util.Objects;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import ai.timefold.solver.core.impl.domain.variable.ListVariableStateSupply;
 import ai.timefold.solver.core.impl.domain.variable.descriptor.GenuineVariableDescriptor;
@@ -11,6 +9,7 @@ import ai.timefold.solver.core.impl.domain.variable.descriptor.ListVariableDescr
 import ai.timefold.solver.core.impl.heuristic.selector.AbstractDemandEnabledSelector;
 import ai.timefold.solver.core.impl.heuristic.selector.value.EntityIndependentValueSelector;
 import ai.timefold.solver.core.impl.phase.scope.AbstractPhaseScope;
+import ai.timefold.solver.core.impl.util.SkippingIterator;
 
 /**
  * Filters planning values based on their assigned status. The assigned status is determined using the inverse supply.
@@ -81,12 +80,22 @@ abstract class AbstractInverseEntityFilteringValueSelector<Solution_>
 
     @Override
     public long getSize(Object entity) {
-        return getSize();
+        var count = 0;
+        var iterator = iterator(entity);
+        while (iterator.hasNext()) {
+            iterator.next();
+            count++;
+        }
+        return count;
     }
 
     @Override
     public long getSize() {
-        return streamUnassignedValues().count();
+        var count = 0;
+        for (var object : this) {
+            count++;
+        }
+        return count;
     }
 
     @Override
@@ -96,18 +105,12 @@ abstract class AbstractInverseEntityFilteringValueSelector<Solution_>
 
     @Override
     public Iterator<Object> iterator() {
-        return streamUnassignedValues().iterator();
+        return new SkippingIterator<>(childValueSelector.iterator(), this::valueFilter);
     }
 
     @Override
     public Iterator<Object> endingIterator(Object entity) {
         return iterator();
-    }
-
-    private Stream<Object> streamUnassignedValues() {
-        return StreamSupport.stream(childValueSelector.spliterator(), false)
-                // Accept either assigned or unassigned values.
-                .filter(this::valueFilter);
     }
 
     @Override
@@ -124,4 +127,5 @@ abstract class AbstractInverseEntityFilteringValueSelector<Solution_>
     public int hashCode() {
         return Objects.hash(childValueSelector);
     }
+
 }

@@ -1,8 +1,5 @@
 package ai.timefold.solver.core.impl.heuristic.selector;
 
-import java.util.Spliterator;
-import java.util.Spliterators;
-
 import ai.timefold.solver.core.impl.heuristic.selector.common.decorator.SelectionProbabilityWeightFactory;
 
 public interface IterableSelector<Solution_, T> extends Selector<Solution_>, Iterable<T> {
@@ -18,12 +15,4 @@ public interface IterableSelector<Solution_, T> extends Selector<Solution_>, Ite
      */
     long getSize();
 
-    @Override
-    default Spliterator<T> spliterator() {
-        if (isCountable()) {
-            return Spliterators.spliterator(iterator(), getSize(), Spliterator.ORDERED);
-        } else {
-            return Iterable.super.spliterator();
-        }
-    }
 }
