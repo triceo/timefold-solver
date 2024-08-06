@@ -63,12 +63,13 @@ import ai.timefold.solver.core.impl.domain.solution.OverridesBasedConstraintWeig
 import ai.timefold.solver.core.impl.domain.solution.cloner.FieldAccessingSolutionCloner;
 import ai.timefold.solver.core.impl.domain.solution.cloner.gizmo.GizmoSolutionCloner;
 import ai.timefold.solver.core.impl.domain.solution.cloner.gizmo.GizmoSolutionClonerFactory;
-import ai.timefold.solver.core.impl.domain.valuerange.descriptor.FromEntityValueRangeDescriptor;
-import ai.timefold.solver.core.impl.domain.valuerange.descriptor.FromSolutionValueRangeDescriptor;
+import ai.timefold.solver.core.impl.domain.valuerange.descriptor.FromEntityPropertyValueRangeDescriptor;
+import ai.timefold.solver.core.impl.domain.valuerange.descriptor.FromSolutionPropertyValueRangeDescriptor;
 import ai.timefold.solver.core.impl.domain.variable.descriptor.GenuineVariableDescriptor;
 import ai.timefold.solver.core.impl.domain.variable.descriptor.ListVariableDescriptor;
 import ai.timefold.solver.core.impl.domain.variable.descriptor.ShadowVariableDescriptor;
 import ai.timefold.solver.core.impl.domain.variable.descriptor.VariableDescriptor;
+import ai.timefold.solver.core.impl.heuristic.selector.value.ValueCounter;
 import ai.timefold.solver.core.impl.score.definition.ScoreDefinition;
 import ai.timefold.solver.core.impl.util.MathUtils;
 import ai.timefold.solver.core.impl.util.MutableInt;
@@ -1039,10 +1040,10 @@ public class SolutionDescriptor<Solution_> {
         MutableLong out = new MutableLong();
         for (var variableDescriptor : genuineVariableDescriptorSet) {
             var valueRangeDescriptor = variableDescriptor.getValueRangeDescriptor();
-            if (valueRangeDescriptor instanceof FromSolutionValueRangeDescriptor<Solution_> fromSolutionValueRangeDescriptor) {
-                out.add(fromSolutionValueRangeDescriptor.extractValueRangeSize(solution));
+            if (valueRangeDescriptor instanceof FromSolutionPropertyValueRangeDescriptor<Solution_> fromSolutionPropertyValueRangeDescriptor) {
+                out.add(fromSolutionPropertyValueRangeDescriptor.extractValueRangeSize(solution));
             } else {
-                var fromEntityValueRangeDescriptor = (FromEntityValueRangeDescriptor<Solution_>) valueRangeDescriptor;
+                var fromEntityValueRangeDescriptor = (FromEntityPropertyValueRangeDescriptor<Solution_>) valueRangeDescriptor;
                 visitEntitiesByEntityClass(solution,
                         variableDescriptor.getEntityDescriptor().getEntityClass(),
                         entity -> {
@@ -1128,7 +1129,7 @@ public class SolutionDescriptor<Solution_> {
             }
             // We count every possibly unassigned element in every list variable.
             // And later we subtract the assigned elements.
-            unassignedValueCount.add((int) listVariableDescriptor.getValueRangeSize(solution, null));
+            unassignedValueCount.add(ValueCounter.countValues(listVariableDescriptor, solution));
         }
         visitAllEntities(solution, entity -> {
             var entityDescriptor = findEntityDescriptorOrFail(entity.getClass());

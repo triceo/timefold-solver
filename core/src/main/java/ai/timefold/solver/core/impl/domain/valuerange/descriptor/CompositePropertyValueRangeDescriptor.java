@@ -12,14 +12,14 @@ import ai.timefold.solver.core.impl.domain.variable.descriptor.GenuineVariableDe
 /**
  * @param <Solution_> the solution type, the class with the {@link PlanningSolution} annotation
  */
-final class CompositeValueRangeDescriptor<Solution_>
+final class CompositePropertyValueRangeDescriptor<Solution_>
         extends AbstractValueRangeDescriptor<Solution_>
-        implements FromSolutionValueRangeDescriptor<Solution_> {
+        implements FromSolutionPropertyValueRangeDescriptor<Solution_> {
 
     private final List<ValueRangeDescriptor<Solution_>> childValueRangeDescriptorList;
 
-    public CompositeValueRangeDescriptor(GenuineVariableDescriptor<Solution_> variableDescriptor, boolean addNullInValueRange,
-            List<ValueRangeDescriptor<Solution_>> childValueRangeDescriptorList) {
+    public CompositePropertyValueRangeDescriptor(GenuineVariableDescriptor<Solution_> variableDescriptor,
+            List<ValueRangeDescriptor<Solution_>> childValueRangeDescriptorList, boolean addNullInValueRange) {
         super(variableDescriptor, addNullInValueRange);
         this.childValueRangeDescriptorList = childValueRangeDescriptorList;
         for (var valueRangeDescriptor : childValueRangeDescriptorList) {
@@ -42,14 +42,12 @@ final class CompositeValueRangeDescriptor<Solution_>
 
     @Override
     public ValueRange<?> extractValueRange(Solution_ solution) {
-        return innerExtractValueRange(solution);
-    }
-
-    private <T> ValueRange<T> innerExtractValueRange(Solution_ solution) {
-        var childValueRangeList = new ArrayList<CountableValueRange<T>>(childValueRangeDescriptorList.size());
+        var childValueRangeList = new ArrayList<CountableValueRange<Object>>(childValueRangeDescriptorList.size());
         for (var valueRangeDescriptor : childValueRangeDescriptorList) {
-            var entityIndependentValueRangeDescriptor = (FromSolutionValueRangeDescriptor<Solution_>) valueRangeDescriptor;
-            childValueRangeList.add((CountableValueRange<T>) entityIndependentValueRangeDescriptor.extractValueRange(solution));
+            var entityIndependentValueRangeDescriptor =
+                    (FromSolutionPropertyValueRangeDescriptor<Solution_>) valueRangeDescriptor;
+            childValueRangeList
+                    .add((CountableValueRange<Object>) entityIndependentValueRangeDescriptor.extractValueRange(solution));
         }
         return doNullInValueRangeWrapping(new CompositeCountableValueRange<>(childValueRangeList));
     }
@@ -58,7 +56,8 @@ final class CompositeValueRangeDescriptor<Solution_>
     public long extractValueRangeSize(Solution_ solution) {
         var size = addNullInValueRange ? 1L : 0L;
         for (var valueRangeDescriptor : childValueRangeDescriptorList) {
-            var entityIndependentValueRangeDescriptor = (FromSolutionValueRangeDescriptor<Solution_>) valueRangeDescriptor;
+            var entityIndependentValueRangeDescriptor =
+                    (FromSolutionPropertyValueRangeDescriptor<Solution_>) valueRangeDescriptor;
             size += ((CountableValueRange<?>) entityIndependentValueRangeDescriptor.extractValueRange(solution)).getSize();
         }
         return size;

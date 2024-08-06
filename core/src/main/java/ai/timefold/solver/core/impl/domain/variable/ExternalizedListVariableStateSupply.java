@@ -4,10 +4,10 @@ import java.util.Map;
 import java.util.Objects;
 
 import ai.timefold.solver.core.api.score.director.ScoreDirector;
-import ai.timefold.solver.core.impl.domain.valuerange.descriptor.FromSolutionValueRangeDescriptor;
 import ai.timefold.solver.core.impl.domain.variable.descriptor.ListVariableDescriptor;
 import ai.timefold.solver.core.impl.heuristic.selector.list.ElementLocation;
 import ai.timefold.solver.core.impl.heuristic.selector.list.LocationInList;
+import ai.timefold.solver.core.impl.heuristic.selector.value.ValueCounter;
 import ai.timefold.solver.core.impl.util.CollectionUtils;
 
 final class ExternalizedListVariableStateSupply<Solution_>
@@ -20,9 +20,7 @@ final class ExternalizedListVariableStateSupply<Solution_>
 
     public ExternalizedListVariableStateSupply(ListVariableDescriptor<Solution_> sourceVariableDescriptor) {
         this.sourceVariableDescriptor = sourceVariableDescriptor;
-        this.valueCounter = sourceVariableDescriptor.getValueRangeDescriptor() instanceof FromSolutionValueRangeDescriptor
-                ? new FromSolutionValueCounter<>(sourceVariableDescriptor)
-                : new FromEntityValueCounter<>(sourceVariableDescriptor);
+        this.valueCounter = ValueCounter.create(sourceVariableDescriptor);
     }
 
     @Override

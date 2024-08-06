@@ -11,23 +11,24 @@ import ai.timefold.solver.core.impl.domain.variable.descriptor.GenuineVariableDe
  * @param <Solution_> the solution type, the class with the {@link PlanningSolution} annotation
  */
 public sealed interface ValueRangeDescriptor<Solution_>
-        permits AbstractValueRangeDescriptor, FromEntityValueRangeDescriptor, FromSolutionValueRangeDescriptor {
+        permits AbstractValueRangeDescriptor, FromEntityPropertyValueRangeDescriptor, FromSolutionPropertyValueRangeDescriptor {
 
-    static <Solution_> FromSolutionValueRangeDescriptor<Solution_> fromSolution(
+    static <Solution_> FromSolutionPropertyValueRangeDescriptor<Solution_> fromSolution(
             GenuineVariableDescriptor<Solution_> variableDescriptor, MemberAccessor memberAccessor,
             boolean addNullInValueRange) {
-        return new FromSolutionValueRangeDescriptorImpl<>(variableDescriptor, memberAccessor, addNullInValueRange);
+        return new FromSolutionPropertyValueRangeDescriptorImpl<>(variableDescriptor, memberAccessor, addNullInValueRange);
     }
 
-    static <Solution_> FromEntityValueRangeDescriptor<Solution_> fromEntity(
+    static <Solution_> FromEntityPropertyValueRangeDescriptor<Solution_> fromEntity(
             GenuineVariableDescriptor<Solution_> variableDescriptor, MemberAccessor memberAccessor,
             boolean addNullInValueRange) {
-        return new FromEntityValueRangeDescriptorImpl<>(variableDescriptor, memberAccessor, addNullInValueRange);
+        return new FromEntityPropertyValueRangeDescriptorImpl<>(variableDescriptor, memberAccessor, addNullInValueRange);
     }
 
     static <Solution_> ValueRangeDescriptor<Solution_> compose(GenuineVariableDescriptor<Solution_> variableDescriptor,
             boolean addNullInValueRange, List<ValueRangeDescriptor<Solution_>> childValueRangeDescriptorList) {
-        return new CompositeValueRangeDescriptor<>(variableDescriptor, addNullInValueRange, childValueRangeDescriptorList);
+        return new CompositePropertyValueRangeDescriptor<>(variableDescriptor, childValueRangeDescriptorList,
+                addNullInValueRange);
     }
 
     /**

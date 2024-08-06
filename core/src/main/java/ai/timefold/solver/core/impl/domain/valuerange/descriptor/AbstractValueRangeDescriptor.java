@@ -12,7 +12,7 @@ import ai.timefold.solver.core.impl.domain.variable.descriptor.GenuineVariableDe
  */
 abstract sealed class AbstractValueRangeDescriptor<Solution_>
         implements ValueRangeDescriptor<Solution_>
-        permits AbstractFromPropertyValueRangeDescriptor, CompositeValueRangeDescriptor {
+        permits AbstractFromPropertyValueRangeDescriptor, CompositePropertyValueRangeDescriptor {
 
     protected final GenuineVariableDescriptor<Solution_> variableDescriptor;
     protected final boolean addNullInValueRange;

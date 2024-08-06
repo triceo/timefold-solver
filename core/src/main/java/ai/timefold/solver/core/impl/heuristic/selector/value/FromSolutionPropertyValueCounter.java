@@ -1,14 +1,14 @@
-package ai.timefold.solver.core.impl.domain.variable;
+package ai.timefold.solver.core.impl.heuristic.selector.value;
 
 import ai.timefold.solver.core.impl.domain.variable.descriptor.ListVariableDescriptor;
 
-final class FromSolutionValueCounter<Solution_>
+final class FromSolutionPropertyValueCounter<Solution_>
         implements ValueCounter<Solution_> {
 
     private final ListVariableDescriptor<Solution_> sourceVariableDescriptor;
     private int valueCount = 0;
 
-    public FromSolutionValueCounter(ListVariableDescriptor<Solution_> sourceVariableDescriptor) {
+    public FromSolutionPropertyValueCounter(ListVariableDescriptor<Solution_> sourceVariableDescriptor) {
         this.sourceVariableDescriptor = sourceVariableDescriptor;
     }
 

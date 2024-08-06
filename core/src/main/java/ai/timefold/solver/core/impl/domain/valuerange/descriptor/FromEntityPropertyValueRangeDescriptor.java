@@ -6,14 +6,14 @@ import ai.timefold.solver.core.api.domain.valuerange.ValueRange;
 /**
  * @param <Solution_> the solution type, the class with the {@link PlanningSolution} annotation
  */
-public sealed interface FromEntityValueRangeDescriptor<Solution_>
+public sealed interface FromEntityPropertyValueRangeDescriptor<Solution_>
         extends ValueRangeDescriptor<Solution_>
-        permits FromEntityValueRangeDescriptorImpl {
+        permits FromEntityPropertyValueRangeDescriptorImpl {
 
     /**
      * @param solution never null
      * @param entity never null. To avoid this parameter,
-     *        use {@link FromSolutionValueRangeDescriptor#extractValueRange} instead.
+     *        use {@link FromSolutionPropertyValueRangeDescriptor#extractValueRange} instead.
      * @return never null
      */
     ValueRange<?> extractValueRange(Solution_ solution, Object entity);
@@ -21,7 +21,7 @@ public sealed interface FromEntityValueRangeDescriptor<Solution_>
     /**
      * @param solution never null
      * @param entity never null. To avoid this parameter,
-     *        use {@link FromSolutionValueRangeDescriptor#extractValueRangeSize} instead.
+     *        use {@link FromSolutionPropertyValueRangeDescriptor#extractValueRangeSize} instead.
      * @return never null
      * @throws UnsupportedOperationException if {@link #isCountable()} returns false
      */

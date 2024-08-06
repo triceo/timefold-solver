@@ -66,6 +66,7 @@ import ai.timefold.solver.core.impl.heuristic.selector.common.decorator.Selectio
 import ai.timefold.solver.core.impl.heuristic.selector.common.decorator.SelectionSorterWeightFactory;
 import ai.timefold.solver.core.impl.heuristic.selector.common.decorator.WeightFactorySelectionSorter;
 import ai.timefold.solver.core.impl.heuristic.selector.entity.decorator.PinEntityFilter;
+import ai.timefold.solver.core.impl.heuristic.selector.value.ValueCounter;
 import ai.timefold.solver.core.impl.util.CollectionUtils;
 import ai.timefold.solver.core.impl.util.MutableInt;
 
@@ -754,7 +755,6 @@ public class EntityDescriptor<Solution_> {
             maximumValueCount = Math.max(maximumValueCount, variableDescriptor.getValueRangeSize(solution, entity));
         }
         return maximumValueCount;
-
     }
 
     public void processProblemScale(ScoreDirector<Solution_> scoreDirector, Solution_ solution, Object entity,
@@ -797,7 +797,7 @@ public class EntityDescriptor<Solution_> {
                     }
                 }
             } else if (variableDescriptor instanceof ListVariableDescriptor<Solution_> listVariableDescriptor) {
-                tracker.setListTotalValueCount((int) listVariableDescriptor.getValueRangeSize(solution, entity));
+                tracker.setListTotalValueCount(ValueCounter.countValues(listVariableDescriptor, solution));
                 if (isMovable(scoreDirector, entity)) {
                     tracker.incrementListEntityCount(true);
                     tracker.addPinnedListValueCount(listVariableDescriptor.getFirstUnpinnedIndex(entity));

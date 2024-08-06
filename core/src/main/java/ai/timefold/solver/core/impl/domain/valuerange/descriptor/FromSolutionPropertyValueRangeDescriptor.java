@@ -6,9 +6,9 @@ import ai.timefold.solver.core.api.domain.valuerange.ValueRange;
 /**
  * @param <Solution_> the solution type, the class with the {@link PlanningSolution} annotation
  */
-public sealed interface FromSolutionValueRangeDescriptor<Solution_>
+public sealed interface FromSolutionPropertyValueRangeDescriptor<Solution_>
         extends ValueRangeDescriptor<Solution_>
-        permits CompositeValueRangeDescriptor, FromSolutionValueRangeDescriptorImpl {
+        permits CompositePropertyValueRangeDescriptor, FromSolutionPropertyValueRangeDescriptorImpl {
 
     /**
      * @param solution never null

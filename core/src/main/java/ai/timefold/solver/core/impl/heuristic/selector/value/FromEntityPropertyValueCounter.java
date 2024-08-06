@@ -1,4 +1,4 @@
-package ai.timefold.solver.core.impl.domain.variable;
+package ai.timefold.solver.core.impl.heuristic.selector.value;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -7,14 +7,14 @@ import java.util.Objects;
 import ai.timefold.solver.core.api.domain.valuerange.CountableValueRange;
 import ai.timefold.solver.core.impl.domain.variable.descriptor.ListVariableDescriptor;
 
-final class FromEntityValueCounter<Solution_>
+final class FromEntityPropertyValueCounter<Solution_>
         implements ValueCounter<Solution_> {
 
     private final ListVariableDescriptor<Solution_> sourceVariableDescriptor;
     private final Map<Object, Integer> valueCountMap = new IdentityHashMap<>();
     private Solution_ workingSolution;
 
-    public FromEntityValueCounter(ListVariableDescriptor<Solution_> sourceVariableDescriptor) {
+    public FromEntityPropertyValueCounter(ListVariableDescriptor<Solution_> sourceVariableDescriptor) {
         this.sourceVariableDescriptor = sourceVariableDescriptor;
     }
 

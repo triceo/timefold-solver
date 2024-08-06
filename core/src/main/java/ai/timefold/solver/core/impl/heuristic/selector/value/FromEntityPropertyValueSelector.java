@@ -6,7 +6,7 @@ import java.util.Objects;
 import ai.timefold.solver.core.api.domain.solution.PlanningSolution;
 import ai.timefold.solver.core.api.domain.valuerange.CountableValueRange;
 import ai.timefold.solver.core.api.domain.valuerange.ValueRange;
-import ai.timefold.solver.core.impl.domain.valuerange.descriptor.FromEntityValueRangeDescriptor;
+import ai.timefold.solver.core.impl.domain.valuerange.descriptor.FromEntityPropertyValueRangeDescriptor;
 import ai.timefold.solver.core.impl.domain.variable.descriptor.GenuineVariableDescriptor;
 import ai.timefold.solver.core.impl.heuristic.selector.AbstractDemandEnabledSelector;
 import ai.timefold.solver.core.impl.phase.scope.AbstractPhaseScope;
@@ -20,12 +20,12 @@ public final class FromEntityPropertyValueSelector<Solution_>
         extends AbstractDemandEnabledSelector<Solution_>
         implements ValueSelector<Solution_> {
 
-    private final FromEntityValueRangeDescriptor<Solution_> valueRangeDescriptor;
+    private final FromEntityPropertyValueRangeDescriptor<Solution_> valueRangeDescriptor;
     private final boolean randomSelection;
 
     private Solution_ workingSolution;
 
-    public FromEntityPropertyValueSelector(FromEntityValueRangeDescriptor<Solution_> valueRangeDescriptor,
+    public FromEntityPropertyValueSelector(FromEntityPropertyValueRangeDescriptor<Solution_> valueRangeDescriptor,
             boolean randomSelection) {
         this.valueRangeDescriptor = valueRangeDescriptor;
         this.randomSelection = randomSelection;

@@ -19,8 +19,8 @@ import ai.timefold.solver.core.config.util.ConfigUtils;
 import ai.timefold.solver.core.impl.domain.common.accessor.MemberAccessor;
 import ai.timefold.solver.core.impl.domain.entity.descriptor.EntityDescriptor;
 import ai.timefold.solver.core.impl.domain.policy.DescriptorPolicy;
-import ai.timefold.solver.core.impl.domain.valuerange.descriptor.FromEntityValueRangeDescriptor;
-import ai.timefold.solver.core.impl.domain.valuerange.descriptor.FromSolutionValueRangeDescriptor;
+import ai.timefold.solver.core.impl.domain.valuerange.descriptor.FromEntityPropertyValueRangeDescriptor;
+import ai.timefold.solver.core.impl.domain.valuerange.descriptor.FromSolutionPropertyValueRangeDescriptor;
 import ai.timefold.solver.core.impl.domain.valuerange.descriptor.ValueRangeDescriptor;
 import ai.timefold.solver.core.impl.heuristic.selector.common.decorator.ComparatorSelectionSorter;
 import ai.timefold.solver.core.impl.heuristic.selector.common.decorator.SelectionSorter;
@@ -214,7 +214,7 @@ public abstract class GenuineVariableDescriptor<Solution_> extends VariableDescr
     }
 
     public boolean isValueRangeEntityIndependent() {
-        return valueRangeDescriptor instanceof FromSolutionValueRangeDescriptor;
+        return valueRangeDescriptor instanceof FromSolutionPropertyValueRangeDescriptor;
     }
 
     // ************************************************************************
@@ -252,19 +252,19 @@ public abstract class GenuineVariableDescriptor<Solution_> extends VariableDescr
 
     @SuppressWarnings("unchecked")
     public <T> ValueRange<T> getValueRange(Solution_ solution, Object entity) {
-        if (valueRangeDescriptor instanceof FromSolutionValueRangeDescriptor<Solution_> fromSolutionValueRangeDescriptor) {
-            return (ValueRange<T>) fromSolutionValueRangeDescriptor.extractValueRange(solution);
+        if (valueRangeDescriptor instanceof FromSolutionPropertyValueRangeDescriptor<Solution_> fromSolutionPropertyValueRangeDescriptor) {
+            return (ValueRange<T>) fromSolutionPropertyValueRangeDescriptor.extractValueRange(solution);
         } else {
-            var fromEntityValueRangeDescriptor = (FromEntityValueRangeDescriptor<Solution_>) valueRangeDescriptor;
+            var fromEntityValueRangeDescriptor = (FromEntityPropertyValueRangeDescriptor<Solution_>) valueRangeDescriptor;
             return (ValueRange<T>) fromEntityValueRangeDescriptor.extractValueRange(solution, Objects.requireNonNull(entity));
         }
     }
 
     public long getValueRangeSize(Solution_ solution, Object entity) {
-        if (valueRangeDescriptor instanceof FromSolutionValueRangeDescriptor<Solution_> fromSolutionValueRangeDescriptor) {
-            return fromSolutionValueRangeDescriptor.extractValueRangeSize(solution);
+        if (valueRangeDescriptor instanceof FromSolutionPropertyValueRangeDescriptor<Solution_> fromSolutionPropertyValueRangeDescriptor) {
+            return fromSolutionPropertyValueRangeDescriptor.extractValueRangeSize(solution);
         } else {
-            var fromEntityValueRangeDescriptor = (FromEntityValueRangeDescriptor<Solution_>) valueRangeDescriptor;
+            var fromEntityValueRangeDescriptor = (FromEntityPropertyValueRangeDescriptor<Solution_>) valueRangeDescriptor;
             return fromEntityValueRangeDescriptor.extractValueRangeSize(solution, Objects.requireNonNull(entity));
         }
     }

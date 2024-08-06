@@ -7,7 +7,7 @@ import ai.timefold.solver.core.api.domain.valuerange.CountableValueRange;
 import ai.timefold.solver.core.api.domain.valuerange.ValueRange;
 import ai.timefold.solver.core.config.heuristic.selector.common.SelectionCacheType;
 import ai.timefold.solver.core.config.heuristic.selector.common.SelectionOrder;
-import ai.timefold.solver.core.impl.domain.valuerange.descriptor.FromSolutionValueRangeDescriptor;
+import ai.timefold.solver.core.impl.domain.valuerange.descriptor.FromSolutionPropertyValueRangeDescriptor;
 import ai.timefold.solver.core.impl.domain.variable.descriptor.GenuineVariableDescriptor;
 import ai.timefold.solver.core.impl.heuristic.selector.AbstractDemandEnabledSelector;
 import ai.timefold.solver.core.impl.phase.scope.AbstractPhaseScope;
@@ -21,7 +21,7 @@ public final class FromSolutionPropertyValueSelector<Solution_>
         extends AbstractDemandEnabledSelector<Solution_>
         implements EntityIndependentValueSelector<Solution_> {
 
-    private final FromSolutionValueRangeDescriptor<Solution_> valueRangeDescriptor;
+    private final FromSolutionPropertyValueRangeDescriptor<Solution_> valueRangeDescriptor;
     private final SelectionCacheType minimumCacheType;
     private final boolean randomSelection;
     private final boolean valueRangeMightContainEntity;
@@ -30,7 +30,7 @@ public final class FromSolutionPropertyValueSelector<Solution_>
     private Long cachedEntityListRevision = null;
     private boolean cachedEntityListIsDirty = false;
 
-    public FromSolutionPropertyValueSelector(FromSolutionValueRangeDescriptor<Solution_> valueRangeDescriptor,
+    public FromSolutionPropertyValueSelector(FromSolutionPropertyValueRangeDescriptor<Solution_> valueRangeDescriptor,
             SelectionCacheType minimumCacheType, boolean randomSelection) {
         this.valueRangeDescriptor = valueRangeDescriptor;
         this.minimumCacheType = minimumCacheType;

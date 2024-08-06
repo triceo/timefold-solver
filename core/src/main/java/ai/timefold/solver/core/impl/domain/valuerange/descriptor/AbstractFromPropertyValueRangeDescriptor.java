@@ -23,7 +23,7 @@ import ai.timefold.solver.core.impl.domain.variable.descriptor.GenuineVariableDe
  */
 abstract sealed class AbstractFromPropertyValueRangeDescriptor<Solution_>
         extends AbstractValueRangeDescriptor<Solution_>
-        permits FromEntityValueRangeDescriptorImpl, FromSolutionValueRangeDescriptorImpl {
+        permits FromEntityPropertyValueRangeDescriptorImpl, FromSolutionPropertyValueRangeDescriptorImpl {
 
     protected final MemberAccessor memberAccessor;
     protected boolean collectionWrapping;
