@@ -488,13 +488,6 @@ public class ValueSelectorFactory<Solution_>
             GenuineVariableDescriptor<Solution_> variableDescriptor, ValueSelector<Solution_> valueSelector) {
         if (variableDescriptor.isListVariable() && configPolicy.isUnassignedValuesAllowed()
                 && listValueFilteringType != ListValueFilteringType.NONE) {
-            if (!(valueSelector instanceof EntityIndependentValueSelector)) {
-                throw new IllegalArgumentException("The valueSelectorConfig (" + config
-                        + ") with id (" + config.getId()
-                        + ") needs to be based on an "
-                        + EntityIndependentValueSelector.class.getSimpleName() + " (" + valueSelector + ")."
-                        + " Check your @" + ValueRangeProvider.class.getSimpleName() + " annotations.");
-            }
             valueSelector = listValueFilteringType == ListValueFilteringType.ACCEPT_ASSIGNED
                     ? new AssignedListValueSelector<>(((EntityIndependentValueSelector<Solution_>) valueSelector))
                     : new UnassignedListValueSelector<>(((EntityIndependentValueSelector<Solution_>) valueSelector));

@@ -2,7 +2,6 @@ package ai.timefold.solver.core.impl.domain.variable.descriptor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 import java.util.List;
 
@@ -38,9 +37,8 @@ class ListVariableDescriptorTest {
     }
 
     @Test
-    void requiresEntityIndependentValueRange() {
-        assertThatIllegalArgumentException()
-                .isThrownBy(TestdataListEntityProvidingSolution::buildSolutionDescriptor)
-                .withMessageContaining("is not supported with a list variable");
+    void supportsValueRangeFromEntity() {
+        assertThatCode(TestdataListEntityProvidingSolution::buildSolutionDescriptor)
+                .doesNotThrowAnyException();
     }
 }

@@ -1,15 +1,11 @@
 package ai.timefold.solver.core.impl.domain.variable.descriptor;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
-import ai.timefold.solver.core.api.domain.entity.PlanningEntity;
-import ai.timefold.solver.core.api.domain.solution.PlanningSolution;
-import ai.timefold.solver.core.api.domain.valuerange.ValueRangeProvider;
 import ai.timefold.solver.core.api.domain.variable.InverseRelationShadowVariable;
 import ai.timefold.solver.core.api.domain.variable.PlanningListVariable;
 import ai.timefold.solver.core.api.score.director.ScoreDirector;
@@ -61,22 +57,6 @@ public final class ListVariableDescriptor<Solution_> extends GenuineVariableDesc
         PlanningListVariable planningVariableAnnotation = variableMemberAccessor.getAnnotation(PlanningListVariable.class);
         allowsUnassignedValues = planningVariableAnnotation.allowsUnassignedValues();
         processValueRangeRefs(descriptorPolicy, planningVariableAnnotation.valueRangeProviderRefs());
-    }
-
-    @Override
-    protected void processValueRangeRefs(DescriptorPolicy descriptorPolicy, String[] valueRangeProviderRefs) {
-        var fromEntityValueRangeProviderRefs = Arrays.stream(valueRangeProviderRefs)
-                .filter(descriptorPolicy::hasFromEntityValueRangeProvider)
-                .toList();
-        if (!fromEntityValueRangeProviderRefs.isEmpty()) {
-            throw new IllegalArgumentException("@" + ValueRangeProvider.class.getSimpleName()
-                    + " on a @" + PlanningEntity.class.getSimpleName()
-                    + " is not supported with a list variable (" + this + ").\n"
-                    + "Maybe move the valueRangeProvider" + (fromEntityValueRangeProviderRefs.size() > 1 ? "s" : "")
-                    + " (" + fromEntityValueRangeProviderRefs
-                    + ") from the entity class to the @" + PlanningSolution.class.getSimpleName() + " class.");
-        }
-        super.processValueRangeRefs(descriptorPolicy, valueRangeProviderRefs);
     }
 
     // ************************************************************************

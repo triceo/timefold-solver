@@ -79,6 +79,9 @@ import ai.timefold.solver.core.impl.testdata.domain.list.pinned.TestdataPinnedLi
 import ai.timefold.solver.core.impl.testdata.domain.list.pinned.index.TestdataPinnedWithIndexListEntity;
 import ai.timefold.solver.core.impl.testdata.domain.list.pinned.index.TestdataPinnedWithIndexListSolution;
 import ai.timefold.solver.core.impl.testdata.domain.list.pinned.index.TestdataPinnedWithIndexListValue;
+import ai.timefold.solver.core.impl.testdata.domain.list.valuerange.TestdataListEntityProvidingEntity;
+import ai.timefold.solver.core.impl.testdata.domain.list.valuerange.TestdataListEntityProvidingSolution;
+import ai.timefold.solver.core.impl.testdata.domain.list.valuerange.TestdataListEntityProvidingValue;
 import ai.timefold.solver.core.impl.testdata.domain.multientity.TestdataHerdEntity;
 import ai.timefold.solver.core.impl.testdata.domain.multientity.TestdataLeadEntity;
 import ai.timefold.solver.core.impl.testdata.domain.multientity.TestdataMultiEntitySolution;
@@ -912,6 +915,46 @@ class DefaultSolverTest {
 
         final var valueCount = 24;
         var solution = TestdataListSolution.generateUninitializedSolution(valueCount, 8);
+
+        var score = SolutionManager.create(solverFactory).update(solution);
+        assertThat(score.initScore()).isEqualTo(-valueCount);
+        assertThat(score.isSolutionInitialized()).isFalse();
+
+        // Keep restarting the solver until the solution is initialized.
+        for (var initScore = -valueCount; initScore < 0; initScore += stepCountLimit) {
+            softly.assertThat(solution.getScore().initScore()).isEqualTo(initScore);
+            softly.assertThat(solution.getScore().isSolutionInitialized()).isFalse();
+            solution = solver.solve(solution);
+        }
+
+        // Finally, the initScore is 0.
+        softly.assertThat(solution.getScore().initScore()).isZero();
+        softly.assertThat(solution.getScore().isSolutionInitialized()).isTrue();
+    }
+
+    @Test
+    void solveListVariableWithValueRangeFromEntity(SoftAssertions softly) {
+        var solverConfig = PlannerTestUtils.buildSolverConfig(TestdataListEntityProvidingSolution.class,
+                TestdataListEntityProvidingEntity.class, TestdataListEntityProvidingValue.class);
+
+        // Run only 7 steps at a time, although the total number of steps needed to complete CH is equal to maximumValueRangeSize.
+        final var stepCountLimit = 7;
+        var phaseConfig = new ConstructionHeuristicPhaseConfig();
+        phaseConfig.setTerminationConfig(new TerminationConfig().withStepCountLimit(stepCountLimit));
+        solverConfig.setPhaseConfigList(Collections.singletonList(phaseConfig));
+        SolverFactory<TestdataListEntityProvidingSolution> solverFactory = SolverFactory.create(solverConfig);
+        var solver = solverFactory.buildSolver();
+
+        final var valueCount = 24;
+        var value1 = new TestdataListEntityProvidingValue("v1");
+        var value2 = new TestdataListEntityProvidingValue("v2");
+        var value3 = new TestdataListEntityProvidingValue("v3");
+        var value4 = new TestdataListEntityProvidingValue("v4");
+        var overlappingValue = new TestdataListEntityProvidingValue("v5");
+        var entity1 = new TestdataListEntityProvidingEntity(List.of(value1, value2, overlappingValue));
+        var entity2 = new TestdataListEntityProvidingEntity(List.of(overlappingValue, value3, value4));
+        var solution = new TestdataListEntityProvidingSolution();
+        solution.setEntityList(List.of(entity1, entity2));
 
         var score = SolutionManager.create(solverFactory).update(solution);
         assertThat(score.initScore()).isEqualTo(-valueCount);
