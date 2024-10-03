@@ -28,8 +28,8 @@ public abstract class AbstractJoinNode<LeftTuple_ extends AbstractTuple, Right_,
     protected final int inputStoreIndexRightOutTupleList;
     protected final int outputStoreIndexLeftOutEntry;
     protected final int outputStoreIndexRightOutEntry;
-    private final StaticPropagationQueue<OutTuple_> propagationQueue;
 
+    private final StaticPropagationQueue<OutTuple_> propagationQueue;
     protected final BiConsumer<LeftTuple_, UniTuple<Right_>> outTupleInserter;
 
     protected AbstractJoinNode(int inputStoreIndexLeftOutTupleList, int inputStoreIndexRightOutTupleList,

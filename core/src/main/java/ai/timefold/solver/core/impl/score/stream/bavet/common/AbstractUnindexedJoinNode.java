@@ -1,5 +1,7 @@
 package ai.timefold.solver.core.impl.score.stream.bavet.common;
 
+import java.util.function.BiConsumer;
+
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.AbstractTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.LeftTupleLifecycle;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.RightTupleLifecycle;
@@ -21,10 +23,11 @@ public abstract class AbstractUnindexedJoinNode<LeftTuple_ extends AbstractTuple
 
     private final int inputStoreIndexLeftEntry;
     private final int inputStoreIndexRightEntry;
-    private final boolean isFiltering;
 
     private final ElementAwareList<LeftTuple_> leftTupleList = new ElementAwareList<>();
     private final ElementAwareList<UniTuple<Right_>> rightTupleList = new ElementAwareList<>();
+    private final Updater<LeftTuple_, OutTuple_> leftUpdater;
+    private final Updater<UniTuple<Right_>, OutTuple_> rightUpdater;
 
     protected AbstractUnindexedJoinNode(int inputStoreIndexLeftEntry, int inputStoreIndexLeftOutTupleList,
             int inputStoreIndexRightEntry, int inputStoreIndexRightOutTupleList,
@@ -34,7 +37,8 @@ public abstract class AbstractUnindexedJoinNode<LeftTuple_ extends AbstractTuple
                 outputStoreIndexLeftOutEntry, outputStoreIndexRightOutEntry);
         this.inputStoreIndexLeftEntry = inputStoreIndexLeftEntry;
         this.inputStoreIndexRightEntry = inputStoreIndexRightEntry;
-        this.isFiltering = isFiltering;
+        this.leftUpdater = isFiltering ? this::updateLeftFiltered : this::updateLeftUnfiltered;
+        this.rightUpdater = isFiltering ? this::updateRightFiltered : this::updateRightUnfiltered;
     }
 
     @Override
@@ -61,16 +65,20 @@ public abstract class AbstractUnindexedJoinNode<LeftTuple_ extends AbstractTuple
             return;
         }
         ElementAwareList<OutTuple_> outTupleListLeft = leftTuple.getStore(inputStoreIndexLeftOutTupleList);
-        if (isFiltering) {
-            rightTupleList.forEach(rightTuple -> {
-                ElementAwareList<OutTuple_> rightOutList = rightTuple.getStore(inputStoreIndexRightOutTupleList);
-                processMatch(leftTuple, rightTuple, rightOutList, outTupleListLeft, outputStoreIndexRightOutEntry);
-            });
-        } else {
-            for (OutTuple_ outTuple : outTupleListLeft) {
-                setOutTupleLeftFacts(outTuple, leftTuple);
-                updateOutTuple(outTuple);
-            }
+        leftUpdater.accept(leftTuple, outTupleListLeft);
+    }
+
+    private void updateLeftFiltered(LeftTuple_ leftTuple, ElementAwareList<OutTuple_> outTupleListLeft) {
+        rightTupleList.forEach(rightTuple -> {
+            ElementAwareList<OutTuple_> rightOutList = rightTuple.getStore(inputStoreIndexRightOutTupleList);
+            processMatch(leftTuple, rightTuple, rightOutList, outTupleListLeft, outputStoreIndexRightOutEntry);
+        });
+    }
+
+    private void updateLeftUnfiltered(LeftTuple_ leftTuple, ElementAwareList<OutTuple_> outTupleListLeft) {
+        for (OutTuple_ outTuple : outTupleListLeft) {
+            setOutTupleLeftFacts(outTuple, leftTuple);
+            updateOutTuple(outTuple);
         }
     }
 
@@ -110,17 +118,20 @@ public abstract class AbstractUnindexedJoinNode<LeftTuple_ extends AbstractTuple
             return;
         }
         ElementAwareList<OutTuple_> outTupleListRight = rightTuple.getStore(inputStoreIndexRightOutTupleList);
-        if (isFiltering) {
-            // Prefer an update over retract-insert if possible
-            leftTupleList.forEach(leftTuple -> {
-                ElementAwareList<OutTuple_> leftOutList = leftTuple.getStore(inputStoreIndexLeftOutTupleList);
-                processMatch(leftTuple, rightTuple, leftOutList, outTupleListRight, outputStoreIndexLeftOutEntry);
-            });
-        } else {
-            for (OutTuple_ outTuple : outTupleListRight) {
-                setOutTupleRightFact(outTuple, rightTuple);
-                updateOutTuple(outTuple);
-            }
+        rightUpdater.accept(rightTuple, outTupleListRight);
+    }
+
+    private void updateRightFiltered(UniTuple<Right_> rightTuple, ElementAwareList<OutTuple_> outTupleListRight) {
+        leftTupleList.forEach(leftTuple -> {
+            ElementAwareList<OutTuple_> leftOutList = leftTuple.getStore(inputStoreIndexLeftOutTupleList);
+            processMatch(leftTuple, rightTuple, leftOutList, outTupleListRight, outputStoreIndexLeftOutEntry);
+        });
+    }
+
+    private void updateRightUnfiltered(UniTuple<Right_> rightTuple, ElementAwareList<OutTuple_> outTupleListRight) {
+        for (OutTuple_ outTuple : outTupleListRight) {
+            setOutTupleRightFact(outTuple, rightTuple);
+            updateOutTuple(outTuple);
         }
     }
 
@@ -134,6 +145,11 @@ public abstract class AbstractUnindexedJoinNode<LeftTuple_ extends AbstractTuple
         ElementAwareList<OutTuple_> outTupleListRight = rightTuple.removeStore(inputStoreIndexRightOutTupleList);
         rightEntry.remove();
         outTupleListRight.forEach(this::retractOutTuple);
+    }
+
+    @FunctionalInterface
+    private interface Updater<Tuple_ extends AbstractTuple, OutTuple_ extends AbstractTuple>
+            extends BiConsumer<Tuple_, ElementAwareList<OutTuple_>> {
     }
 
 }
