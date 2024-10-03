@@ -21,6 +21,8 @@ public abstract class AbstractUnindexedJoinNode<LeftTuple_ extends AbstractTuple
 
     private final int inputStoreIndexLeftEntry;
     private final int inputStoreIndexRightEntry;
+    private final boolean isFiltering;
+
     private final ElementAwareList<LeftTuple_> leftTupleList = new ElementAwareList<>();
     private final ElementAwareList<UniTuple<Right_>> rightTupleList = new ElementAwareList<>();
 
@@ -32,6 +34,7 @@ public abstract class AbstractUnindexedJoinNode<LeftTuple_ extends AbstractTuple
                 outputStoreIndexLeftOutEntry, outputStoreIndexRightOutEntry);
         this.inputStoreIndexLeftEntry = inputStoreIndexLeftEntry;
         this.inputStoreIndexRightEntry = inputStoreIndexRightEntry;
+        this.isFiltering = isFiltering;
     }
 
     @Override
@@ -57,7 +60,18 @@ public abstract class AbstractUnindexedJoinNode<LeftTuple_ extends AbstractTuple
             insertLeft(leftTuple);
             return;
         }
-        leftTupleUpdater.accept(leftTuple, rightTupleList::forEach);
+        ElementAwareList<OutTuple_> outTupleListLeft = leftTuple.getStore(inputStoreIndexLeftOutTupleList);
+        if (isFiltering) {
+            rightTupleList.forEach(rightTuple -> {
+                ElementAwareList<OutTuple_> rightOutList = rightTuple.getStore(inputStoreIndexRightOutTupleList);
+                processMatch(leftTuple, rightTuple, rightOutList, outTupleListLeft, outputStoreIndexRightOutEntry);
+            });
+        } else {
+            for (OutTuple_ outTuple : outTupleListLeft) {
+                setOutTupleLeftFacts(outTuple, leftTuple);
+                updateOutTuple(outTuple);
+            }
+        }
     }
 
     @Override
@@ -95,7 +109,19 @@ public abstract class AbstractUnindexedJoinNode<LeftTuple_ extends AbstractTuple
             insertRight(rightTuple);
             return;
         }
-        rightTupleUpdater.accept(rightTuple, leftTupleList::forEach);
+        ElementAwareList<OutTuple_> outTupleListRight = rightTuple.getStore(inputStoreIndexRightOutTupleList);
+        if (isFiltering) {
+            // Prefer an update over retract-insert if possible
+            leftTupleList.forEach(leftTuple -> {
+                ElementAwareList<OutTuple_> leftOutList = leftTuple.getStore(inputStoreIndexLeftOutTupleList);
+                processMatch(leftTuple, rightTuple, leftOutList, outTupleListRight, outputStoreIndexLeftOutEntry);
+            });
+        } else {
+            for (OutTuple_ outTuple : outTupleListRight) {
+                setOutTupleRightFact(outTuple, rightTuple);
+                updateOutTuple(outTuple);
+            }
+        }
     }
 
     @Override

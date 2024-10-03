@@ -1,7 +1,6 @@
 package ai.timefold.solver.core.impl.score.stream.bavet.common;
 
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.AbstractTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.LeftTupleLifecycle;
@@ -27,12 +26,10 @@ public abstract class AbstractJoinNode<LeftTuple_ extends AbstractTuple, Right_,
 
     protected final int inputStoreIndexLeftOutTupleList;
     protected final int inputStoreIndexRightOutTupleList;
-    private final int outputStoreIndexLeftOutEntry;
-    private final int outputStoreIndexRightOutEntry;
+    protected final int outputStoreIndexLeftOutEntry;
+    protected final int outputStoreIndexRightOutEntry;
     private final StaticPropagationQueue<OutTuple_> propagationQueue;
 
-    protected final BiConsumer<LeftTuple_, Consumer<Consumer<UniTuple<Right_>>>> leftTupleUpdater;
-    protected final BiConsumer<UniTuple<Right_>, Consumer<Consumer<LeftTuple_>>> rightTupleUpdater;
     protected final BiConsumer<LeftTuple_, UniTuple<Right_>> outTupleInserter;
 
     protected AbstractJoinNode(int inputStoreIndexLeftOutTupleList, int inputStoreIndexRightOutTupleList,
@@ -43,8 +40,6 @@ public abstract class AbstractJoinNode<LeftTuple_ extends AbstractTuple, Right_,
         this.outputStoreIndexLeftOutEntry = outputStoreIndexLeftOutEntry;
         this.outputStoreIndexRightOutEntry = outputStoreIndexRightOutEntry;
         this.propagationQueue = new StaticPropagationQueue<>(nextNodesTupleLifecycle);
-        this.leftTupleUpdater = isFiltering ? this::updateLeftTupleFiltered : this::updateLeftTupleUnfiltered;
-        this.rightTupleUpdater = isFiltering ? this::updateRightTupleFiltered : this::updateRightTupleUnfiltered;
         this.outTupleInserter = isFiltering ? this::insertOutTupleFiltered : this::insertOutTupleUnfiltered;
     }
 
@@ -73,57 +68,25 @@ public abstract class AbstractJoinNode<LeftTuple_ extends AbstractTuple, Right_,
         }
     }
 
-    private void updateLeftTupleUnfiltered(LeftTuple_ leftTuple, Consumer<Consumer<UniTuple<Right_>>> rightTupleConsumer) {
-        ElementAwareList<OutTuple_> outTupleListLeft = leftTuple.getStore(inputStoreIndexLeftOutTupleList);
-        for (var outTuple : outTupleListLeft) {
-            setOutTupleLeftFacts(outTuple, leftTuple);
-            updateOutTuple(outTuple);
-        }
-    }
-
-    private void updateLeftTupleFiltered(LeftTuple_ leftTuple, Consumer<Consumer<UniTuple<Right_>>> rightTupleConsumer) {
-        ElementAwareList<OutTuple_> outTupleListLeft = leftTuple.getStore(inputStoreIndexLeftOutTupleList);
-        rightTupleConsumer.accept(rightTuple -> {
-            ElementAwareList<OutTuple_> rightOutList = rightTuple.getStore(inputStoreIndexRightOutTupleList);
-            processOutTupleUpdate(leftTuple, rightTuple, rightOutList, outTupleListLeft, outputStoreIndexRightOutEntry);
-        });
-    }
-
-    private void updateRightTupleUnfiltered(UniTuple<Right_> rightTuple, Consumer<Consumer<LeftTuple_>> leftTupleConsumer) {
-        ElementAwareList<OutTuple_> outTupleListRight = rightTuple.getStore(inputStoreIndexRightOutTupleList);
-        for (var outTuple : outTupleListRight) {
-            setOutTupleRightFact(outTuple, rightTuple);
-            updateOutTuple(outTuple);
-        }
-    }
-
-    private void updateRightTupleFiltered(UniTuple<Right_> rightTuple, Consumer<Consumer<LeftTuple_>> leftTupleConsumer) {
-        // Prefer an update over retract-insert if possible
-        ElementAwareList<OutTuple_> outTupleListRight = rightTuple.getStore(inputStoreIndexRightOutTupleList);
-        leftTupleConsumer.accept(leftTuple -> {
-            ElementAwareList<OutTuple_> leftOutList = leftTuple.getStore(inputStoreIndexLeftOutTupleList);
-            processOutTupleUpdate(leftTuple, rightTuple, leftOutList, outTupleListRight, outputStoreIndexLeftOutEntry);
-        });
-    }
-
-    private void processOutTupleUpdate(LeftTuple_ leftTuple, UniTuple<Right_> rightTuple, ElementAwareList<OutTuple_> outList,
+    protected void processMatch(LeftTuple_ leftTuple, UniTuple<Right_> rightTuple, ElementAwareList<OutTuple_> outList,
             ElementAwareList<OutTuple_> outTupleList, int outputStoreIndexOutEntry) {
         var outTuple = findOutTuple(outTupleList, outList, outputStoreIndexOutEntry);
+        var outTupleExists = outTuple != null;
         if (testFiltering(leftTuple, rightTuple)) {
-            if (outTuple == null) {
-                insertOutTupleUnfiltered(leftTuple, rightTuple);
-            } else {
+            if (outTupleExists) {
                 setOutTupleLeftFacts(outTuple, leftTuple);
                 updateOutTuple(outTuple);
+            } else {
+                insertOutTupleUnfiltered(leftTuple, rightTuple);
             }
         } else {
-            if (outTuple != null) {
+            if (outTupleExists) {
                 retractOutTuple(outTuple);
             }
         }
     }
 
-    private void updateOutTuple(OutTuple_ outTuple) {
+    protected void updateOutTuple(OutTuple_ outTuple) {
         var state = outTuple.state;
         if (!state.isActive()) { // Impossible because they shouldn't linger in the indexes.
             throw new IllegalStateException("Impossible state: The tuple (" + outTuple.state + ") in node (" +

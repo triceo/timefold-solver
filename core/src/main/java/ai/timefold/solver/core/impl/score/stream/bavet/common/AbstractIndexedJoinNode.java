@@ -28,6 +28,7 @@ public abstract class AbstractIndexedJoinNode<LeftTuple_ extends AbstractTuple, 
     private final int inputStoreIndexLeftEntry;
     private final int inputStoreIndexRightProperties;
     private final int inputStoreIndexRightEntry;
+    private final boolean isFiltering;
     /**
      * Calls for example {@link AbstractScorer#insert(AbstractTuple)} and/or ...
      */
@@ -48,6 +49,7 @@ public abstract class AbstractIndexedJoinNode<LeftTuple_ extends AbstractTuple, 
         this.inputStoreIndexRightEntry = inputStoreIndexRightEntry;
         this.indexerLeft = indexerLeft;
         this.indexerRight = indexerRight;
+        this.isFiltering = isFiltering;
     }
 
     @Override
@@ -75,7 +77,18 @@ public abstract class AbstractIndexedJoinNode<LeftTuple_ extends AbstractTuple, 
         if (oldIndexProperties.equals(newIndexProperties)) {
             // No need for re-indexing because the index properties didn't change
             // Prefer an update over retract-insert if possible
-            leftTupleUpdater.accept(leftTuple, consumer -> indexerRight.forEach(oldIndexProperties, consumer));
+            ElementAwareList<OutTuple_> outTupleListLeft = leftTuple.getStore(inputStoreIndexLeftOutTupleList);
+            if (isFiltering) {
+                indexerRight.forEach(oldIndexProperties, rightTuple -> {
+                    ElementAwareList<OutTuple_> rightOutList = rightTuple.getStore(inputStoreIndexRightOutTupleList);
+                    processMatch(leftTuple, rightTuple, rightOutList, outTupleListLeft, outputStoreIndexRightOutEntry);
+                });
+            } else {
+                for (OutTuple_ outTuple : outTupleListLeft) {
+                    setOutTupleLeftFacts(outTuple, leftTuple);
+                    updateOutTuple(outTuple);
+                }
+            }
         } else {
             ElementAwareListEntry<LeftTuple_> leftEntry = leftTuple.getStore(inputStoreIndexLeftEntry);
             ElementAwareList<OutTuple_> outTupleListLeft = leftTuple.getStore(inputStoreIndexLeftOutTupleList);
@@ -132,7 +145,18 @@ public abstract class AbstractIndexedJoinNode<LeftTuple_ extends AbstractTuple, 
         if (oldIndexProperties.equals(newIndexProperties)) {
             // No need for re-indexing because the index properties didn't change
             // Prefer an update over retract-insert if possible
-            rightTupleUpdater.accept(rightTuple, consumer -> indexerLeft.forEach(oldIndexProperties, consumer));
+            ElementAwareList<OutTuple_> outTupleListRight = rightTuple.getStore(inputStoreIndexRightOutTupleList);
+            if (isFiltering) {
+                indexerLeft.forEach(oldIndexProperties, leftTuple -> {
+                    ElementAwareList<OutTuple_> leftOutList = leftTuple.getStore(inputStoreIndexLeftOutTupleList);
+                    processMatch(leftTuple, rightTuple, leftOutList, outTupleListRight, outputStoreIndexLeftOutEntry);
+                });
+            } else {
+                for (OutTuple_ outTuple : outTupleListRight) {
+                    setOutTupleRightFact(outTuple, rightTuple);
+                    updateOutTuple(outTuple);
+                }
+            }
         } else {
             ElementAwareListEntry<UniTuple<Right_>> rightEntry = rightTuple.getStore(inputStoreIndexRightEntry);
             ElementAwareList<OutTuple_> outTupleListRight = rightTuple.getStore(inputStoreIndexRightOutTupleList);
