@@ -1,5 +1,6 @@
 package ai.timefold.solver.core.impl.score.stream.bavet.common;
 
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.AbstractTuple;
@@ -31,6 +32,8 @@ public abstract class AbstractJoinNode<LeftTuple_ extends AbstractTuple, Right_,
     private final int outputStoreIndexRightOutEntry;
     private final StaticPropagationQueue<OutTuple_> propagationQueue;
 
+    protected final BiConsumer<LeftTuple_, UniTuple<Right_>> outTupleInserter;
+
     protected AbstractJoinNode(int inputStoreIndexLeftOutTupleList, int inputStoreIndexRightOutTupleList,
             TupleLifecycle<OutTuple_> nextNodesTupleLifecycle, boolean isFiltering,
             int outputStoreIndexLeftOutEntry, int outputStoreIndexRightOutEntry) {
@@ -40,6 +43,7 @@ public abstract class AbstractJoinNode<LeftTuple_ extends AbstractTuple, Right_,
         this.outputStoreIndexLeftOutEntry = outputStoreIndexLeftOutEntry;
         this.outputStoreIndexRightOutEntry = outputStoreIndexRightOutEntry;
         this.propagationQueue = new StaticPropagationQueue<>(nextNodesTupleLifecycle);
+        this.outTupleInserter = isFiltering ? this::insertOutTupleFiltered : this::insertOutTupleUnfiltered;
     }
 
     protected abstract OutTuple_ createOutTuple(LeftTuple_ leftTuple, UniTuple<Right_> rightTuple);
@@ -50,7 +54,7 @@ public abstract class AbstractJoinNode<LeftTuple_ extends AbstractTuple, Right_,
 
     protected abstract boolean testFiltering(LeftTuple_ leftTuple, UniTuple<Right_> rightTuple);
 
-    protected final void insertOutTuple(LeftTuple_ leftTuple, UniTuple<Right_> rightTuple) {
+    private void insertOutTupleUnfiltered(LeftTuple_ leftTuple, UniTuple<Right_> rightTuple) {
         var outTuple = createOutTuple(leftTuple, rightTuple);
         ElementAwareList<OutTuple_> outTupleListLeft = leftTuple.getStore(inputStoreIndexLeftOutTupleList);
         var outEntryLeft = outTupleListLeft.add(outTuple);
@@ -61,9 +65,9 @@ public abstract class AbstractJoinNode<LeftTuple_ extends AbstractTuple, Right_,
         propagationQueue.insert(outTuple);
     }
 
-    protected final void insertOutTupleFiltered(LeftTuple_ leftTuple, UniTuple<Right_> rightTuple) {
-        if (!isFiltering || testFiltering(leftTuple, rightTuple)) {
-            insertOutTuple(leftTuple, rightTuple);
+    private void insertOutTupleFiltered(LeftTuple_ leftTuple, UniTuple<Right_> rightTuple) {
+        if (testFiltering(leftTuple, rightTuple)) {
+            insertOutTupleUnfiltered(leftTuple, rightTuple);
         }
     }
 
@@ -121,7 +125,7 @@ public abstract class AbstractJoinNode<LeftTuple_ extends AbstractTuple, Right_,
         var outTuple = findOutTuple(outTupleList, outList, outputStoreIndexOutEntry);
         if (testFiltering(leftTuple, rightTuple)) {
             if (outTuple == null) {
-                insertOutTuple(leftTuple, rightTuple);
+                insertOutTupleUnfiltered(leftTuple, rightTuple);
             } else {
                 updateOutTupleLeft(outTuple, leftTuple);
             }
