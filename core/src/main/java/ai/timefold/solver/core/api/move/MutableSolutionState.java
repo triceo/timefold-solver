@@ -1,5 +1,6 @@
 package ai.timefold.solver.core.api.move;
 
+import ai.timefold.solver.core.api.domain.metamodel.LocationInList;
 import ai.timefold.solver.core.api.domain.metamodel.PlanningListVariableMetaModel;
 import ai.timefold.solver.core.api.domain.metamodel.PlanningVariableMetaModel;
 import ai.timefold.solver.core.api.domain.solution.PlanningSolution;
@@ -36,8 +37,31 @@ public interface MutableSolutionState<Solution_> extends SolutionState<Solution_
      * @param <Value_>
      */
     <Entity_, Value_> void changeVariable(PlanningVariableMetaModel<Solution_, Entity_, Value_> variableMetaModel,
-            Entity_ entity,
-            Value_ newValue);
+            Entity_ entity, Value_ newValue);
+
+    <Entity_, Value_> void assignValue(PlanningListVariableMetaModel<Solution_, Entity_, Value_> variableMetaModel,
+            Value_ value, Entity_ destinationEntity, int destinationIndex);
+
+    @SuppressWarnings("unchecked")
+    default <Entity_, Value_> void unassignValue(PlanningListVariableMetaModel<Solution_, Entity_, Value_> variableMetaModel,
+            Value_ value) {
+        var locationInList = (LocationInList<Entity_>) getPositionOf(variableMetaModel, value)
+                .ensureAssigned(() -> """
+                        The value (%s) is not assigned to a list variable.
+                        This may indicate score corruption or a problem with the move's implementation."""
+                        .formatted(value));
+        unassignValue(variableMetaModel, value, locationInList.entity(), locationInList.index());
+    }
+
+    default <Entity_, Value_> Value_ unassignValue(PlanningListVariableMetaModel<Solution_, Entity_, Value_> variableMetaModel,
+            Entity_ entity, int index) {
+        var value = getValueAtIndex(variableMetaModel, entity, index);
+        unassignValue(variableMetaModel, value, entity, index);
+        return value;
+    }
+
+    <Entity_, Value_> void unassignValue(PlanningListVariableMetaModel<Solution_, Entity_, Value_> variableMetaModel,
+            Value_ value, Entity_ entity, int index);
 
     /**
      * TODO should check if pinned?
@@ -48,11 +72,12 @@ public interface MutableSolutionState<Solution_> extends SolutionState<Solution_
      * @param sourceIndex >= 0
      * @param destinationEntity never null
      * @param destinationIndex >= 0
+     * @return old value
      * @throws IndexOutOfBoundsException if the index is out of bounds
      * @param <Entity_>
      * @param <Value_>
      */
-    <Entity_, Value_> void moveValueBetweenLists(PlanningListVariableMetaModel<Solution_, Entity_, Value_> variableMetaModel,
+    <Entity_, Value_> Value_ moveValueBetweenLists(PlanningListVariableMetaModel<Solution_, Entity_, Value_> variableMetaModel,
             Entity_ sourceEntity, int sourceIndex, Entity_ destinationEntity, int destinationIndex);
 
     /**
@@ -63,11 +88,12 @@ public interface MutableSolutionState<Solution_> extends SolutionState<Solution_
      * @param entity never null
      * @param sourceIndex >= 0
      * @param destinationIndex >= 0
+     * @return old value
      * @throws IndexOutOfBoundsException if the index is out of bounds
      * @param <Entity_>
      * @param <Value_>
      */
-    <Entity_, Value_> void moveValueInList(PlanningListVariableMetaModel<Solution_, Entity_, Value_> variableMetaModel,
+    <Entity_, Value_> Value_ moveValueInList(PlanningListVariableMetaModel<Solution_, Entity_, Value_> variableMetaModel,
             Entity_ entity,
             int sourceIndex, int destinationIndex);
 

@@ -30,40 +30,67 @@ public sealed class MoveDirector<Solution_> implements InnerMutableSolutionState
         scoreDirector.afterVariableChanged(variableDescriptor, entity);
     }
 
-    public final <Entity_, Value_> void moveValueBetweenLists(
+    @Override
+    public <Entity_, Value_> void assignValue(PlanningListVariableMetaModel<Solution_, Entity_, Value_> variableMetaModel,
+            Value_ value, Entity_ destinationEntity, int destinationIndex) {
+        var variableDescriptor = extractVariableDescriptor(variableMetaModel);
+        scoreDirector.beforeListVariableElementAssigned(variableDescriptor, value);
+        scoreDirector.beforeListVariableChanged(variableDescriptor, destinationEntity, destinationIndex, destinationIndex);
+        variableDescriptor.addElement(destinationEntity, destinationIndex, value);
+        scoreDirector.afterListVariableChanged(variableDescriptor, destinationEntity, destinationIndex, destinationIndex + 1);
+        scoreDirector.afterListVariableElementAssigned(variableDescriptor, value);
+    }
+
+    @Override
+    public <Entity_, Value_> void unassignValue(PlanningListVariableMetaModel<Solution_, Entity_, Value_> variableMetaModel,
+            Value_ value, Entity_ entity, int index) {
+        var variableDescriptor = extractVariableDescriptor(variableMetaModel);
+        scoreDirector.beforeListVariableElementUnassigned(variableDescriptor, value);
+        scoreDirector.beforeListVariableChanged(variableDescriptor, entity, index, index);
+        var oldValue = variableDescriptor.removeElement(entity, index);
+        if (oldValue != value) {
+            throw new IllegalStateException("""
+                    The value (%s) removed from the entity (%s) at index (%d) was not the expected value (%s).
+                    This may indicate a score corruption or a problem with the move's implementation."""
+                    .formatted(oldValue, entity, index, value));
+        }
+        scoreDirector.afterListVariableChanged(variableDescriptor, entity, index, index);
+        scoreDirector.afterListVariableElementUnassigned(variableDescriptor, value);
+    }
+
+    public final <Entity_, Value_> Value_ moveValueBetweenLists(
             PlanningListVariableMetaModel<Solution_, Entity_, Value_> variableMetaModel,
             Entity_ sourceEntity, int sourceIndex, Entity_ destinationEntity, int destinationIndex) {
         if (sourceEntity == destinationEntity) {
-            moveValueInList(variableMetaModel, sourceEntity, sourceIndex, destinationIndex);
-            return;
+            return moveValueInList(variableMetaModel, sourceEntity, sourceIndex, destinationIndex);
         }
         var variableDescriptor = extractVariableDescriptor(variableMetaModel);
         scoreDirector.beforeListVariableChanged(variableDescriptor, sourceEntity, sourceIndex, sourceIndex + 1);
-        var element = variableDescriptor.removeElement(sourceEntity, sourceIndex);
+        Value_ element = variableDescriptor.removeElement(sourceEntity, sourceIndex);
         scoreDirector.afterListVariableChanged(variableDescriptor, sourceEntity, sourceIndex, sourceIndex);
 
         scoreDirector.beforeListVariableChanged(variableDescriptor, destinationEntity, destinationIndex, destinationIndex);
         variableDescriptor.addElement(destinationEntity, destinationIndex, element);
         scoreDirector.afterListVariableChanged(variableDescriptor, destinationEntity, destinationIndex, destinationIndex + 1);
+        return element;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public final <Entity_, Value_> void moveValueInList(
-            PlanningListVariableMetaModel<Solution_, Entity_, Value_> variableMetaModel,
-            Entity_ entity, int sourceIndex, int destinationIndex) {
-        if (sourceIndex == destinationIndex) {
-            return;
-        } else if (sourceIndex > destinationIndex) { // Always start from the lower index.
-            moveValueInList(variableMetaModel, entity, destinationIndex, sourceIndex);
-            return;
+    public final <Entity_, Value_> Value_ moveValueInList(
+            PlanningListVariableMetaModel<Solution_, Entity_, Value_> variableMetaModel, Entity_ entity, int sourceIndex,
+            int destinationIndex) {
+        if (sourceIndex > destinationIndex) { // Always start from the lower index.
+            return moveValueInList(variableMetaModel, entity, destinationIndex, sourceIndex);
         }
         var variableDescriptor = extractVariableDescriptor(variableMetaModel);
         var toIndex = destinationIndex + 1;
         scoreDirector.beforeListVariableChanged(variableDescriptor, entity, sourceIndex, toIndex);
         var variable = variableDescriptor.getValue(entity);
-        var value = variable.remove(sourceIndex);
+        var value = (Value_) variable.remove(sourceIndex);
         variable.add(destinationIndex, value);
         scoreDirector.afterListVariableChanged(variableDescriptor, entity, sourceIndex, toIndex);
+        return value;
     }
 
     @Override
@@ -76,6 +103,11 @@ public sealed class MoveDirector<Solution_> implements InnerMutableSolutionState
     public final <Entity_, Value_> Value_ getValue(PlanningVariableMetaModel<Solution_, Entity_, Value_> variableMetaModel,
             Entity_ entity) {
         return (Value_) extractVariableDescriptor(variableMetaModel).getValue(entity);
+    }
+
+    @Override
+    public <Entity_> int getValueCount(PlanningListVariableMetaModel<Solution_, Entity_, ?> variableMetaModel, Entity_ entity) {
+        return extractVariableDescriptor(variableMetaModel).getListSize(entity);
     }
 
     @SuppressWarnings("unchecked")

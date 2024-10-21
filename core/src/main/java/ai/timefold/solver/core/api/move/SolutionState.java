@@ -41,6 +41,16 @@ public interface SolutionState<Solution_> {
     <Entity_, Value_> Value_ getValue(PlanningVariableMetaModel<Solution_, Entity_, Value_> variableMetaModel, Entity_ entity);
 
     /**
+     * Reads the number of values in a @{@link PlanningListVariable list planning variable} of a given entity.
+     *
+     * @param variableMetaModel never null
+     * @param entity never null
+     * @return never null; the number of values in that entity's list variable
+     * @param <Entity_>
+     */
+    <Entity_> int getValueCount(PlanningListVariableMetaModel<Solution_, Entity_, ?> variableMetaModel, Entity_ entity);
+
+    /**
      * Reads the value of a @{@link PlanningListVariable list planning variable} of a given entity at a specific index.
      * 
      * @param variableMetaModel never null
