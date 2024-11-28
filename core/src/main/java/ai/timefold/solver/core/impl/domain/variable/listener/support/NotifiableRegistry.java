@@ -3,7 +3,6 @@ package ai.timefold.solver.core.impl.domain.variable.listener.support;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -11,6 +10,7 @@ import ai.timefold.solver.core.impl.domain.entity.descriptor.EntityDescriptor;
 import ai.timefold.solver.core.impl.domain.solution.descriptor.SolutionDescriptor;
 import ai.timefold.solver.core.impl.domain.variable.descriptor.ListVariableDescriptor;
 import ai.timefold.solver.core.impl.domain.variable.descriptor.VariableDescriptor;
+import ai.timefold.solver.core.impl.util.ListBasedScalingMap;
 
 final class NotifiableRegistry<Solution_> {
 
@@ -31,7 +31,8 @@ final class NotifiableRegistry<Solution_> {
             }
             var entityDescriptorId = entityDescriptor.getOrdinal();
             sourceVariableToNotifiableListArray[entityDescriptorId] = array;
-            sourceEntityToNotifiableSetArray[entityDescriptorId] = new LinkedHashSet<>();
+            sourceEntityToNotifiableSetArray[entityDescriptorId] =
+                    Collections.newSetFromMap(ListBasedScalingMap.createLinked());
         }
     }
 
