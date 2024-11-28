@@ -4,12 +4,11 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
 import ai.timefold.solver.core.api.score.stream.common.LoadBalance;
+import ai.timefold.solver.core.impl.util.ListBasedScalingMap;
 
 import org.jspecify.annotations.NonNull;
 
@@ -18,8 +17,8 @@ public final class LoadBalanceImpl<Balanced_> implements LoadBalance<Balanced_> 
     // If need be, precision can be made configurable on the constraint collector level.
     private static final MathContext RESULT_MATH_CONTEXT = new MathContext(6, RoundingMode.HALF_EVEN);
 
-    private final Map<Balanced_, Integer> balancedItemCountMap = new HashMap<>();
-    private final Map<Balanced_, Long> balancedItemToMetricValueMap = new LinkedHashMap<>();
+    private final Map<Balanced_, Integer> balancedItemCountMap = ListBasedScalingMap.create();
+    private final Map<Balanced_, Long> balancedItemToMetricValueMap = ListBasedScalingMap.createLinked();
 
     private long sum = 0;
     private long squaredDeviationIntegralPart = 0;

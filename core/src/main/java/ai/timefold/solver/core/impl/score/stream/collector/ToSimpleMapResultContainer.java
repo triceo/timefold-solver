@@ -1,18 +1,19 @@
 package ai.timefold.solver.core.impl.score.stream.collector;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BinaryOperator;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
+import ai.timefold.solver.core.impl.util.ListBasedScalingMap;
+
 public final class ToSimpleMapResultContainer<Key_, Value_, Result_ extends Map<Key_, Value_>>
         implements ToMapResultContainer<Key_, Value_, Value_, Result_> {
 
     private final BinaryOperator<Value_> mergeFunction;
     private final Result_ result;
-    private final Map<Key_, ToMapPerKeyCounter<Value_>> valueCounts = new HashMap<>(0);
+    private final Map<Key_, ToMapPerKeyCounter<Value_>> valueCounts = ListBasedScalingMap.create();
 
     public ToSimpleMapResultContainer(Supplier<Result_> resultSupplier, BinaryOperator<Value_> mergeFunction) {
         this.mergeFunction = Objects.requireNonNull(mergeFunction);

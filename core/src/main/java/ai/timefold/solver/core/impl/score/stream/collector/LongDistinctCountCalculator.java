@@ -1,12 +1,12 @@
 package ai.timefold.solver.core.impl.score.stream.collector;
 
-import java.util.HashMap;
 import java.util.Map;
 
+import ai.timefold.solver.core.impl.util.ListBasedScalingMap;
 import ai.timefold.solver.core.impl.util.MutableInt;
 
 public final class LongDistinctCountCalculator<Input_> implements ObjectCalculator<Input_, Long, Input_> {
-    private final Map<Input_, MutableInt> countMap = new HashMap<>();
+    private final Map<Input_, MutableInt> countMap = ListBasedScalingMap.create();
 
     @Override
     public Input_ insert(Input_ input) {

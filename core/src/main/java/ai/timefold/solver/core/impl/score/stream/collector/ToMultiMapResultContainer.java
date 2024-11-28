@@ -1,18 +1,19 @@
 package ai.timefold.solver.core.impl.score.stream.collector;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
+import ai.timefold.solver.core.impl.util.ListBasedScalingMap;
+
 public final class ToMultiMapResultContainer<Key_, Value_, Set_ extends Set<Value_>, Result_ extends Map<Key_, Set_>>
         implements ToMapResultContainer<Key_, Value_, Set_, Result_> {
 
     private final Supplier<Set_> setSupplier;
     private final Result_ result;
-    private final Map<Key_, ToMapPerKeyCounter<Value_>> valueCounts = new HashMap<>(0);
+    private final Map<Key_, ToMapPerKeyCounter<Value_>> valueCounts = ListBasedScalingMap.create();
 
     public ToMultiMapResultContainer(Supplier<Result_> resultSupplier, IntFunction<Set_> setFunction) {
         IntFunction<Set_> nonNullSetFunction = Objects.requireNonNull(setFunction);

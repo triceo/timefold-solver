@@ -1,13 +1,14 @@
 package ai.timefold.solver.core.impl.score.stream.collector;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.BinaryOperator;
 import java.util.stream.Stream;
 
+import ai.timefold.solver.core.impl.util.ListBasedScalingMap;
+
 public final class ToMapPerKeyCounter<Value_> {
 
-    private final Map<Value_, Long> counts = new LinkedHashMap<>(0);
+    private final Map<Value_, Long> counts = ListBasedScalingMap.createLinked();
 
     public long add(Value_ value) {
         return counts.compute(value, (k, currentCount) -> {

@@ -2,7 +2,6 @@ package ai.timefold.solver.core.impl.score.stream.common.inliner;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Supplier;
@@ -31,6 +30,7 @@ import ai.timefold.solver.core.impl.score.definition.ScoreDefinition;
 import ai.timefold.solver.core.impl.score.stream.common.AbstractConstraint;
 import ai.timefold.solver.core.impl.util.CollectionUtils;
 import ai.timefold.solver.core.impl.util.ElementAwareList;
+import ai.timefold.solver.core.impl.util.ListBasedScalingMap;
 
 /**
  * Keeps track of the working score and constraint matches for a single constraint session.
@@ -215,7 +215,7 @@ public abstract class AbstractScoreInliner<Score_ extends Score<Score_>> {
     }
 
     private void rebuildIndictments() {
-        var workingIndictmentMap = new LinkedHashMap<Object, Indictment<Score_>>();
+        var workingIndictmentMap = ListBasedScalingMap.<Object, Indictment<Score_>> createLinked();
         for (var entry : constraintMatchMap.entrySet()) {
             for (var carrier : entry.getValue()) {
                 // Constraint match instances are only created here when we actually need them.
@@ -224,8 +224,7 @@ public abstract class AbstractScoreInliner<Score_ extends Score<Score_>> {
                     if (indictedObject == null) { // Users may have sent null, or it came from the default mapping.
                         continue;
                     }
-                    var indictment =
-                            (DefaultIndictment<Score_>) getIndictment(workingIndictmentMap, constraintMatch, indictedObject);
+                    var indictment = getIndictment(workingIndictmentMap, constraintMatch, indictedObject);
                     /*
                      * Optimization: In order to not have to go over the indicted object list and remove duplicates,
                      * we use a method that will silently skip duplicate constraint matches.

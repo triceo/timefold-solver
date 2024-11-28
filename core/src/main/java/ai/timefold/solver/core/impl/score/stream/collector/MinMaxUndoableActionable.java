@@ -1,13 +1,13 @@
 package ai.timefold.solver.core.impl.score.stream.collector;
 
 import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.function.Function;
 
 import ai.timefold.solver.core.impl.util.ConstantLambdaUtils;
+import ai.timefold.solver.core.impl.util.ListBasedScalingMap;
 import ai.timefold.solver.core.impl.util.MutableInt;
 
 public final class MinMaxUndoableActionable<Result_, Property_> implements UndoableActionable<Result_, Result_> {
@@ -54,7 +54,8 @@ public final class MinMaxUndoableActionable<Result_, Property_> implements Undoa
     @Override
     public Runnable insert(Result_ item) {
         Property_ key = propertyFunction.apply(item);
-        Map<Result_, MutableInt> itemCountMap = propertyToItemCountMap.computeIfAbsent(key, ignored -> new LinkedHashMap<>());
+        Map<Result_, MutableInt> itemCountMap =
+                propertyToItemCountMap.computeIfAbsent(key, ignored -> ListBasedScalingMap.createLinked());
         MutableInt count = itemCountMap.computeIfAbsent(item, ignored -> new MutableInt());
         count.increment();
 
