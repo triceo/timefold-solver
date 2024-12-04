@@ -31,10 +31,6 @@ public class LateAcceptanceAcceptor<Solution_> extends AbstractAcceptor<Solution
         super.phaseStarted(phaseScope);
         validate();
         previousScores = new Score[lateAcceptanceSize];
-        Score initialScore = phaseScope.getBestScore();
-        for (int i = 0; i < previousScores.length; i++) {
-            previousScores[i] = initialScore;
-        }
         lateScoreIndex = 0;
     }
 
@@ -47,8 +43,11 @@ public class LateAcceptanceAcceptor<Solution_> extends AbstractAcceptor<Solution
 
     @Override
     public boolean isAccepted(LocalSearchMoveScope<Solution_> moveScope) {
-        Score moveScore = moveScope.getScore();
         Score lateScore = previousScores[lateScoreIndex];
+        if (lateScore == null) {
+            return true;
+        }
+        Score moveScore = moveScope.getScore();
         if (moveScore.compareTo(lateScore) >= 0) {
             return true;
         }
