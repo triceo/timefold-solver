@@ -11,21 +11,19 @@ final class UnindexedIfExistsBiNode<A, B, C> extends AbstractUnindexedIfExistsNo
     private final TriPredicate<A, B, C> filtering;
 
     public UnindexedIfExistsBiNode(boolean shouldExist,
-            int inputStoreIndexLeftCounterEntry, int inputStoreIndexRightEntry,
+            int inputStoreIndexLeft, int inputStoreIndexRight,
             TupleLifecycle<BiTuple<A, B>> nextNodesTupleLifecycle) {
         this(shouldExist,
-                inputStoreIndexLeftCounterEntry, -1, inputStoreIndexRightEntry, -1,
+                inputStoreIndexLeft, inputStoreIndexRight,
                 nextNodesTupleLifecycle, null);
     }
 
     public UnindexedIfExistsBiNode(boolean shouldExist,
-            int inputStoreIndexLeftCounterEntry, int inputStoreIndexLeftTrackerList, int inputStoreIndexRightEntry,
-            int inputStoreIndexRightTrackerList,
+            int inputStoreIndexLeft, int inputStoreIndexRight,
             TupleLifecycle<BiTuple<A, B>> nextNodesTupleLifecycle,
             TriPredicate<A, B, C> filtering) {
         super(shouldExist,
-                inputStoreIndexLeftCounterEntry, inputStoreIndexLeftTrackerList, inputStoreIndexRightEntry,
-                inputStoreIndexRightTrackerList,
+                inputStoreIndexLeft, inputStoreIndexRight,
                 nextNodesTupleLifecycle, filtering != null);
         this.filtering = filtering;
     }

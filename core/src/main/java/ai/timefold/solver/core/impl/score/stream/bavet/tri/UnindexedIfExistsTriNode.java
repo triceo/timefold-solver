@@ -14,18 +14,16 @@ final class UnindexedIfExistsTriNode<A, B, C, D> extends AbstractUnindexedIfExis
             int inputStoreIndexLeftCounterEntry, int inputStoreIndexRightEntry,
             TupleLifecycle<TriTuple<A, B, C>> nextNodesTupleLifecycle) {
         this(shouldExist,
-                inputStoreIndexLeftCounterEntry, -1, inputStoreIndexRightEntry, -1,
+                inputStoreIndexLeftCounterEntry, inputStoreIndexRightEntry,
                 nextNodesTupleLifecycle, null);
     }
 
     public UnindexedIfExistsTriNode(boolean shouldExist,
-            int inputStoreIndexLeftCounterEntry, int inputStoreIndexLeftTrackerList, int inputStoreIndexRightEntry,
-            int inputStoreIndexRightTrackerList,
+            int inputStoreIndexLeft, int inputStoreIndexRight,
             TupleLifecycle<TriTuple<A, B, C>> nextNodesTupleLifecycle,
             QuadPredicate<A, B, C, D> filtering) {
         super(shouldExist,
-                inputStoreIndexLeftCounterEntry, inputStoreIndexLeftTrackerList, inputStoreIndexRightEntry,
-                inputStoreIndexRightTrackerList,
+                inputStoreIndexLeft, inputStoreIndexRight,
                 nextNodesTupleLifecycle, filtering != null);
         this.filtering = filtering;
     }

@@ -24,19 +24,17 @@ public abstract class AbstractIfExistsNode<LeftTuple_ extends AbstractTuple, Rig
 
     protected final boolean shouldExist;
 
-    protected final int inputStoreIndexLeftTrackerList; // -1 if !isFiltering
-    protected final int inputStoreIndexRightTrackerList; // -1 if !isFiltering
+    protected final int inputStoreIndexLeft;
+    protected final int inputStoreIndexRight;
 
     protected final boolean isFiltering;
     private final DynamicPropagationQueue<LeftTuple_, ExistsCounter<LeftTuple_>> propagationQueue;
 
-    protected AbstractIfExistsNode(boolean shouldExist,
-            int inputStoreIndexLeftTrackerList, int inputStoreIndexRightTrackerList,
-            TupleLifecycle<LeftTuple_> nextNodesTupleLifecycle,
-            boolean isFiltering) {
+    protected AbstractIfExistsNode(boolean shouldExist, int inputStoreIndexLeft, int inputStoreIndexRight,
+            TupleLifecycle<LeftTuple_> nextNodesTupleLifecycle, boolean isFiltering) {
         this.shouldExist = shouldExist;
-        this.inputStoreIndexLeftTrackerList = inputStoreIndexLeftTrackerList;
-        this.inputStoreIndexRightTrackerList = inputStoreIndexRightTrackerList;
+        this.inputStoreIndexLeft = inputStoreIndexLeft;
+        this.inputStoreIndexRight = inputStoreIndexRight;
         this.isFiltering = isFiltering;
         this.propagationQueue = new DynamicPropagationQueue<>(nextNodesTupleLifecycle);
     }
@@ -118,8 +116,9 @@ public abstract class AbstractIfExistsNode<LeftTuple_ extends AbstractTuple, Rig
         } // Else do not even propagate an update
     }
 
-    protected ElementAwareList<FilteringTracker<LeftTuple_>> updateRightTrackerList(UniTuple<Right_> rightTuple) {
-        ElementAwareList<FilteringTracker<LeftTuple_>> rightTrackerList = rightTuple.getStore(inputStoreIndexRightTrackerList);
+    protected ElementAwareList<FilteringTracker<LeftTuple_>>
+            updateRightTrackerList(AbstractIfExistsStore<LeftTuple_> rightStore) {
+        ElementAwareList<FilteringTracker<LeftTuple_>> rightTrackerList = rightStore.trackerList;
         for (FilteringTracker<LeftTuple_> tuple : rightTrackerList) {
             decrementCounterRight(tuple.counter);
             tuple.remove();
@@ -127,13 +126,12 @@ public abstract class AbstractIfExistsNode<LeftTuple_ extends AbstractTuple, Rig
         return rightTrackerList;
     }
 
-    protected void updateCounterFromLeft(LeftTuple_ leftTuple, UniTuple<Right_> rightTuple, ExistsCounter<LeftTuple_> counter,
+    protected void updateCounterFromLeft(LeftTuple_ leftTuple, UniTuple<Right_> rightTuple,
+            AbstractIfExistsStore<LeftTuple_> rightStore, ExistsCounter<LeftTuple_> counter,
             ElementAwareList<FilteringTracker<LeftTuple_>> leftTrackerList) {
         if (testFiltering(leftTuple, rightTuple)) {
             counter.countRight++;
-            ElementAwareList<FilteringTracker<LeftTuple_>> rightTrackerList =
-                    rightTuple.getStore(inputStoreIndexRightTrackerList);
-            new FilteringTracker<>(counter, leftTrackerList, rightTrackerList);
+            new FilteringTracker<>(counter, leftTrackerList, rightStore.trackerList);
         }
     }
 
@@ -141,9 +139,8 @@ public abstract class AbstractIfExistsNode<LeftTuple_ extends AbstractTuple, Rig
             ElementAwareList<FilteringTracker<LeftTuple_>> rightTrackerList) {
         if (testFiltering(counter.leftTuple, rightTuple)) {
             incrementCounterRight(counter);
-            ElementAwareList<FilteringTracker<LeftTuple_>> leftTrackerList =
-                    counter.leftTuple.getStore(inputStoreIndexLeftTrackerList);
-            new FilteringTracker<>(counter, leftTrackerList, rightTrackerList);
+            AbstractIfExistsStore<LeftTuple_> leftStore = counter.leftTuple.getStore(inputStoreIndexLeft);
+            new FilteringTracker<>(counter, leftStore.trackerList, rightTrackerList);
         }
     }
 
@@ -188,6 +185,15 @@ public abstract class AbstractIfExistsNode<LeftTuple_ extends AbstractTuple, Rig
             leftTrackerEntry.remove();
             rightTrackerEntry.remove();
         }
+
+    }
+
+    protected abstract static sealed class AbstractIfExistsStore<Tuple_ extends AbstractTuple>
+            permits AbstractIndexedIfExistsNode.LeftIndexedIfExistsStore, AbstractIndexedIfExistsNode.RightIndexedIfExistsStore,
+            AbstractUnindexedIfExistsNode.LeftUnindexedIfExistsStore,
+            AbstractUnindexedIfExistsNode.RightUnindexedIfExistsStore {
+
+        protected ElementAwareList<FilteringTracker<Tuple_>> trackerList;
 
     }
 
