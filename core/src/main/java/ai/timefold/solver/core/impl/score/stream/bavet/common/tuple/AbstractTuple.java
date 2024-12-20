@@ -4,6 +4,9 @@ import java.util.function.Function;
 
 import ai.timefold.solver.core.api.score.stream.uni.UniConstraintStream;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+
 /**
  * A tuple is an <i>out tuple</i> in exactly one node and an <i>in tuple</i> in one or more nodes.
  *
@@ -30,32 +33,32 @@ public abstract sealed class AbstractTuple permits UniTuple, BiTuple, TriTuple, 
     public TupleState state = TupleState.DEAD; // It's the node's job to mark a new tuple as CREATING.
 
     protected AbstractTuple(int storeSize) {
-        this.store = (storeSize < 2) ? null : new Object[storeSize];
+        this.store = (storeSize < 2) ? null : new Int2ObjectOpenHashMap<>(Math.max(2, storeSize / 2));
         this.storeIsArray = store != null;
     }
 
     public final <Value_> Value_ getStore(int index) {
-        return (Value_) (storeIsArray ? ((Object[]) store)[index] : store);
+        return (Value_) (storeIsArray ? getStoreMap().get(index) : store);
+    }
+
+    private Int2ObjectMap<Object> getStoreMap() {
+        return (Int2ObjectMap<Object>) store;
     }
 
     public final void setStore(int index, Object value) {
         if (storeIsArray) {
-            ((Object[]) store)[index] = value;
+            getStoreMap().put(index, value);
         } else {
             store = value;
         }
     }
 
     public <Value_> Value_ removeStore(int index) {
-        Value_ value;
         if (storeIsArray) {
-            Object[] array = (Object[]) store;
-            value = (Value_) array[index];
-            array[index] = null;
-        } else {
-            value = (Value_) store;
-            store = null;
+            return (Value_) getStoreMap().remove(index);
         }
+        Value_ value = (Value_) store;
+        store = null;
         return value;
     }
 
