@@ -24,48 +24,41 @@ public abstract class AbstractIndexedJoinNode<LeftTuple_ extends AbstractTuple, 
         implements LeftTupleLifecycle<LeftTuple_>, RightTupleLifecycle<UniTuple<Right_>> {
 
     private final Function<Right_, IndexProperties> mappingRight;
-    private final int inputStoreIndexLeftProperties;
-    private final int inputStoreIndexLeftEntry;
-    private final int inputStoreIndexRightProperties;
-    private final int inputStoreIndexRightEntry;
     /**
      * Calls for example {@link AbstractScorer#insert(AbstractTuple)} and/or ...
      */
     private final Indexer<LeftTuple_> indexerLeft;
     private final Indexer<UniTuple<Right_>> indexerRight;
 
-    protected AbstractIndexedJoinNode(Function<Right_, IndexProperties> mappingRight, int inputStoreIndexLeftProperties,
-            int inputStoreIndexLeftEntry, int inputStoreIndexLeftOutTupleList, int inputStoreIndexRightProperties,
-            int inputStoreIndexRightEntry, int inputStoreIndexRightOutTupleList,
-            TupleLifecycle<OutTuple_> nextNodesTupleLifecycle, boolean isFiltering, int outputStoreIndexLeftOutEntry,
-            int outputStoreIndexRightOutEntry, Indexer<LeftTuple_> indexerLeft, Indexer<UniTuple<Right_>> indexerRight) {
+    protected AbstractIndexedJoinNode(Function<Right_, IndexProperties> mappingRight, int inputStoreIndexLeftOutTupleList,
+            int inputStoreIndexRightOutTupleList, TupleLifecycle<OutTuple_> nextNodesTupleLifecycle, boolean isFiltering,
+            int outputStoreIndexLeftOutEntry, int outputStoreIndexRightOutEntry, Indexer<LeftTuple_> indexerLeft,
+            Indexer<UniTuple<Right_>> indexerRight) {
         super(inputStoreIndexLeftOutTupleList, inputStoreIndexRightOutTupleList, nextNodesTupleLifecycle, isFiltering,
                 outputStoreIndexLeftOutEntry, outputStoreIndexRightOutEntry);
         this.mappingRight = mappingRight;
-        this.inputStoreIndexLeftProperties = inputStoreIndexLeftProperties;
-        this.inputStoreIndexLeftEntry = inputStoreIndexLeftEntry;
-        this.inputStoreIndexRightProperties = inputStoreIndexRightProperties;
-        this.inputStoreIndexRightEntry = inputStoreIndexRightEntry;
         this.indexerLeft = indexerLeft;
         this.indexerRight = indexerRight;
     }
 
     @Override
     public final void insertLeft(LeftTuple_ leftTuple) {
-        if (leftTuple.getStore(inputStoreIndexLeftProperties) != null) {
+        IndexedJoinStore<LeftTuple_, OutTuple_> leftStore = leftTuple.getStore(inputStoreIndexLeft,
+                IndexedJoinStore::new);
+        if (leftStore.indexProperties != null) {
             throw new IllegalStateException("Impossible state: the input for the tuple (" + leftTuple
                     + ") was already added in the tupleStore.");
         }
         IndexProperties indexProperties = createIndexPropertiesLeft(leftTuple);
-
-        ElementAwareList<OutTuple_> outTupleListLeft = new ElementAwareList<>();
-        leftTuple.setStore(inputStoreIndexLeftOutTupleList, outTupleListLeft);
-        indexAndPropagateLeft(leftTuple, indexProperties);
+        leftStore.outList = new ElementAwareList<>();
+        indexAndPropagateLeft(leftTuple, leftStore, indexProperties);
     }
 
     @Override
     public final void updateLeft(LeftTuple_ leftTuple) {
-        IndexProperties oldIndexProperties = leftTuple.getStore(inputStoreIndexLeftProperties);
+        IndexedJoinStore<LeftTuple_, OutTuple_> leftStore =
+                leftTuple.getStore(inputStoreIndexLeft, IndexedJoinStore::new);
+        IndexProperties oldIndexProperties = leftStore.indexProperties;
         if (oldIndexProperties == null) {
             // No fail fast if null because we don't track which tuples made it through the filter predicate(s)
             insertLeft(leftTuple);
@@ -75,54 +68,56 @@ public abstract class AbstractIndexedJoinNode<LeftTuple_ extends AbstractTuple, 
         if (oldIndexProperties.equals(newIndexProperties)) {
             // No need for re-indexing because the index properties didn't change
             // Prefer an update over retract-insert if possible
-            innerUpdateLeft(leftTuple, consumer -> indexerRight.forEach(oldIndexProperties, consumer));
+            innerUpdateLeft(leftTuple, leftStore, consumer -> indexerRight.forEach(oldIndexProperties, consumer));
         } else {
-            ElementAwareListEntry<LeftTuple_> leftEntry = leftTuple.getStore(inputStoreIndexLeftEntry);
-            ElementAwareList<OutTuple_> outTupleListLeft = leftTuple.getStore(inputStoreIndexLeftOutTupleList);
-            indexerLeft.remove(oldIndexProperties, leftEntry);
-            outTupleListLeft.forEach(this::retractOutTuple);
-            // outTupleListLeft is now empty
-            // No need for leftTuple.setStore(inputStoreIndexLeftOutTupleList, outTupleListLeft);
-            indexAndPropagateLeft(leftTuple, newIndexProperties);
+            indexerLeft.remove(oldIndexProperties, leftStore.entry);
+            leftStore.outList.forEach(this::retractOutTuple);
+            // outList is now empty, no need to set leftStore.outList.
+            indexAndPropagateLeft(leftTuple, leftStore, newIndexProperties);
         }
     }
 
-    private void indexAndPropagateLeft(LeftTuple_ leftTuple, IndexProperties indexProperties) {
-        leftTuple.setStore(inputStoreIndexLeftProperties, indexProperties);
-        ElementAwareListEntry<LeftTuple_> leftEntry = indexerLeft.put(indexProperties, leftTuple);
-        leftTuple.setStore(inputStoreIndexLeftEntry, leftEntry);
-        indexerRight.forEach(indexProperties, rightTuple -> insertOutTupleFiltered(leftTuple, rightTuple));
+    private void indexAndPropagateLeft(LeftTuple_ leftTuple, IndexedJoinStore<LeftTuple_, OutTuple_> leftStore,
+            IndexProperties indexProperties) {
+        leftStore.indexProperties = indexProperties;
+        leftStore.entry = indexerLeft.put(indexProperties, leftTuple);
+        indexerRight.forEach(indexProperties, rightTuple -> {
+            IndexedJoinStore<UniTuple<Right_>, OutTuple_> rightStore = rightTuple.getStore(inputStoreIndexRight);
+            insertOutTupleFiltered(leftTuple, leftStore, rightTuple, rightStore);
+        });
     }
 
     @Override
     public final void retractLeft(LeftTuple_ leftTuple) {
-        IndexProperties indexProperties = leftTuple.removeStore(inputStoreIndexLeftProperties);
-        if (indexProperties == null) {
+        IndexedJoinStore<LeftTuple_, OutTuple_> leftStore = leftTuple.removeStore(inputStoreIndexLeft);
+        if (leftStore == null) {
             // No fail fast if null because we don't track which tuples made it through the filter predicate(s)
             return;
         }
-        ElementAwareListEntry<LeftTuple_> leftEntry = leftTuple.removeStore(inputStoreIndexLeftEntry);
-        ElementAwareList<OutTuple_> outTupleListLeft = leftTuple.removeStore(inputStoreIndexLeftOutTupleList);
-        indexerLeft.remove(indexProperties, leftEntry);
+        ElementAwareListEntry<LeftTuple_> leftEntry = leftStore.entry;
+        ElementAwareList<OutTuple_> outTupleListLeft = leftStore.outList;
+        indexerLeft.remove(leftStore.indexProperties, leftEntry);
         outTupleListLeft.forEach(this::retractOutTuple);
     }
 
     @Override
     public final void insertRight(UniTuple<Right_> rightTuple) {
-        if (rightTuple.getStore(inputStoreIndexRightProperties) != null) {
+        IndexedJoinStore<UniTuple<Right_>, OutTuple_> rightStore = rightTuple.getStore(inputStoreIndexRight,
+                IndexedJoinStore::new);
+        if (rightStore.indexProperties != null) {
             throw new IllegalStateException("Impossible state: the input for the tuple (" + rightTuple
                     + ") was already added in the tupleStore.");
         }
         IndexProperties indexProperties = mappingRight.apply(rightTuple.factA);
-
-        ElementAwareList<OutTuple_> outTupleListRight = new ElementAwareList<>();
-        rightTuple.setStore(inputStoreIndexRightOutTupleList, outTupleListRight);
-        indexAndPropagateRight(rightTuple, indexProperties);
+        rightStore.outList = new ElementAwareList<>();
+        indexAndPropagateRight(rightTuple, rightStore, indexProperties);
     }
 
     @Override
     public final void updateRight(UniTuple<Right_> rightTuple) {
-        IndexProperties oldIndexProperties = rightTuple.getStore(inputStoreIndexRightProperties);
+        IndexedJoinStore<UniTuple<Right_>, OutTuple_> rightStore =
+                rightTuple.getStore(inputStoreIndexRight, IndexedJoinStore::new);
+        IndexProperties oldIndexProperties = rightStore.indexProperties;
         if (oldIndexProperties == null) {
             // No fail fast if null because we don't track which tuples made it through the filter predicate(s)
             insertRight(rightTuple);
@@ -132,38 +127,44 @@ public abstract class AbstractIndexedJoinNode<LeftTuple_ extends AbstractTuple, 
         if (oldIndexProperties.equals(newIndexProperties)) {
             // No need for re-indexing because the index properties didn't change
             // Prefer an update over retract-insert if possible
-            innerUpdateRight(rightTuple, consumer -> indexerLeft.forEach(oldIndexProperties, consumer));
+            innerUpdateRight(rightTuple, rightStore, consumer -> indexerLeft.forEach(oldIndexProperties, consumer));
         } else {
-            ElementAwareListEntry<UniTuple<Right_>> rightEntry = rightTuple.getStore(inputStoreIndexRightEntry);
-            ElementAwareList<OutTuple_> outTupleListRight = rightTuple.getStore(inputStoreIndexRightOutTupleList);
-            indexerRight.remove(oldIndexProperties, rightEntry);
-            outTupleListRight.forEach(this::retractOutTuple);
-            // outTupleListRight is now empty
-            // No need for rightTuple.setStore(inputStoreIndexRightOutTupleList, outTupleListRight);
-            indexAndPropagateRight(rightTuple, newIndexProperties);
+            indexerRight.remove(oldIndexProperties, rightStore.entry);
+            rightStore.outList.forEach(this::retractOutTuple);
+            // outList is now empty, no need for to set rightStore.outList.
+            indexAndPropagateRight(rightTuple, rightStore, newIndexProperties);
         }
     }
 
-    private void indexAndPropagateRight(UniTuple<Right_> rightTuple, IndexProperties indexProperties) {
-        rightTuple.setStore(inputStoreIndexRightProperties, indexProperties);
-        ElementAwareListEntry<UniTuple<Right_>> rightEntry = indexerRight.put(indexProperties, rightTuple);
-        rightTuple.setStore(inputStoreIndexRightEntry, rightEntry);
-        indexerLeft.forEach(indexProperties, leftTuple -> insertOutTupleFiltered(leftTuple, rightTuple));
+    private void indexAndPropagateRight(UniTuple<Right_> rightTuple, IndexedJoinStore<UniTuple<Right_>, OutTuple_> rightStore,
+            IndexProperties indexProperties) {
+        rightStore.indexProperties = indexProperties;
+        rightStore.entry = indexerRight.put(indexProperties, rightTuple);
+        indexerLeft.forEach(indexProperties, leftTuple -> {
+            IndexedJoinStore<LeftTuple_, OutTuple_> leftStore = leftTuple.getStore(inputStoreIndexLeft);
+            insertOutTupleFiltered(leftTuple, leftStore, rightTuple, rightStore);
+        });
     }
 
     @Override
     public final void retractRight(UniTuple<Right_> rightTuple) {
-        IndexProperties indexProperties = rightTuple.removeStore(inputStoreIndexRightProperties);
-        if (indexProperties == null) {
+        IndexedJoinStore<UniTuple<Right_>, OutTuple_> rightStore = rightTuple.removeStore(inputStoreIndexRight);
+        if (rightStore == null) {
             // No fail fast if null because we don't track which tuples made it through the filter predicate(s)
             return;
         }
-        ElementAwareListEntry<UniTuple<Right_>> rightEntry = rightTuple.removeStore(inputStoreIndexRightEntry);
-        ElementAwareList<OutTuple_> outTupleListRight = rightTuple.removeStore(inputStoreIndexRightOutTupleList);
-        indexerRight.remove(indexProperties, rightEntry);
-        outTupleListRight.forEach(this::retractOutTuple);
+        indexerRight.remove(rightStore.indexProperties, rightStore.entry);
+        rightStore.outList.forEach(this::retractOutTuple);
     }
 
     protected abstract IndexProperties createIndexPropertiesLeft(LeftTuple_ leftTuple);
+
+    static final class IndexedJoinStore<Tuple_ extends AbstractTuple, OutTuple_ extends AbstractTuple>
+            extends AbstractJoinStore<OutTuple_> {
+
+        private IndexProperties indexProperties;
+        private ElementAwareListEntry<Tuple_> entry;
+
+    }
 
 }

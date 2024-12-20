@@ -59,18 +59,12 @@ public final class BavetJoinBiConstraintStream<Solution_, A, B> extends BavetAbs
                 ? new IndexedJoinBiNode<>(
                         indexerFactory.buildUniLeftMapping(), indexerFactory.buildRightMapping(),
                         buildHelper.reserveTupleStoreIndex(leftParent.getTupleSource()),
-                        buildHelper.reserveTupleStoreIndex(leftParent.getTupleSource()),
-                        buildHelper.reserveTupleStoreIndex(leftParent.getTupleSource()),
-                        buildHelper.reserveTupleStoreIndex(rightParent.getTupleSource()),
-                        buildHelper.reserveTupleStoreIndex(rightParent.getTupleSource()),
                         buildHelper.reserveTupleStoreIndex(rightParent.getTupleSource()),
                         downstream, filtering, outputStoreSize + 2,
                         outputStoreSize, outputStoreSize + 1,
                         indexerFactory.buildIndexer(true), indexerFactory.buildIndexer(false))
                 : new UnindexedJoinBiNode<>(
                         buildHelper.reserveTupleStoreIndex(leftParent.getTupleSource()),
-                        buildHelper.reserveTupleStoreIndex(leftParent.getTupleSource()),
-                        buildHelper.reserveTupleStoreIndex(rightParent.getTupleSource()),
                         buildHelper.reserveTupleStoreIndex(rightParent.getTupleSource()),
                         downstream, filtering, outputStoreSize + 2,
                         outputStoreSize, outputStoreSize + 1);

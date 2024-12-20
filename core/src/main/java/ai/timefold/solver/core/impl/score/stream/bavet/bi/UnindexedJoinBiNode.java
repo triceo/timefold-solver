@@ -13,14 +13,11 @@ final class UnindexedJoinBiNode<A, B>
     private final BiPredicate<A, B> filtering;
     private final int outputStoreSize;
 
-    public UnindexedJoinBiNode(
-            int inputStoreIndexLeftEntry, int inputStoreIndexLeftOutTupleList,
-            int inputStoreIndexRightEntry, int inputStoreIndexRightOutTupleList,
+    public UnindexedJoinBiNode(int inputStoreIndexLeftOutTupleList, int inputStoreIndexRightOutTupleList,
             TupleLifecycle<BiTuple<A, B>> nextNodesTupleLifecycle, BiPredicate<A, B> filtering,
-            int outputStoreSize,
-            int outputStoreIndexLeftOutEntry, int outputStoreIndexRightOutEntry) {
-        super(inputStoreIndexLeftEntry, inputStoreIndexLeftOutTupleList,
-                inputStoreIndexRightEntry, inputStoreIndexRightOutTupleList,
+            int outputStoreSize, int outputStoreIndexLeftOutEntry, int outputStoreIndexRightOutEntry) {
+        super(inputStoreIndexLeftOutTupleList,
+                inputStoreIndexRightOutTupleList,
                 nextNodesTupleLifecycle, filtering != null,
                 outputStoreIndexLeftOutEntry, outputStoreIndexRightOutEntry);
         this.filtering = filtering;

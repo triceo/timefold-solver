@@ -1,6 +1,7 @@
 package ai.timefold.solver.core.impl.score.stream.bavet.common.tuple;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import ai.timefold.solver.core.api.score.stream.uni.UniConstraintStream;
 
@@ -38,6 +39,29 @@ public abstract sealed class AbstractTuple permits UniTuple, BiTuple, TriTuple, 
         return (Value_) (storeIsArray ? ((Object[]) store)[index] : store);
     }
 
+    public final <Value_> Value_ getStore(int index, Supplier<Value_> valueSupplier) {
+        return (Value_) (storeIsArray ? getFromArray(index, valueSupplier) : getPlain(valueSupplier));
+    }
+
+    private <Value_> Object getFromArray(int index, Supplier<Value_> valueSupplier) {
+        var store = (Object[]) this.store;
+        var value = store[index];
+        if (value == null) {
+            value = valueSupplier.get();
+            store[index] = value;
+        }
+        return value;
+    }
+
+    private <Value_> Object getPlain(Supplier<Value_> valueSupplier) {
+        var value = this.store;
+        if (value == null) {
+            value = valueSupplier.get();
+            this.store = value;
+        }
+        return value;
+    }
+
     public final void setStore(int index, Object value) {
         if (storeIsArray) {
             ((Object[]) store)[index] = value;
@@ -47,15 +71,19 @@ public abstract sealed class AbstractTuple permits UniTuple, BiTuple, TriTuple, 
     }
 
     public <Value_> Value_ removeStore(int index) {
-        Value_ value;
-        if (storeIsArray) {
-            Object[] array = (Object[]) store;
-            value = (Value_) array[index];
-            array[index] = null;
-        } else {
-            value = (Value_) store;
-            store = null;
-        }
+        return (Value_) (storeIsArray ? removeStoreFromArray(index) : removePlainStore());
+    }
+
+    private Object removeStoreFromArray(int index) {
+        var array = (Object[]) store;
+        var value = array[index];
+        array[index] = null;
+        return value;
+    }
+
+    private Object removePlainStore() {
+        var value = store;
+        store = null;
         return value;
     }
 

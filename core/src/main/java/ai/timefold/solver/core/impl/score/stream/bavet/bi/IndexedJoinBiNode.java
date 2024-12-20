@@ -17,16 +17,13 @@ final class IndexedJoinBiNode<A, B> extends AbstractIndexedJoinNode<UniTuple<A>,
     private final int outputStoreSize;
 
     public IndexedJoinBiNode(Function<A, IndexProperties> mappingA, Function<B, IndexProperties> mappingB,
-            int inputStoreIndexA, int inputStoreIndexEntryA, int inputStoreIndexOutTupleListA,
-            int inputStoreIndexB, int inputStoreIndexEntryB, int inputStoreIndexOutTupleListB,
+            int inputStoreIndexOutTupleListA, int inputStoreIndexOutTupleListB,
             TupleLifecycle<BiTuple<A, B>> nextNodesTupleLifecycle, BiPredicate<A, B> filtering,
-            int outputStoreSize,
-            int outputStoreIndexOutEntryA, int outputStoreIndexOutEntryB,
+            int outputStoreSize, int outputStoreIndexOutEntryA, int outputStoreIndexOutEntryB,
             Indexer<UniTuple<A>> indexerA,
             Indexer<UniTuple<B>> indexerB) {
         super(mappingB,
-                inputStoreIndexA, inputStoreIndexEntryA, inputStoreIndexOutTupleListA,
-                inputStoreIndexB, inputStoreIndexEntryB, inputStoreIndexOutTupleListB,
+                inputStoreIndexOutTupleListA, inputStoreIndexOutTupleListB,
                 nextNodesTupleLifecycle, filtering != null,
                 outputStoreIndexOutEntryA, outputStoreIndexOutEntryB,
                 indexerA, indexerB);

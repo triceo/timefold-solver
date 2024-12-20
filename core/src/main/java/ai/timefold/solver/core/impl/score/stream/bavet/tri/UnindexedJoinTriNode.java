@@ -13,14 +13,11 @@ final class UnindexedJoinTriNode<A, B, C>
     private final TriPredicate<A, B, C> filtering;
     private final int outputStoreSize;
 
-    public UnindexedJoinTriNode(
-            int inputStoreIndexLeftEntry, int inputStoreIndexLeftOutTupleList,
-            int inputStoreIndexRightEntry, int inputStoreIndexRightOutTupleList,
+    public UnindexedJoinTriNode(int inputStoreIndexLeftOutTupleList, int inputStoreIndexRightOutTupleList,
             TupleLifecycle<TriTuple<A, B, C>> nextNodesTupleLifecycle, TriPredicate<A, B, C> filtering,
-            int outputStoreSize,
-            int outputStoreIndexLeftOutEntry, int outputStoreIndexRightOutEntry) {
-        super(inputStoreIndexLeftEntry, inputStoreIndexLeftOutTupleList,
-                inputStoreIndexRightEntry, inputStoreIndexRightOutTupleList,
+            int outputStoreSize, int outputStoreIndexLeftOutEntry, int outputStoreIndexRightOutEntry) {
+        super(inputStoreIndexLeftOutTupleList,
+                inputStoreIndexRightOutTupleList,
                 nextNodesTupleLifecycle, filtering != null,
                 outputStoreIndexLeftOutEntry, outputStoreIndexRightOutEntry);
         this.filtering = filtering;

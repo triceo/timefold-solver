@@ -24,18 +24,18 @@ public abstract class AbstractJoinNode<LeftTuple_ extends AbstractTuple, Right_,
         extends AbstractNode
         implements LeftTupleLifecycle<LeftTuple_>, RightTupleLifecycle<UniTuple<Right_>> {
 
-    protected final int inputStoreIndexLeftOutTupleList;
-    protected final int inputStoreIndexRightOutTupleList;
+    protected final int inputStoreIndexLeft;
+    protected final int inputStoreIndexRight;
     private final boolean isFiltering;
     private final int outputStoreIndexLeftOutEntry;
     private final int outputStoreIndexRightOutEntry;
     private final StaticPropagationQueue<OutTuple_> propagationQueue;
 
-    protected AbstractJoinNode(int inputStoreIndexLeftOutTupleList, int inputStoreIndexRightOutTupleList,
-            TupleLifecycle<OutTuple_> nextNodesTupleLifecycle, boolean isFiltering,
-            int outputStoreIndexLeftOutEntry, int outputStoreIndexRightOutEntry) {
-        this.inputStoreIndexLeftOutTupleList = inputStoreIndexLeftOutTupleList;
-        this.inputStoreIndexRightOutTupleList = inputStoreIndexRightOutTupleList;
+    protected AbstractJoinNode(int inputStoreIndexLeft, int inputStoreIndexRight,
+            TupleLifecycle<OutTuple_> nextNodesTupleLifecycle, boolean isFiltering, int outputStoreIndexLeftOutEntry,
+            int outputStoreIndexRightOutEntry) {
+        this.inputStoreIndexLeft = inputStoreIndexLeft;
+        this.inputStoreIndexRight = inputStoreIndexRight;
         this.isFiltering = isFiltering;
         this.outputStoreIndexLeftOutEntry = outputStoreIndexLeftOutEntry;
         this.outputStoreIndexRightOutEntry = outputStoreIndexRightOutEntry;
@@ -50,35 +50,34 @@ public abstract class AbstractJoinNode<LeftTuple_ extends AbstractTuple, Right_,
 
     protected abstract boolean testFiltering(LeftTuple_ leftTuple, UniTuple<Right_> rightTuple);
 
-    protected final void insertOutTuple(LeftTuple_ leftTuple, UniTuple<Right_> rightTuple) {
+    protected final void insertOutTuple(LeftTuple_ leftTuple, ElementAwareList<OutTuple_> outTupleListLeft,
+            UniTuple<Right_> rightTuple, ElementAwareList<OutTuple_> outTupleListRight) {
         var outTuple = createOutTuple(leftTuple, rightTuple);
-        ElementAwareList<OutTuple_> outTupleListLeft = leftTuple.getStore(inputStoreIndexLeftOutTupleList);
-        var outEntryLeft = outTupleListLeft.add(outTuple);
-        outTuple.setStore(outputStoreIndexLeftOutEntry, outEntryLeft);
-        ElementAwareList<OutTuple_> outTupleListRight = rightTuple.getStore(inputStoreIndexRightOutTupleList);
-        var outEntryRight = outTupleListRight.add(outTuple);
-        outTuple.setStore(outputStoreIndexRightOutEntry, outEntryRight);
+        outTuple.setStore(outputStoreIndexLeftOutEntry, outTupleListLeft.add(outTuple));
+        outTuple.setStore(outputStoreIndexRightOutEntry, outTupleListRight.add(outTuple));
         propagationQueue.insert(outTuple);
     }
 
-    protected final void insertOutTupleFiltered(LeftTuple_ leftTuple, UniTuple<Right_> rightTuple) {
+    protected final void insertOutTupleFiltered(LeftTuple_ leftTuple, AbstractJoinStore<OutTuple_> leftStore,
+            UniTuple<Right_> rightTuple, AbstractJoinStore<OutTuple_> rightStore) {
         if (!isFiltering || testFiltering(leftTuple, rightTuple)) {
-            insertOutTuple(leftTuple, rightTuple);
+            insertOutTuple(leftTuple, leftStore.outList, rightTuple, rightStore.outList);
         }
     }
 
-    protected final void innerUpdateLeft(LeftTuple_ leftTuple, Consumer<Consumer<UniTuple<Right_>>> rightTupleConsumer) {
+    protected final void innerUpdateLeft(LeftTuple_ leftTuple, AbstractJoinStore<OutTuple_> leftStore,
+            Consumer<Consumer<UniTuple<Right_>>> rightTupleConsumer) {
         // Prefer an update over retract-insert if possible
-        ElementAwareList<OutTuple_> outTupleListLeft = leftTuple.getStore(inputStoreIndexLeftOutTupleList);
-        // Propagate the update for downstream filters, matchWeighers, ...
         if (!isFiltering) {
-            for (var outTuple : outTupleListLeft) {
+            // Propagate the update for downstream filters, matchWeighers, ...
+            for (var outTuple : leftStore.outList) {
                 updateOutTupleLeft(outTuple, leftTuple);
             }
         } else {
             rightTupleConsumer.accept(rightTuple -> {
-                ElementAwareList<OutTuple_> rightOutList = rightTuple.getStore(inputStoreIndexRightOutTupleList);
-                processOutTupleUpdate(leftTuple, rightTuple, rightOutList, outTupleListLeft, outputStoreIndexRightOutEntry);
+                AbstractJoinStore<OutTuple_> rightStore = rightTuple.getStore(inputStoreIndexRight);
+                processOutTupleUpdate(leftTuple, leftStore.outList, rightTuple, rightStore.outList, rightStore.outList,
+                        leftStore.outList, outputStoreIndexRightOutEntry);
             });
         }
     }
@@ -99,29 +98,31 @@ public abstract class AbstractJoinNode<LeftTuple_ extends AbstractTuple, Right_,
         propagationQueue.update(outTuple);
     }
 
-    protected final void innerUpdateRight(UniTuple<Right_> rightTuple, Consumer<Consumer<LeftTuple_>> leftTupleConsumer) {
+    protected final void innerUpdateRight(UniTuple<Right_> rightTuple, AbstractJoinStore<OutTuple_> rightStore,
+            Consumer<Consumer<LeftTuple_>> leftTupleConsumer) {
         // Prefer an update over retract-insert if possible
-        ElementAwareList<OutTuple_> outTupleListRight = rightTuple.getStore(inputStoreIndexRightOutTupleList);
         if (!isFiltering) {
             // Propagate the update for downstream filters, matchWeighers, ...
-            for (var outTuple : outTupleListRight) {
+            for (var outTuple : rightStore.outList) {
                 setOutTupleRightFact(outTuple, rightTuple);
                 doUpdateOutTuple(outTuple);
             }
         } else {
             leftTupleConsumer.accept(leftTuple -> {
-                ElementAwareList<OutTuple_> leftOutList = leftTuple.getStore(inputStoreIndexLeftOutTupleList);
-                processOutTupleUpdate(leftTuple, rightTuple, leftOutList, outTupleListRight, outputStoreIndexLeftOutEntry);
+                AbstractJoinStore<OutTuple_> leftStore = leftTuple.getStore(inputStoreIndexLeft);
+                processOutTupleUpdate(leftTuple, leftStore.outList, rightTuple, rightStore.outList, leftStore.outList,
+                        rightStore.outList, outputStoreIndexLeftOutEntry);
             });
         }
     }
 
-    private void processOutTupleUpdate(LeftTuple_ leftTuple, UniTuple<Right_> rightTuple, ElementAwareList<OutTuple_> outList,
+    private void processOutTupleUpdate(LeftTuple_ leftTuple, ElementAwareList<OutTuple_> outTupleListLeft,
+            UniTuple<Right_> rightTuple, ElementAwareList<OutTuple_> outTupleListRight, ElementAwareList<OutTuple_> outList,
             ElementAwareList<OutTuple_> outTupleList, int outputStoreIndexOutEntry) {
         var outTuple = findOutTuple(outTupleList, outList, outputStoreIndexOutEntry);
         if (testFiltering(leftTuple, rightTuple)) {
             if (outTuple == null) {
-                insertOutTuple(leftTuple, rightTuple);
+                insertOutTuple(leftTuple, outTupleListLeft, rightTuple, outTupleListRight);
             } else {
                 updateOutTupleLeft(outTuple, leftTuple);
             }
@@ -166,6 +167,13 @@ public abstract class AbstractJoinNode<LeftTuple_ extends AbstractTuple, Right_,
     @Override
     public Propagator getPropagator() {
         return propagationQueue;
+    }
+
+    protected static sealed abstract class AbstractJoinStore<OutTuple_ extends AbstractTuple>
+            permits AbstractIndexedJoinNode.IndexedJoinStore, AbstractUnindexedJoinNode.UnindexedJoinStore {
+
+        protected ElementAwareList<OutTuple_> outList;
+
     }
 
 }

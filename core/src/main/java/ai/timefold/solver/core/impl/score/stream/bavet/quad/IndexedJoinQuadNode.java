@@ -20,16 +20,14 @@ final class IndexedJoinQuadNode<A, B, C, D>
     private final int outputStoreSize;
 
     public IndexedJoinQuadNode(TriFunction<A, B, C, IndexProperties> mappingABC, Function<D, IndexProperties> mappingD,
-            int inputStoreIndexABC, int inputStoreIndexEntryABC, int inputStoreIndexOutTupleListABC,
-            int inputStoreIndexD, int inputStoreIndexEntryD, int inputStoreIndexOutTupleListD,
+            int inputStoreIndexOutTupleListABC, int inputStoreIndexOutTupleListD,
             TupleLifecycle<QuadTuple<A, B, C, D>> nextNodesTupleLifecycle, QuadPredicate<A, B, C, D> filtering,
-            int outputStoreSize,
-            int outputStoreIndexOutEntryABC, int outputStoreIndexOutEntryD,
+            int outputStoreSize, int outputStoreIndexOutEntryABC, int outputStoreIndexOutEntryD,
             Indexer<TriTuple<A, B, C>> indexerABC,
             Indexer<UniTuple<D>> indexerD) {
         super(mappingD,
-                inputStoreIndexABC, inputStoreIndexEntryABC, inputStoreIndexOutTupleListABC,
-                inputStoreIndexD, inputStoreIndexEntryD, inputStoreIndexOutTupleListD,
+                inputStoreIndexOutTupleListABC,
+                inputStoreIndexOutTupleListD,
                 nextNodesTupleLifecycle, filtering != null,
                 outputStoreIndexOutEntryABC, outputStoreIndexOutEntryD,
                 indexerABC, indexerD);

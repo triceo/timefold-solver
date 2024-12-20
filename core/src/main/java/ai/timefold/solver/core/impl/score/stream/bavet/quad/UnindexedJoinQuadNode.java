@@ -13,14 +13,11 @@ final class UnindexedJoinQuadNode<A, B, C, D>
     private final QuadPredicate<A, B, C, D> filtering;
     private final int outputStoreSize;
 
-    public UnindexedJoinQuadNode(
-            int inputStoreIndexLeftEntry, int inputStoreIndexLeftOutTupleList,
-            int inputStoreIndexRightEntry, int inputStoreIndexRightOutTupleList,
+    public UnindexedJoinQuadNode(int inputStoreIndexLeftOutTupleList, int inputStoreIndexRightOutTupleList,
             TupleLifecycle<QuadTuple<A, B, C, D>> nextNodesTupleLifecycle, QuadPredicate<A, B, C, D> filtering,
-            int outputStoreSize,
-            int outputStoreIndexLeftOutEntry, int outputStoreIndexRightOutEntry) {
-        super(inputStoreIndexLeftEntry, inputStoreIndexLeftOutTupleList,
-                inputStoreIndexRightEntry, inputStoreIndexRightOutTupleList,
+            int outputStoreSize, int outputStoreIndexLeftOutEntry, int outputStoreIndexRightOutEntry) {
+        super(inputStoreIndexLeftOutTupleList,
+                inputStoreIndexRightOutTupleList,
                 nextNodesTupleLifecycle, filtering != null,
                 outputStoreIndexLeftOutEntry, outputStoreIndexRightOutEntry);
         this.filtering = filtering;
