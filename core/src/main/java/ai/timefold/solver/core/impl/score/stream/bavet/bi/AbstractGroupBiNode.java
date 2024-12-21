@@ -15,12 +15,10 @@ abstract class AbstractGroupBiNode<OldA, OldB, OutTuple_ extends AbstractTuple, 
 
     private final TriFunction<ResultContainer_, OldA, OldB, Runnable> accumulator;
 
-    protected AbstractGroupBiNode(int groupStoreIndex, int undoStoreIndex,
-            Function<BiTuple<OldA, OldB>, GroupKey_> groupKeyFunction,
+    protected AbstractGroupBiNode(int groupStoreIndex, Function<BiTuple<OldA, OldB>, GroupKey_> groupKeyFunction,
             BiConstraintCollector<OldA, OldB, ResultContainer_, Result_> collector,
             TupleLifecycle<OutTuple_> nextNodesTupleLifecycle, EnvironmentMode environmentMode) {
-        super(groupStoreIndex, undoStoreIndex,
-                groupKeyFunction,
+        super(groupStoreIndex, groupKeyFunction,
                 collector == null ? null : collector.supplier(),
                 collector == null ? null : collector.finisher(),
                 nextNodesTupleLifecycle, environmentMode);
@@ -30,8 +28,7 @@ abstract class AbstractGroupBiNode<OldA, OldB, OutTuple_ extends AbstractTuple, 
     protected AbstractGroupBiNode(int groupStoreIndex,
             Function<BiTuple<OldA, OldB>, GroupKey_> groupKeyFunction, TupleLifecycle<OutTuple_> nextNodesTupleLifecycle,
             EnvironmentMode environmentMode) {
-        super(groupStoreIndex,
-                groupKeyFunction, nextNodesTupleLifecycle, environmentMode);
+        super(groupStoreIndex, groupKeyFunction, nextNodesTupleLifecycle, environmentMode);
         accumulator = null;
     }
 

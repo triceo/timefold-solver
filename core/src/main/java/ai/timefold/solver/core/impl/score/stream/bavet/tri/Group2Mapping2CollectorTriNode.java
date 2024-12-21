@@ -14,13 +14,12 @@ final class Group2Mapping2CollectorTriNode<OldA, OldB, OldC, A, B, C, D, ResultC
     private final int outputStoreSize;
 
     public Group2Mapping2CollectorTriNode(TriFunction<OldA, OldB, OldC, A> groupKeyMappingA,
-            TriFunction<OldA, OldB, OldC, B> groupKeyMappingB,
-            int groupStoreIndex, int undoStoreIndex,
+            TriFunction<OldA, OldB, OldC, B> groupKeyMappingB, int groupStoreIndex,
             TriConstraintCollector<OldA, OldB, OldC, ResultContainerC_, C> collectorC,
             TriConstraintCollector<OldA, OldB, OldC, ResultContainerD_, D> collectorD,
             TupleLifecycle<QuadTuple<A, B, C, D>> nextNodesTupleLifecycle, int outputStoreSize,
             EnvironmentMode environmentMode) {
-        super(groupStoreIndex, undoStoreIndex,
+        super(groupStoreIndex,
                 tuple -> Group2Mapping0CollectorTriNode.createGroupKey(groupKeyMappingA, groupKeyMappingB, tuple),
                 Group0Mapping2CollectorTriNode.mergeCollectors(collectorC, collectorD), nextNodesTupleLifecycle,
                 environmentMode);

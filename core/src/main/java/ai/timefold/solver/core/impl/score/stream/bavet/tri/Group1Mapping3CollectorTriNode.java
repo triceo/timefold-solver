@@ -13,14 +13,13 @@ final class Group1Mapping3CollectorTriNode<OldA, OldB, OldC, A, B, C, D, ResultC
 
     private final int outputStoreSize;
 
-    public Group1Mapping3CollectorTriNode(TriFunction<OldA, OldB, OldC, A> groupKeyMapping,
-            int groupStoreIndex, int undoStoreIndex,
+    public Group1Mapping3CollectorTriNode(TriFunction<OldA, OldB, OldC, A> groupKeyMapping, int groupStoreIndex,
             TriConstraintCollector<OldA, OldB, OldC, ResultContainerB_, B> collectorB,
             TriConstraintCollector<OldA, OldB, OldC, ResultContainerC_, C> collectorC,
             TriConstraintCollector<OldA, OldB, OldC, ResultContainerD_, D> collectorD,
             TupleLifecycle<QuadTuple<A, B, C, D>> nextNodesTupleLifecycle, int outputStoreSize,
             EnvironmentMode environmentMode) {
-        super(groupStoreIndex, undoStoreIndex,
+        super(groupStoreIndex,
                 tuple -> Group1Mapping0CollectorTriNode.createGroupKey(groupKeyMapping, tuple),
                 Group0Mapping3CollectorTriNode.mergeCollectors(collectorB, collectorC, collectorD), nextNodesTupleLifecycle,
                 environmentMode);

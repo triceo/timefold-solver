@@ -15,23 +15,19 @@ abstract class AbstractGroupUniNode<OldA, OutTuple_ extends AbstractTuple, Group
 
     private final BiFunction<ResultContainer_, OldA, Runnable> accumulator;
 
-    protected AbstractGroupUniNode(int groupStoreIndex, int undoStoreIndex,
-            Function<UniTuple<OldA>, GroupKey_> groupKeyFunction,
+    protected AbstractGroupUniNode(int groupStoreIndex, Function<UniTuple<OldA>, GroupKey_> groupKeyFunction,
             UniConstraintCollector<OldA, ResultContainer_, Result_> collector,
             TupleLifecycle<OutTuple_> nextNodesTupleLifecycle, EnvironmentMode environmentMode) {
-        super(groupStoreIndex, undoStoreIndex,
-                groupKeyFunction,
+        super(groupStoreIndex, groupKeyFunction,
                 collector == null ? null : collector.supplier(),
                 collector == null ? null : collector.finisher(),
                 nextNodesTupleLifecycle, environmentMode);
         accumulator = collector == null ? null : collector.accumulator();
     }
 
-    protected AbstractGroupUniNode(int groupStoreIndex,
-            Function<UniTuple<OldA>, GroupKey_> groupKeyFunction,
+    protected AbstractGroupUniNode(int groupStoreIndex, Function<UniTuple<OldA>, GroupKey_> groupKeyFunction,
             TupleLifecycle<OutTuple_> nextNodesTupleLifecycle, EnvironmentMode environmentMode) {
-        super(groupStoreIndex,
-                groupKeyFunction, nextNodesTupleLifecycle, environmentMode);
+        super(groupStoreIndex, groupKeyFunction, nextNodesTupleLifecycle, environmentMode);
         accumulator = null;
     }
 

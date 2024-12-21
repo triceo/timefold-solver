@@ -17,10 +17,6 @@ public abstract class AbstractGroupNode<InTuple_ extends AbstractTuple, OutTuple
 
     private final int groupStoreIndex;
     /**
-     * Unused when {@link #hasCollector} is false.
-     */
-    private final int undoStoreIndex;
-    /**
      * Unused when {@link #hasMultipleGroups} is false.
      */
     private final Function<InTuple_, GroupKey_> groupKeyFunction;
@@ -56,12 +52,10 @@ public abstract class AbstractGroupNode<InTuple_ extends AbstractTuple, OutTuple
     private final DynamicPropagationQueue<OutTuple_, Group<OutTuple_, ResultContainer_>> propagationQueue;
     private final boolean useAssertingGroupKey;
 
-    protected AbstractGroupNode(int groupStoreIndex, int undoStoreIndex,
-            Function<InTuple_, GroupKey_> groupKeyFunction, Supplier<ResultContainer_> supplier,
-            Function<ResultContainer_, Result_> finisher,
+    protected AbstractGroupNode(int groupStoreIndex, Function<InTuple_, GroupKey_> groupKeyFunction,
+            Supplier<ResultContainer_> supplier, Function<ResultContainer_, Result_> finisher,
             TupleLifecycle<OutTuple_> nextNodesTupleLifecycle, EnvironmentMode environmentMode) {
         this.groupStoreIndex = groupStoreIndex;
-        this.undoStoreIndex = undoStoreIndex;
         this.groupKeyFunction = groupKeyFunction;
         this.supplier = supplier;
         this.finisher = finisher;
@@ -87,24 +81,23 @@ public abstract class AbstractGroupNode<InTuple_ extends AbstractTuple, OutTuple
     protected AbstractGroupNode(int groupStoreIndex,
             Function<InTuple_, GroupKey_> groupKeyFunction, TupleLifecycle<OutTuple_> nextNodesTupleLifecycle,
             EnvironmentMode environmentMode) {
-        this(groupStoreIndex, -1,
-                groupKeyFunction, null, null, nextNodesTupleLifecycle,
-                environmentMode);
+        this(groupStoreIndex, groupKeyFunction, null, null, nextNodesTupleLifecycle, environmentMode);
     }
 
     @Override
     public final void insert(InTuple_ tuple) {
-        if (tuple.getStore(groupStoreIndex) != null) {
+        GroupStore<OutTuple_, ResultContainer_> groupStore = tuple.getStore(groupStoreIndex, GroupStore::new);
+        if (groupStore.group != null) {
             throw new IllegalStateException("Impossible state: the input for the tuple (" + tuple
                     + ") was already added in the tupleStore.");
         }
         var userSuppliedKey = hasMultipleGroups ? groupKeyFunction.apply(tuple) : null;
-        createTuple(tuple, userSuppliedKey);
+        createTuple(tuple, userSuppliedKey, groupStore);
     }
 
-    private void createTuple(InTuple_ tuple, GroupKey_ userSuppliedKey) {
+    private void createTuple(InTuple_ tuple, GroupKey_ userSuppliedKey, GroupStore<OutTuple_, ResultContainer_> groupStore) {
         var newGroup = getOrCreateGroup(userSuppliedKey);
-        var outTuple = accumulate(tuple, newGroup);
+        var outTuple = accumulate(tuple, newGroup, groupStore);
         switch (outTuple.state) {
             case CREATING, UPDATING -> {
                 // Already in the correct state.
@@ -116,12 +109,12 @@ public abstract class AbstractGroupNode<InTuple_ extends AbstractTuple, OutTuple
         }
     }
 
-    private OutTuple_ accumulate(InTuple_ tuple, Group<OutTuple_, ResultContainer_> group) {
+    private OutTuple_ accumulate(InTuple_ tuple, Group<OutTuple_, ResultContainer_> group,
+            GroupStore<OutTuple_, ResultContainer_> groupStore) {
         if (hasCollector) {
-            var undoAccumulator = accumulate(group.getResultContainer(), tuple);
-            tuple.setStore(undoStoreIndex, undoAccumulator);
+            groupStore.undoAccumulator = accumulate(group.getResultContainer(), tuple);
         }
-        tuple.setStore(groupStoreIndex, group);
+        groupStore.group = group;
         return group.getTuple();
     }
 
@@ -173,22 +166,23 @@ public abstract class AbstractGroupNode<InTuple_ extends AbstractTuple, OutTuple
 
     @Override
     public final void update(InTuple_ tuple) {
-        Group<OutTuple_, ResultContainer_> oldGroup = tuple.getStore(groupStoreIndex);
-        if (oldGroup == null) {
+        GroupStore<OutTuple_, ResultContainer_> groupStore = tuple.getStore(groupStoreIndex);
+        if (groupStore == null) {
             // No fail fast if null because we don't track which tuples made it through the filter predicate(s)
             insert(tuple);
             return;
         }
+
+        var oldGroup = groupStore.group;
         if (hasCollector) {
-            Runnable undoAccumulator = tuple.getStore(undoStoreIndex);
-            undoAccumulator.run();
+            groupStore.undoAccumulator.run();
         }
 
         var oldUserSuppliedGroupKey = hasMultipleGroups ? extractUserSuppliedKey(oldGroup.getGroupKey()) : null;
         var newUserSuppliedGroupKey = hasMultipleGroups ? groupKeyFunction.apply(tuple) : null;
         if (Objects.equals(newUserSuppliedGroupKey, oldUserSuppliedGroupKey)) {
             // No need to change parentCount because it is the same group
-            var outTuple = accumulate(tuple, oldGroup);
+            var outTuple = accumulate(tuple, oldGroup, groupStore);
             switch (outTuple.state) {
                 case CREATING, UPDATING -> {
                     // Already in the correct state.
@@ -199,7 +193,7 @@ public abstract class AbstractGroupNode<InTuple_ extends AbstractTuple, OutTuple
             }
         } else {
             killTuple(oldGroup);
-            createTuple(tuple, newUserSuppliedGroupKey);
+            createTuple(tuple, newUserSuppliedGroupKey, groupStore);
         }
     }
 
@@ -251,14 +245,15 @@ public abstract class AbstractGroupNode<InTuple_ extends AbstractTuple, OutTuple
 
     @Override
     public final void retract(InTuple_ tuple) {
-        Group<OutTuple_, ResultContainer_> group = tuple.removeStore(groupStoreIndex);
-        if (group == null) {
+        GroupStore<OutTuple_, ResultContainer_> groupStore = tuple.removeStore(groupStoreIndex);
+        if (groupStore == null) {
             // No fail fast if null because we don't track which tuples made it through the filter predicate(s)
             return;
         }
+
+        var group = groupStore.group;
         if (hasCollector) {
-            Runnable undoAccumulator = tuple.removeStore(undoStoreIndex);
-            undoAccumulator.run();
+            groupStore.undoAccumulator.run();
         }
         killTuple(group);
     }
@@ -322,6 +317,13 @@ public abstract class AbstractGroupNode<InTuple_ extends AbstractTuple, OutTuple
             var key = getKey();
             return key == null ? 0 : key.hashCode();
         }
+    }
+
+    private static final class GroupStore<Tuple_ extends AbstractTuple, ResultContainer_> {
+
+        private Group<Tuple_, ResultContainer_> group;
+        private Runnable undoAccumulator;
+
     }
 
 }

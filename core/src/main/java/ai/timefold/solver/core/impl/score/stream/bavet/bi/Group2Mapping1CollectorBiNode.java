@@ -14,10 +14,10 @@ final class Group2Mapping1CollectorBiNode<OldA, OldB, A, B, C, ResultContainer_>
     private final int outputStoreSize;
 
     public Group2Mapping1CollectorBiNode(BiFunction<OldA, OldB, A> groupKeyMappingA, BiFunction<OldA, OldB, B> groupKeyMappingB,
-            int groupStoreIndex, int undoStoreIndex,
+            int groupStoreIndex,
             BiConstraintCollector<OldA, OldB, ResultContainer_, C> collector,
             TupleLifecycle<TriTuple<A, B, C>> nextNodesTupleLifecycle, int outputStoreSize, EnvironmentMode environmentMode) {
-        super(groupStoreIndex, undoStoreIndex,
+        super(groupStoreIndex,
                 tuple -> Group2Mapping0CollectorBiNode.createGroupKey(groupKeyMappingA, groupKeyMappingB, tuple), collector,
                 nextNodesTupleLifecycle, environmentMode);
         this.outputStoreSize = outputStoreSize;
