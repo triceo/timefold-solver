@@ -74,13 +74,13 @@ public abstract class AbstractIndexedIfExistsNode<LeftTuple_ extends AbstractTup
 
     @Override
     public final void updateLeft(LeftTuple_ leftTuple) {
-        LeftIndexedIfExistsStore<LeftTuple_> leftStore = leftTuple.getStore(inputStoreIndexLeft, LeftIndexedIfExistsStore::new);
-        IndexProperties oldIndexProperties = leftStore.indexProperties;
-        if (oldIndexProperties == null) {
+        LeftIndexedIfExistsStore<LeftTuple_> leftStore = leftTuple.getStore(inputStoreIndexLeft);
+        if (leftStore == null) {
             // No fail fast if null because we don't track which tuples made it through the filter predicate(s)
             insertLeft(leftTuple);
             return;
         }
+        var oldIndexProperties = leftStore.indexProperties;
         var newIndexProperties = createIndexProperties(leftTuple);
         var counter = leftStore.entry.getElement();
 
@@ -154,14 +154,13 @@ public abstract class AbstractIndexedIfExistsNode<LeftTuple_ extends AbstractTup
 
     @Override
     public final void updateRight(UniTuple<Right_> rightTuple) {
-        RightIndexedIfExistsStore<LeftTuple_, Right_> rightStore =
-                rightTuple.getStore(inputStoreIndexRight, RightIndexedIfExistsStore::new);
-        IndexProperties oldIndexProperties = rightStore.indexProperties;
-        if (oldIndexProperties == null) {
+        RightIndexedIfExistsStore<LeftTuple_, Right_> rightStore = rightTuple.getStore(inputStoreIndexRight);
+        if (rightStore == null) {
             // No fail fast if null because we don't track which tuples made it through the filter predicate(s)
             insertRight(rightTuple);
             return;
         }
+        var oldIndexProperties = rightStore.indexProperties;
         var newIndexProperties = mappingRight.apply(rightTuple.factA);
 
         if (oldIndexProperties.equals(newIndexProperties)) {
@@ -172,7 +171,7 @@ public abstract class AbstractIndexedIfExistsNode<LeftTuple_ extends AbstractTup
                         counter -> updateCounterFromRight(rightTuple, counter, rightTrackerList));
             }
         } else {
-            ElementAwareListEntry<UniTuple<Right_>> rightEntry = rightStore.entry;
+            var rightEntry = rightStore.entry;
             indexerRight.remove(oldIndexProperties, rightEntry);
             if (!isFiltering) {
                 indexerLeft.forEach(oldIndexProperties, this::decrementCounterRight);

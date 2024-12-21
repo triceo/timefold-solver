@@ -56,9 +56,8 @@ public abstract class AbstractUnindexedIfExistsNode<LeftTuple_ extends AbstractT
 
     @Override
     public final void updateLeft(LeftTuple_ leftTuple) {
-        LeftUnindexedIfExistsStore<LeftTuple_> leftStore =
-                leftTuple.getStore(inputStoreIndexLeft, LeftUnindexedIfExistsStore::new);
-        if (leftStore.entry == null) {
+        LeftUnindexedIfExistsStore<LeftTuple_> leftStore = leftTuple.getStore(inputStoreIndexLeft);
+        if (leftStore == null) {
             // No fail fast if null because we don't track which tuples made it through the filter predicate(s)
             insertLeft(leftTuple);
             return;
@@ -117,10 +116,8 @@ public abstract class AbstractUnindexedIfExistsNode<LeftTuple_ extends AbstractT
 
     @Override
     public final void updateRight(UniTuple<Right_> rightTuple) {
-        RightUnindexedIfExistsStore<LeftTuple_, Right_> rightStore =
-                rightTuple.getStore(inputStoreIndexRight, RightUnindexedIfExistsStore::new);
-        var rightEntry = rightStore.entry;
-        if (rightEntry == null) {
+        RightUnindexedIfExistsStore<LeftTuple_, Right_> rightStore = rightTuple.getStore(inputStoreIndexRight);
+        if (rightStore == null) {
             // No fail fast if null because we don't track which tuples made it through the filter predicate(s)
             insertRight(rightTuple);
             return;
