@@ -17,23 +17,15 @@ final class IndexedJoinQuadNode<A, B, C, D>
 
     private final TriFunction<A, B, C, IndexProperties> mappingABC;
     private final QuadPredicate<A, B, C, D> filtering;
-    private final int outputStoreSize;
 
     public IndexedJoinQuadNode(TriFunction<A, B, C, IndexProperties> mappingABC, Function<D, IndexProperties> mappingD,
             int inputStoreIndexOutTupleListABC, int inputStoreIndexOutTupleListD,
             TupleLifecycle<QuadTuple<A, B, C, D>> nextNodesTupleLifecycle, QuadPredicate<A, B, C, D> filtering,
-            int outputStoreSize, int outputStoreIndexOutEntryABC, int outputStoreIndexOutEntryD,
-            Indexer<TriTuple<A, B, C>> indexerABC,
-            Indexer<UniTuple<D>> indexerD) {
-        super(mappingD,
-                inputStoreIndexOutTupleListABC,
-                inputStoreIndexOutTupleListD,
-                nextNodesTupleLifecycle, filtering != null,
-                outputStoreIndexOutEntryABC, outputStoreIndexOutEntryD,
-                indexerABC, indexerD);
+            int outputStoreSize, Indexer<TriTuple<A, B, C>> indexerABC, Indexer<UniTuple<D>> indexerD) {
+        super(mappingD, inputStoreIndexOutTupleListABC, inputStoreIndexOutTupleListD, nextNodesTupleLifecycle,
+                filtering != null, outputStoreSize, indexerABC, indexerD);
         this.mappingABC = mappingABC;
         this.filtering = filtering;
-        this.outputStoreSize = outputStoreSize;
     }
 
     @Override

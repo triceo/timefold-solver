@@ -17,23 +17,15 @@ final class IndexedJoinTriNode<A, B, C>
 
     private final BiFunction<A, B, IndexProperties> mappingAB;
     private final TriPredicate<A, B, C> filtering;
-    private final int outputStoreSize;
 
     public IndexedJoinTriNode(BiFunction<A, B, IndexProperties> mappingAB, Function<C, IndexProperties> mappingC,
             int inputStoreIndexOutTupleListAB, int inputStoreIndexOutTupleListC,
-            TupleLifecycle<TriTuple<A, B, C>> nextNodesTupleLifecycle, TriPredicate<A, B, C> filtering,
-            int outputStoreSize, int outputStoreIndexOutEntryAB, int outputStoreIndexOutEntryC,
-            Indexer<BiTuple<A, B>> indexerAB,
-            Indexer<UniTuple<C>> indexerC) {
-        super(mappingC,
-                inputStoreIndexOutTupleListAB,
-                inputStoreIndexOutTupleListC,
-                nextNodesTupleLifecycle, filtering != null,
-                outputStoreIndexOutEntryAB, outputStoreIndexOutEntryC,
-                indexerAB, indexerC);
+            TupleLifecycle<TriTuple<A, B, C>> nextNodesTupleLifecycle, TriPredicate<A, B, C> filtering, int outputStoreSize,
+            Indexer<BiTuple<A, B>> indexerAB, Indexer<UniTuple<C>> indexerC) {
+        super(mappingC, inputStoreIndexOutTupleListAB, inputStoreIndexOutTupleListC, nextNodesTupleLifecycle, filtering != null,
+                outputStoreSize, indexerAB, indexerC);
         this.mappingAB = mappingAB;
         this.filtering = filtering;
-        this.outputStoreSize = outputStoreSize;
     }
 
     @Override

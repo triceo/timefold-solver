@@ -63,14 +63,12 @@ public final class BavetJoinTriConstraintStream<Solution_, A, B, C>
                         indexerFactory.buildBiLeftMapping(), indexerFactory.buildRightMapping(),
                         buildHelper.reserveTupleStoreIndex(leftParent.getTupleSource()),
                         buildHelper.reserveTupleStoreIndex(rightParent.getTupleSource()),
-                        downstream, filtering, outputStoreSize + 2,
-                        outputStoreSize, outputStoreSize + 1,
+                        downstream, filtering, outputStoreSize + 1,
                         indexerFactory.buildIndexer(true), indexerFactory.buildIndexer(false))
                 : new UnindexedJoinTriNode<>(
                         buildHelper.reserveTupleStoreIndex(leftParent.getTupleSource()),
                         buildHelper.reserveTupleStoreIndex(rightParent.getTupleSource()),
-                        downstream, filtering, outputStoreSize + 2,
-                        outputStoreSize, outputStoreSize + 1);
+                        downstream, filtering, outputStoreSize + 1);
         buildHelper.addNode(node, this, leftParent, rightParent);
     }
 

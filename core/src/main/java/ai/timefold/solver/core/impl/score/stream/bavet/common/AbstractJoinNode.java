@@ -1,6 +1,7 @@
 package ai.timefold.solver.core.impl.score.stream.bavet.common;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.AbstractTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.LeftTupleLifecycle;
@@ -27,18 +28,17 @@ public abstract class AbstractJoinNode<LeftTuple_ extends AbstractTuple, Right_,
     protected final int inputStoreIndexLeft;
     protected final int inputStoreIndexRight;
     private final boolean isFiltering;
-    private final int outputStoreIndexLeftOutEntry;
-    private final int outputStoreIndexRightOutEntry;
+    protected final int outputStoreSize;
+    private final int outputStoreIndex;
     private final StaticPropagationQueue<OutTuple_> propagationQueue;
 
     protected AbstractJoinNode(int inputStoreIndexLeft, int inputStoreIndexRight,
-            TupleLifecycle<OutTuple_> nextNodesTupleLifecycle, boolean isFiltering, int outputStoreIndexLeftOutEntry,
-            int outputStoreIndexRightOutEntry) {
+            TupleLifecycle<OutTuple_> nextNodesTupleLifecycle, boolean isFiltering, int outputStoreSize) {
         this.inputStoreIndexLeft = inputStoreIndexLeft;
         this.inputStoreIndexRight = inputStoreIndexRight;
         this.isFiltering = isFiltering;
-        this.outputStoreIndexLeftOutEntry = outputStoreIndexLeftOutEntry;
-        this.outputStoreIndexRightOutEntry = outputStoreIndexRightOutEntry;
+        this.outputStoreSize = outputStoreSize;
+        this.outputStoreIndex = outputStoreSize - 1;
         this.propagationQueue = new StaticPropagationQueue<>(nextNodesTupleLifecycle);
     }
 
@@ -53,8 +53,10 @@ public abstract class AbstractJoinNode<LeftTuple_ extends AbstractTuple, Right_,
     protected final void insertOutTuple(LeftTuple_ leftTuple, ElementAwareList<OutTuple_> outTupleListLeft,
             UniTuple<Right_> rightTuple, ElementAwareList<OutTuple_> outTupleListRight) {
         var outTuple = createOutTuple(leftTuple, rightTuple);
-        outTuple.setStore(outputStoreIndexLeftOutEntry, outTupleListLeft.add(outTuple));
-        outTuple.setStore(outputStoreIndexRightOutEntry, outTupleListRight.add(outTuple));
+        var outJoinStore = new OutJoinStore<OutTuple_>();
+        outJoinStore.leftOutListEntry = outTupleListLeft.add(outTuple);
+        outJoinStore.rightOutListEntry = outTupleListRight.add(outTuple);
+        outTuple.setStore(outputStoreIndex, outJoinStore);
         propagationQueue.insert(outTuple);
     }
 
@@ -77,7 +79,7 @@ public abstract class AbstractJoinNode<LeftTuple_ extends AbstractTuple, Right_,
             rightTupleConsumer.accept(rightTuple -> {
                 AbstractJoinStore<OutTuple_> rightStore = rightTuple.getStore(inputStoreIndexRight);
                 processOutTupleUpdate(leftTuple, leftStore.outList, rightTuple, rightStore.outList, rightStore.outList,
-                        leftStore.outList, outputStoreIndexRightOutEntry);
+                        leftStore.outList, outStore -> outStore.rightOutListEntry);
             });
         }
     }
@@ -111,15 +113,16 @@ public abstract class AbstractJoinNode<LeftTuple_ extends AbstractTuple, Right_,
             leftTupleConsumer.accept(leftTuple -> {
                 AbstractJoinStore<OutTuple_> leftStore = leftTuple.getStore(inputStoreIndexLeft);
                 processOutTupleUpdate(leftTuple, leftStore.outList, rightTuple, rightStore.outList, leftStore.outList,
-                        rightStore.outList, outputStoreIndexLeftOutEntry);
+                        rightStore.outList, outStore -> outStore.leftOutListEntry);
             });
         }
     }
 
     private void processOutTupleUpdate(LeftTuple_ leftTuple, ElementAwareList<OutTuple_> outTupleListLeft,
             UniTuple<Right_> rightTuple, ElementAwareList<OutTuple_> outTupleListRight, ElementAwareList<OutTuple_> outList,
-            ElementAwareList<OutTuple_> outTupleList, int outputStoreIndexOutEntry) {
-        var outTuple = findOutTuple(outTupleList, outList, outputStoreIndexOutEntry);
+            ElementAwareList<OutTuple_> outTupleList,
+            Function<OutJoinStore<OutTuple_>, ElementAwareListEntry<OutTuple_>> outEntryFunction) {
+        var outTuple = findOutTuple(outTupleList, outList, outEntryFunction);
         if (testFiltering(leftTuple, rightTuple)) {
             if (outTuple == null) {
                 insertOutTuple(leftTuple, outTupleListLeft, rightTuple, outTupleListRight);
@@ -133,14 +136,15 @@ public abstract class AbstractJoinNode<LeftTuple_ extends AbstractTuple, Right_,
         }
     }
 
-    private static <Tuple_ extends AbstractTuple> Tuple_ findOutTuple(ElementAwareList<Tuple_> outTupleList,
-            ElementAwareList<Tuple_> outList, int outputStoreIndexOutEntry) {
+    private OutTuple_ findOutTuple(ElementAwareList<OutTuple_> outTupleList, ElementAwareList<OutTuple_> outList,
+            Function<OutJoinStore<OutTuple_>, ElementAwareListEntry<OutTuple_>> outEntryFunction) {
         // Hack: the outTuple has no left/right input tuple reference, use the left/right outList reference instead.
         var item = outTupleList.first();
         while (item != null) {
             // Creating list iterators here caused major GC pressure; therefore, we iterate over the entries directly.
             var outTuple = item.getElement();
-            ElementAwareListEntry<Tuple_> outEntry = outTuple.getStore(outputStoreIndexOutEntry);
+            OutJoinStore<OutTuple_> outStore = outTuple.getStore(outputStoreIndex);
+            var outEntry = outEntryFunction.apply(outStore);
             var outEntryList = outEntry.getList();
             if (outList == outEntryList) {
                 return outTuple;
@@ -151,10 +155,9 @@ public abstract class AbstractJoinNode<LeftTuple_ extends AbstractTuple, Right_,
     }
 
     protected final void retractOutTuple(OutTuple_ outTuple) {
-        ElementAwareListEntry<OutTuple_> outEntryLeft = outTuple.removeStore(outputStoreIndexLeftOutEntry);
-        outEntryLeft.remove();
-        ElementAwareListEntry<OutTuple_> outEntryRight = outTuple.removeStore(outputStoreIndexRightOutEntry);
-        outEntryRight.remove();
+        OutJoinStore<OutTuple_> outStore = outTuple.removeStore(outputStoreIndex);
+        outStore.leftOutListEntry.remove();
+        outStore.rightOutListEntry.remove();
         var state = outTuple.state;
         if (!state.isActive()) {
             // Impossible because they shouldn't linger in the indexes.
@@ -173,6 +176,13 @@ public abstract class AbstractJoinNode<LeftTuple_ extends AbstractTuple, Right_,
             permits AbstractIndexedJoinNode.IndexedJoinStore, AbstractUnindexedJoinNode.UnindexedJoinStore {
 
         protected ElementAwareList<OutTuple_> outList;
+
+    }
+
+    private static final class OutJoinStore<OutTuple_ extends AbstractTuple> {
+
+        private ElementAwareListEntry<OutTuple_> leftOutListEntry;
+        private ElementAwareListEntry<OutTuple_> rightOutListEntry;
 
     }
 

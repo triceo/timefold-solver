@@ -23,10 +23,9 @@ public abstract class AbstractUnindexedJoinNode<LeftTuple_ extends AbstractTuple
     private final ElementAwareList<UniTuple<Right_>> rightTupleList = new ElementAwareList<>();
 
     protected AbstractUnindexedJoinNode(int inputStoreIndexLeftOutTupleList, int inputStoreIndexRightOutTupleList,
-            TupleLifecycle<OutTuple_> nextNodesTupleLifecycle, boolean isFiltering, int outputStoreIndexLeftOutEntry,
-            int outputStoreIndexRightOutEntry) {
+            TupleLifecycle<OutTuple_> nextNodesTupleLifecycle, boolean isFiltering, int outputStoreSize) {
         super(inputStoreIndexLeftOutTupleList, inputStoreIndexRightOutTupleList, nextNodesTupleLifecycle, isFiltering,
-                outputStoreIndexLeftOutEntry, outputStoreIndexRightOutEntry);
+                outputStoreSize);
     }
 
     @Override

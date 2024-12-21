@@ -11,17 +11,13 @@ final class UnindexedJoinQuadNode<A, B, C, D>
         extends AbstractUnindexedJoinNode<TriTuple<A, B, C>, D, QuadTuple<A, B, C, D>> {
 
     private final QuadPredicate<A, B, C, D> filtering;
-    private final int outputStoreSize;
 
     public UnindexedJoinQuadNode(int inputStoreIndexLeftOutTupleList, int inputStoreIndexRightOutTupleList,
             TupleLifecycle<QuadTuple<A, B, C, D>> nextNodesTupleLifecycle, QuadPredicate<A, B, C, D> filtering,
-            int outputStoreSize, int outputStoreIndexLeftOutEntry, int outputStoreIndexRightOutEntry) {
-        super(inputStoreIndexLeftOutTupleList,
-                inputStoreIndexRightOutTupleList,
-                nextNodesTupleLifecycle, filtering != null,
-                outputStoreIndexLeftOutEntry, outputStoreIndexRightOutEntry);
+            int outputStoreSize) {
+        super(inputStoreIndexLeftOutTupleList, inputStoreIndexRightOutTupleList, nextNodesTupleLifecycle, filtering != null,
+                outputStoreSize);
         this.filtering = filtering;
-        this.outputStoreSize = outputStoreSize;
     }
 
     @Override

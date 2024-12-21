@@ -32,10 +32,9 @@ public abstract class AbstractIndexedJoinNode<LeftTuple_ extends AbstractTuple, 
 
     protected AbstractIndexedJoinNode(Function<Right_, IndexProperties> mappingRight, int inputStoreIndexLeftOutTupleList,
             int inputStoreIndexRightOutTupleList, TupleLifecycle<OutTuple_> nextNodesTupleLifecycle, boolean isFiltering,
-            int outputStoreIndexLeftOutEntry, int outputStoreIndexRightOutEntry, Indexer<LeftTuple_> indexerLeft,
-            Indexer<UniTuple<Right_>> indexerRight) {
+            int outputStoreSize, Indexer<LeftTuple_> indexerLeft, Indexer<UniTuple<Right_>> indexerRight) {
         super(inputStoreIndexLeftOutTupleList, inputStoreIndexRightOutTupleList, nextNodesTupleLifecycle, isFiltering,
-                outputStoreIndexLeftOutEntry, outputStoreIndexRightOutEntry);
+                outputStoreSize);
         this.mappingRight = mappingRight;
         this.indexerLeft = indexerLeft;
         this.indexerRight = indexerRight;

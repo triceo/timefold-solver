@@ -11,17 +11,13 @@ final class UnindexedJoinBiNode<A, B>
         extends AbstractUnindexedJoinNode<UniTuple<A>, B, BiTuple<A, B>> {
 
     private final BiPredicate<A, B> filtering;
-    private final int outputStoreSize;
 
     public UnindexedJoinBiNode(int inputStoreIndexLeftOutTupleList, int inputStoreIndexRightOutTupleList,
             TupleLifecycle<BiTuple<A, B>> nextNodesTupleLifecycle, BiPredicate<A, B> filtering,
-            int outputStoreSize, int outputStoreIndexLeftOutEntry, int outputStoreIndexRightOutEntry) {
-        super(inputStoreIndexLeftOutTupleList,
-                inputStoreIndexRightOutTupleList,
-                nextNodesTupleLifecycle, filtering != null,
-                outputStoreIndexLeftOutEntry, outputStoreIndexRightOutEntry);
+            int outputStoreSize) {
+        super(inputStoreIndexLeftOutTupleList, inputStoreIndexRightOutTupleList, nextNodesTupleLifecycle, filtering != null,
+                outputStoreSize);
         this.filtering = filtering;
-        this.outputStoreSize = outputStoreSize;
     }
 
     @Override

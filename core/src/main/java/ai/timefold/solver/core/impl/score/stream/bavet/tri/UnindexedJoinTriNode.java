@@ -11,17 +11,12 @@ final class UnindexedJoinTriNode<A, B, C>
         extends AbstractUnindexedJoinNode<BiTuple<A, B>, C, TriTuple<A, B, C>> {
 
     private final TriPredicate<A, B, C> filtering;
-    private final int outputStoreSize;
 
     public UnindexedJoinTriNode(int inputStoreIndexLeftOutTupleList, int inputStoreIndexRightOutTupleList,
-            TupleLifecycle<TriTuple<A, B, C>> nextNodesTupleLifecycle, TriPredicate<A, B, C> filtering,
-            int outputStoreSize, int outputStoreIndexLeftOutEntry, int outputStoreIndexRightOutEntry) {
-        super(inputStoreIndexLeftOutTupleList,
-                inputStoreIndexRightOutTupleList,
-                nextNodesTupleLifecycle, filtering != null,
-                outputStoreIndexLeftOutEntry, outputStoreIndexRightOutEntry);
+            TupleLifecycle<TriTuple<A, B, C>> nextNodesTupleLifecycle, TriPredicate<A, B, C> filtering, int outputStoreSize) {
+        super(inputStoreIndexLeftOutTupleList, inputStoreIndexRightOutTupleList, nextNodesTupleLifecycle, filtering != null,
+                outputStoreSize);
         this.filtering = filtering;
-        this.outputStoreSize = outputStoreSize;
     }
 
     @Override
