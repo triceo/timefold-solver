@@ -81,7 +81,7 @@ public abstract class AbstractIndexedJoinNode<LeftTuple_ extends AbstractTuple, 
         leftStore.entry = indexerLeft.put(indexProperties, leftTuple);
         indexerRight.forEach(indexProperties, rightTuple -> {
             IndexedJoinStore<UniTuple<Right_>, OutTuple_> rightStore = rightTuple.getStore(inputStoreIndexRight);
-            insertOutTupleFiltered(leftTuple, leftStore, rightTuple, rightStore);
+            insertOutTupleFiltered(leftTuple, leftStore.outList, rightTuple, rightStore.outList);
         });
     }
 
@@ -139,7 +139,7 @@ public abstract class AbstractIndexedJoinNode<LeftTuple_ extends AbstractTuple, 
         rightStore.entry = indexerRight.put(indexProperties, rightTuple);
         indexerLeft.forEach(indexProperties, leftTuple -> {
             IndexedJoinStore<LeftTuple_, OutTuple_> leftStore = leftTuple.getStore(inputStoreIndexLeft);
-            insertOutTupleFiltered(leftTuple, leftStore, rightTuple, rightStore);
+            insertOutTupleFiltered(leftTuple, leftStore.outList, rightTuple, rightStore.outList);
         });
     }
 

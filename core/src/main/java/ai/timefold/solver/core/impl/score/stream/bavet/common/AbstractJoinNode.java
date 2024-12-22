@@ -60,10 +60,10 @@ public abstract class AbstractJoinNode<LeftTuple_ extends AbstractTuple, Right_,
         propagationQueue.insert(outTuple);
     }
 
-    protected final void insertOutTupleFiltered(LeftTuple_ leftTuple, AbstractJoinStore<OutTuple_> leftStore,
-            UniTuple<Right_> rightTuple, AbstractJoinStore<OutTuple_> rightStore) {
+    protected final void insertOutTupleFiltered(LeftTuple_ leftTuple, ElementAwareList<OutTuple_> outTupleListLeft,
+            UniTuple<Right_> rightTuple, ElementAwareList<OutTuple_> outTupleListRight) {
         if (!isFiltering || testFiltering(leftTuple, rightTuple)) {
-            insertOutTuple(leftTuple, leftStore.outList, rightTuple, rightStore.outList);
+            insertOutTuple(leftTuple, outTupleListLeft, rightTuple, outTupleListRight);
         }
     }
 
@@ -144,8 +144,7 @@ public abstract class AbstractJoinNode<LeftTuple_ extends AbstractTuple, Right_,
             // Creating list iterators here caused major GC pressure; therefore, we iterate over the entries directly.
             var outTuple = item.getElement();
             OutJoinStore<OutTuple_> outStore = outTuple.getStore(outputStoreIndex);
-            var outEntry = outEntryFunction.apply(outStore);
-            var outEntryList = outEntry.getList();
+            var outEntryList = outEntryFunction.apply(outStore).getList();
             if (outList == outEntryList) {
                 return outTuple;
             }
