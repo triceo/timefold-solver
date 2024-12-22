@@ -7,7 +7,7 @@ record TwoIndexProperties<A, B>(A propertyA, B propertyB) implements IndexProper
         return (Type_) switch (id) {
             case 0 -> propertyA;
             case 1 -> propertyB;
-            default -> throw new IllegalArgumentException("Impossible state: index (" + id + ") != 0");
+            default -> throw new IllegalArgumentException("Impossible state: index (" + id + ") not in range [0, 1]");
         };
     }
 

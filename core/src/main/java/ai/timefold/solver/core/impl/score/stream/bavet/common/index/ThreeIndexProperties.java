@@ -8,7 +8,7 @@ record ThreeIndexProperties<A, B, C>(A propertyA, B propertyB, C propertyC) impl
             case 0 -> propertyA;
             case 1 -> propertyB;
             case 2 -> propertyC;
-            default -> throw new IllegalArgumentException("Impossible state: index (" + id + ") != 0");
+            default -> throw new IllegalArgumentException("Impossible state: index (" + id + ") not in range [0, 2].");
         };
     }
 
