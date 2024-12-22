@@ -1,14 +1,15 @@
 package ai.timefold.solver.core.impl.util;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.collections.impl.list.mutable.FastList;
+
 /**
- * An ordered {@link Set} which is implemented as a {@link ArrayList} for a small {@link Set#size()}
+ * An ordered {@link Set} which is implemented as a {@link FastList} for a small {@link Set#size()}
  * and a {@link LinkedHashSet} for a big {@link Set#size()}.
  * <p>
  * This speeds up {@link #add(Object)} performance (in some cases by 20%) if most instances have a small size
@@ -18,7 +19,7 @@ import java.util.Set;
  */
 public final class ListBasedScalingOrderedSet<E> implements Set<E> {
 
-    protected static final int LIST_SIZE_THRESHOLD = 16;
+    static final int LIST_SIZE_THRESHOLD = 16;
 
     private boolean belowThreshold;
     private List<E> list;
@@ -26,7 +27,7 @@ public final class ListBasedScalingOrderedSet<E> implements Set<E> {
 
     public ListBasedScalingOrderedSet() {
         belowThreshold = true;
-        list = new ArrayList<>(LIST_SIZE_THRESHOLD);
+        list = new FastList<>(LIST_SIZE_THRESHOLD);
         set = null;
     }
 
@@ -53,7 +54,7 @@ public final class ListBasedScalingOrderedSet<E> implements Set<E> {
     @Override
     public Iterator<E> iterator() {
         final Iterator<E> childIterator = belowThreshold ? list.iterator() : set.iterator();
-        return new Iterator<E>() {
+        return new Iterator<>() {
             @Override
             public boolean hasNext() {
                 return childIterator.hasNext();
@@ -134,7 +135,7 @@ public final class ListBasedScalingOrderedSet<E> implements Set<E> {
             int newSize = set.size() - 1;
             if (newSize <= LIST_SIZE_THRESHOLD) {
                 set.remove(o);
-                list = new ArrayList<>(set);
+                list = new FastList<>(set);
                 set = null;
                 belowThreshold = true;
                 return true;
@@ -159,7 +160,7 @@ public final class ListBasedScalingOrderedSet<E> implements Set<E> {
         if (belowThreshold) {
             list.clear();
         } else {
-            list = new ArrayList<>(LIST_SIZE_THRESHOLD);
+            list = new FastList<>(LIST_SIZE_THRESHOLD);
             set = null;
             belowThreshold = true;
         }

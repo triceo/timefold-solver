@@ -1,6 +1,5 @@
 package ai.timefold.solver.core.impl.domain.variable.listener.support;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -25,6 +24,8 @@ import ai.timefold.solver.core.impl.domain.variable.supply.Demand;
 import ai.timefold.solver.core.impl.domain.variable.supply.Supply;
 import ai.timefold.solver.core.impl.domain.variable.supply.SupplyManager;
 import ai.timefold.solver.core.impl.score.director.InnerScoreDirector;
+
+import org.eclipse.collections.impl.list.mutable.FastList;
 
 /**
  * This class is not thread-safe.
@@ -56,7 +57,7 @@ public final class VariableListenerSupport<Solution_> implements SupplyManager {
                 .flatMap(e -> e.getDeclaredCascadingUpdateShadowVariableDescriptors().stream())
                 .toList();
         this.listVariableDescriptor = scoreDirector.getSolutionDescriptor().getListVariableDescriptor();
-        this.listVariableEventList = new ArrayList<>();
+        this.listVariableEventList = new FastList<>();
     }
 
     public void linkVariableListeners() {

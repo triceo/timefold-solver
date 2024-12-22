@@ -1,6 +1,5 @@
 package ai.timefold.solver.core.impl.domain.variable.listener.support;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -12,9 +11,11 @@ import ai.timefold.solver.core.impl.domain.solution.descriptor.SolutionDescripto
 import ai.timefold.solver.core.impl.domain.variable.descriptor.ListVariableDescriptor;
 import ai.timefold.solver.core.impl.domain.variable.descriptor.VariableDescriptor;
 
+import org.eclipse.collections.impl.list.mutable.FastList;
+
 final class NotifiableRegistry<Solution_> {
 
-    private final List<Notifiable> notifiableList = new ArrayList<>();
+    private final List<Notifiable> notifiableList = new FastList<>();
     private final Set<EntityNotifiable<Solution_>>[] sourceEntityToNotifiableSetArray;
     private final List<Notifiable>[][] sourceVariableToNotifiableListArray;
 
@@ -27,7 +28,7 @@ final class NotifiableRegistry<Solution_> {
             var declaredVariableDescriptorList = entityDescriptor.getDeclaredVariableDescriptors();
             var array = new List[declaredVariableDescriptorList.size()];
             for (var variableDescriptor : declaredVariableDescriptorList) {
-                array[variableDescriptor.getOrdinal()] = new ArrayList<>();
+                array[variableDescriptor.getOrdinal()] = new FastList<>();
             }
             var entityDescriptorId = entityDescriptor.getOrdinal();
             sourceVariableToNotifiableListArray[entityDescriptorId] = array;
