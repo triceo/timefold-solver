@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.collections.api.block.HashingStrategy;
+import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 import org.eclipse.collections.impl.map.strategy.mutable.UnifiedMapWithHashingStrategy;
 import org.eclipse.collections.impl.set.mutable.UnifiedSet;
@@ -26,7 +27,7 @@ public final class CollectionUtils {
      */
     public static <E> List<E> copy(List<E> originalList, boolean reverse) {
         if (!reverse) {
-            return new ArrayList<>(originalList);
+            return new FastList<>(originalList);
         }
         /*
          * Some move implementations on the hot path rely heavily on list reversal.
@@ -35,21 +36,21 @@ public final class CollectionUtils {
          */
         switch (originalList.size()) {
             case 0 -> {
-                return new ArrayList<>(0);
+                return new FastList<>(0);
             }
             case 1 -> {
-                List<E> singletonList = new ArrayList<>(1);
+                var singletonList = new FastList<E>(1);
                 singletonList.add(originalList.get(0));
                 return singletonList;
             }
             case 2 -> {
-                List<E> smallList = new ArrayList<>(2);
+                var smallList = new FastList<E>(2);
                 smallList.add(originalList.get(1));
                 smallList.add(originalList.get(0));
                 return smallList;
             }
             default -> {
-                List<E> largeList = new ArrayList<>(originalList);
+                var largeList = new FastList<>(originalList);
                 Collections.reverse(largeList);
                 return largeList;
             }
@@ -57,7 +58,7 @@ public final class CollectionUtils {
     }
 
     public static <T> List<T> concat(List<T> left, List<T> right) {
-        List<T> result = new ArrayList<>(left.size() + right.size());
+        var result = new FastList<T>(left.size() + right.size());
         result.addAll(left);
         result.addAll(right);
         return result;
@@ -78,13 +79,13 @@ public final class CollectionUtils {
             }
             default -> {
                 if (collection instanceof Set<T> set) {
-                    return new ArrayList<>(set);
+                    return new FastList<>(set);
                 }
                 /*
                  * The following is better than ArrayList(LinkedHashSet) because HashSet is cheaper,
                  * while still maintaining the original order of the collection.
                  */
-                var resultList = new ArrayList<T>(size);
+                var resultList = new FastList<T>(size);
                 var set = newHashSet(size);
                 for (T element : collection) {
                     if (set.add(element)) {
@@ -115,7 +116,7 @@ public final class CollectionUtils {
     }
 
     public static <K, V> Map<K, V> newIdentityHashMap(int size) {
-        return new UnifiedMapWithHashingStrategy<>(new IdentityHashingStrategy<>(),
+        return new UnifiedMapWithHashingStrategy<>(IdentityHashingStrategy.INSTANCE,
                 calculateCapacityForDefaultLoadFactor(size));
     }
 
@@ -125,6 +126,9 @@ public final class CollectionUtils {
     }
 
     private static final class IdentityHashingStrategy<T> implements HashingStrategy<T> {
+
+        static final IdentityHashingStrategy INSTANCE = new IdentityHashingStrategy<>();
+
         @Override
         public int computeHashCode(T t) {
             return System.identityHashCode(t);

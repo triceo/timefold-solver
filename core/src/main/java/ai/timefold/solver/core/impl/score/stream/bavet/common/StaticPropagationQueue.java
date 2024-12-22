@@ -1,12 +1,13 @@
 package ai.timefold.solver.core.impl.score.stream.bavet.common;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.List;
 import java.util.function.Consumer;
 
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.AbstractTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleState;
+
+import org.eclipse.collections.impl.list.mutable.FastList;
 
 /**
  * The implementation moves tuples directly into an either retract, update or insert queue,
@@ -19,18 +20,18 @@ import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleState;
 public final class StaticPropagationQueue<Tuple_ extends AbstractTuple>
         implements PropagationQueue<Tuple_> {
 
-    private final Deque<Tuple_> retractQueue;
-    private final Deque<Tuple_> updateQueue;
-    private final Deque<Tuple_> insertQueue;
+    private final List<Tuple_> retractQueue;
+    private final List<Tuple_> updateQueue;
+    private final List<Tuple_> insertQueue;
     private final Consumer<Tuple_> retractPropagator;
     private final Consumer<Tuple_> updatePropagator;
     private final Consumer<Tuple_> insertPropagator;
 
     public StaticPropagationQueue(TupleLifecycle<Tuple_> nextNodesTupleLifecycle, int size) {
         // Guesstimate that updates are dominant.
-        this.retractQueue = new ArrayDeque<>(size / 20);
-        this.updateQueue = new ArrayDeque<>((size / 20) * 18);
-        this.insertQueue = new ArrayDeque<>(size / 20);
+        this.retractQueue = new FastList<>(size / 20);
+        this.updateQueue = new FastList<>((size / 20) * 18);
+        this.insertQueue = new FastList<>(size / 20);
         // Don't create these lambdas over and over again.
         this.retractPropagator = nextNodesTupleLifecycle::retract;
         this.updatePropagator = nextNodesTupleLifecycle::update;
@@ -98,7 +99,7 @@ public final class StaticPropagationQueue<Tuple_ extends AbstractTuple>
         processAndClear(updateQueue, updatePropagator);
     }
 
-    private void processAndClear(Deque<Tuple_> dirtyQueue, Consumer<Tuple_> propagator) {
+    private void processAndClear(List<Tuple_> dirtyQueue, Consumer<Tuple_> propagator) {
         if (dirtyQueue.isEmpty()) {
             return;
         }

@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.AbstractTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleState;
+import org.eclipse.collections.impl.list.mutable.FastList;
 
 /**
  * This implementation has the capability to move tuples between the individual propagation queues.
@@ -34,7 +35,7 @@ final class DynamicPropagationQueue<Tuple_ extends AbstractTuple, Carrier_ exten
          * Their unchanging position in the list is their index for the bitset-based queues.
          * This way, we can cheaply move them between the queues.
          */
-        this.dirtyList = new ArrayList<>(size);
+        this.dirtyList = new FastList<>(size);
         // Updates tend to be dominant; update queue isn't stored, it's deduced as neither insert nor retract.
         this.retractQueue = new BitSet(size);
         this.insertQueue = new BitSet(size);
