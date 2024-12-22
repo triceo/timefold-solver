@@ -25,6 +25,7 @@
     <version.org.apache.commons.math3>3.6.1</version.org.apache.commons.math3>
     <version.org.apache.logging.log4j>2.24.3</version.org.apache.logging.log4j>
     <version.org.assertj>3.26.3</version.org.assertj>
+    <version.org.eclipse.collections>12.0.0.M3</version.org.eclipse.collections>
     <version.org.freemarker>2.3.33</version.org.freemarker>
     <version.org.jspecify>1.0.0</version.org.jspecify>
     <version.org.openrewrite.recipe>2.23.1</version.org.openrewrite.recipe>
@@ -131,6 +132,17 @@
         <artifactId>jspecify</artifactId>
         <version>${version.org.jspecify}</version>
       </dependency>
+      <dependency>
+        <groupId>org.eclipse.collections</groupId>
+        <artifactId>eclipse-collections</artifactId>
+        <version>${version.org.eclipse.collections}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.collections</groupId>
+        <artifactId>eclipse-collections-api</artifactId>
+        <version>${version.org.eclipse.collections}</version>
+      </dependency>
+
 
       <!-- ASM -->
       <dependency>

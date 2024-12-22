@@ -1,18 +1,18 @@
 package ai.timefold.solver.core.impl.score.stream.bavet.common.index;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import ai.timefold.solver.core.impl.util.CollectionUtils;
 import ai.timefold.solver.core.impl.util.ElementAwareListEntry;
 
 final class EqualsIndexer<T, Key_> implements Indexer<T> {
 
     private final int propertyIndex;
     private final Supplier<Indexer<T>> downstreamIndexerSupplier;
-    private final Map<Key_, Indexer<T>> downstreamIndexerMap = new HashMap<>();
+    private final Map<Key_, Indexer<T>> downstreamIndexerMap = CollectionUtils.newHashMap(16);
 
     public EqualsIndexer(Supplier<Indexer<T>> downstreamIndexerSupplier) {
         this(0, downstreamIndexerSupplier);

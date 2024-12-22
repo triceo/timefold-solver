@@ -1,6 +1,5 @@
 package ai.timefold.solver.core.impl.score.stream.bavet;
 
-import java.util.IdentityHashMap;
 import java.util.Map;
 
 import ai.timefold.solver.core.api.score.Score;
@@ -11,6 +10,7 @@ import ai.timefold.solver.core.impl.score.director.stream.BavetConstraintStreamS
 import ai.timefold.solver.core.impl.score.stream.bavet.common.PropagationQueue;
 import ai.timefold.solver.core.impl.score.stream.bavet.uni.AbstractForEachUniNode;
 import ai.timefold.solver.core.impl.score.stream.common.inliner.AbstractScoreInliner;
+import ai.timefold.solver.core.impl.util.CollectionUtils;
 
 /**
  * The type is public to make it easier for Bavet-specific minimal bug reproducers to be created.
@@ -33,7 +33,7 @@ public final class BavetConstraintSession<Score_ extends Score<Score_>> {
     BavetConstraintSession(AbstractScoreInliner<Score_> scoreInliner, NodeNetwork nodeNetwork) {
         this.scoreInliner = scoreInliner;
         this.nodeNetwork = nodeNetwork;
-        this.effectiveClassToNodeArrayMap = new IdentityHashMap<>(nodeNetwork.forEachNodeCount());
+        this.effectiveClassToNodeArrayMap = CollectionUtils.newIdentityHashMap(nodeNetwork.forEachNodeCount());
     }
 
     public void insert(Object fact) {

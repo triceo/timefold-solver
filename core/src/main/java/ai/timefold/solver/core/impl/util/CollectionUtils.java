@@ -3,14 +3,16 @@ package ai.timefold.solver.core.impl.util;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.eclipse.collections.api.block.HashingStrategy;
+import org.eclipse.collections.impl.map.mutable.UnifiedMap;
+import org.eclipse.collections.impl.map.strategy.mutable.UnifiedMapWithHashingStrategy;
+import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 
 public final class CollectionUtils {
 
@@ -96,7 +98,7 @@ public final class CollectionUtils {
     }
 
     public static <T> Set<T> newHashSet(int size) {
-        return new HashSet<>(calculateCapacityForDefaultLoadFactor(size));
+        return new UnifiedSet<>(calculateCapacityForDefaultLoadFactor(size));
     }
 
     private static int calculateCapacityForDefaultLoadFactor(int numElements) {
@@ -109,16 +111,29 @@ public final class CollectionUtils {
     }
 
     public static <K, V> Map<K, V> newHashMap(int size) {
-        return new HashMap<>(calculateCapacityForDefaultLoadFactor(size));
+        return new UnifiedMap<>(calculateCapacityForDefaultLoadFactor(size));
     }
 
     public static <K, V> Map<K, V> newIdentityHashMap(int size) {
-        return new IdentityHashMap<>(calculateCapacityForDefaultLoadFactor(size));
+        return new UnifiedMapWithHashingStrategy<>(new IdentityHashingStrategy<>(),
+                calculateCapacityForDefaultLoadFactor(size));
     }
 
     public static <K, V> Map<K, V> newLinkedHashMap(int size) {
         return new LinkedHashMap<>(calculateCapacityForDefaultLoadFactor(size));
 
+    }
+
+    private static final class IdentityHashingStrategy<T> implements HashingStrategy<T> {
+        @Override
+        public int computeHashCode(T t) {
+            return System.identityHashCode(t);
+        }
+
+        @Override
+        public boolean equals(T a, T b) {
+            return a == b;
+        }
     }
 
     private CollectionUtils() {

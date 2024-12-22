@@ -1,6 +1,5 @@
 package ai.timefold.solver.core.impl.score.stream.bavet.uni;
 
-import java.util.IdentityHashMap;
 import java.util.Map;
 
 import ai.timefold.solver.core.impl.score.stream.bavet.common.AbstractNode;
@@ -9,6 +8,7 @@ import ai.timefold.solver.core.impl.score.stream.bavet.common.StaticPropagationQ
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleState;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniTuple;
+import ai.timefold.solver.core.impl.util.CollectionUtils;
 
 /**
  * Filtering nodes are expensive.
@@ -25,7 +25,7 @@ public abstract sealed class AbstractForEachUniNode<A>
     private final Class<A> forEachClass;
     private final int outputStoreSize;
     private final StaticPropagationQueue<UniTuple<A>> propagationQueue;
-    protected final Map<A, UniTuple<A>> tupleMap = new IdentityHashMap<>(1000);
+    protected final Map<A, UniTuple<A>> tupleMap = CollectionUtils.newIdentityHashMap(1000);
 
     public AbstractForEachUniNode(Class<A> forEachClass, TupleLifecycle<UniTuple<A>> nextNodesTupleLifecycle,
             int outputStoreSize) {
