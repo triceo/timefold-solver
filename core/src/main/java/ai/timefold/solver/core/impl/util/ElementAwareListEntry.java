@@ -7,8 +7,8 @@ package ai.timefold.solver.core.impl.util;
  */
 public final class ElementAwareListEntry<T> {
 
-    private ElementAwareList<T> list;
-    private final T element;
+    ElementAwareList<T> list;
+    T element;
     ElementAwareListEntry<T> previous;
     ElementAwareListEntry<T> next;
 
@@ -29,10 +29,16 @@ public final class ElementAwareListEntry<T> {
 
     public void remove() {
         if (list == null) {
-            throw new IllegalStateException("The element (" + element + ") was already removed.");
+            throw new IllegalStateException("The entry was already removed.");
         }
         list.remove(this);
+    }
+
+    void clear() {
         list = null;
+        element = null;
+        previous = null;
+        next = null;
     }
 
     public T getElement() {
