@@ -99,6 +99,15 @@ public final class UniversalTuple<A, B, C, D> implements QuadTuple<A, B, C, D> {
 
     @Override
     public String toString() {
+        if (factD == null) {
+            if (factC == null) {
+                if (factB == null) {
+                    return "{" + factA + "}";
+                }
+                return "{" + factA + ", " + factB + "}";
+            }
+            return "{" + factA + ", " + factB + ", " + factC + "}";
+        }
         return "{" + factA + ", " + factB + ", " + factC + ", " + factD + "}";
     }
 
