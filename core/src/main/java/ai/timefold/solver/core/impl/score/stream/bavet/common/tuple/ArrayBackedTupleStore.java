@@ -2,11 +2,15 @@ package ai.timefold.solver.core.impl.score.stream.bavet.common.tuple;
 
 final class ArrayBackedTupleStore implements TupleStore {
 
-    static final ArrayBackedTupleStore EMPTY = new ArrayBackedTupleStore(0);
+    private static final ArrayBackedTupleStore EMPTY = new ArrayBackedTupleStore(0);
+
+    static TupleStore ofSize(int size) {
+        return size == 0 ? EMPTY : new ArrayBackedTupleStore(size);
+    }
 
     private final Object[] values;
 
-    public ArrayBackedTupleStore(int size) {
+    private ArrayBackedTupleStore(int size) {
         values = new Object[size];
     }
 

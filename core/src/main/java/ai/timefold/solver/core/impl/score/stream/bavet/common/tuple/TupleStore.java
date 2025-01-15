@@ -3,11 +3,11 @@ package ai.timefold.solver.core.impl.score.stream.bavet.common.tuple;
 sealed interface TupleStore permits ArrayBackedTupleStore, SingleItemTupleStore {
 
     static TupleStore ofSize(int size) {
-        return switch (size) {
-            case 0 -> ArrayBackedTupleStore.EMPTY;
-            case 1 -> new SingleItemTupleStore();
-            default -> new ArrayBackedTupleStore(size);
-        };
+        if (size == 1) {
+            return new SingleItemTupleStore();
+        } else {
+            return ArrayBackedTupleStore.ofSize(size);
+        }
     }
 
     Object get(int index);
