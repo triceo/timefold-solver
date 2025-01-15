@@ -13,7 +13,7 @@ public final class UniversalTuple<A, B, C, D> implements QuadTuple<A, B, C, D> {
     private TupleState state = TupleState.DEAD; // It's the node's job to mark a new tuple as CREATING.
 
     public UniversalTuple(A factA, int storeSize) {
-        this.store = storeSize < 2 ? new SingleItemTupleStore() : new ArrayBackedTupleStore(storeSize);
+        this.store = TupleStore.ofSize(storeSize);
         this.setA(factA);
     }
 
