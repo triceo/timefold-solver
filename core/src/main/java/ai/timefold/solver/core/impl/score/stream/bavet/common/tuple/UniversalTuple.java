@@ -82,9 +82,10 @@ public final class UniversalTuple<A, B, C, D> implements QuadTuple<A, B, C, D> {
         this.state = state;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <Value_> Value_ getStore(int index) {
-        return store.get(index);
+        return (Value_) store.get(index);
     }
 
     @Override
@@ -92,9 +93,10 @@ public final class UniversalTuple<A, B, C, D> implements QuadTuple<A, B, C, D> {
         store.set(index, value);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <Value_> Value_ removeStore(int index) {
-        return store.remove(index);
+        return (Value_) store.remove(index);
     }
 
     @Override

@@ -9,20 +9,13 @@ final class ArrayBackedTupleStore implements TupleStore {
     }
 
     @Override
-    public <Value_> Value_ get(int index) {
-        return (Value_) values[index];
+    public Object get(int index) {
+        return values[index];
     }
 
     @Override
     public void set(int index, Object value) {
-        this.values[index] = value;
-    }
-
-    @Override
-    public <Value_> Value_ remove(int index) {
-        var oldValue = get(index);
-        set(index, null);
-        return (Value_) oldValue;
+        values[index] = value;
     }
 
 }
