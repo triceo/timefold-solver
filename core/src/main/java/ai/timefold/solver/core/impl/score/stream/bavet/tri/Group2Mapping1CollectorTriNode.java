@@ -5,6 +5,7 @@ import ai.timefold.solver.core.api.score.stream.tri.TriConstraintCollector;
 import ai.timefold.solver.core.config.solver.EnvironmentMode;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TriTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniversalTuple;
 import ai.timefold.solver.core.impl.util.Pair;
 
 final class Group2Mapping1CollectorTriNode<OldA, OldB, OldC, A, B, C, ResultContainer_>
@@ -26,12 +27,12 @@ final class Group2Mapping1CollectorTriNode<OldA, OldB, OldC, A, B, C, ResultCont
 
     @Override
     protected TriTuple<A, B, C> createOutTuple(Pair<A, B> groupKey) {
-        return new TriTuple<>(groupKey.key(), groupKey.value(), null, outputStoreSize);
+        return new UniversalTuple<>(groupKey.key(), groupKey.value(), null, outputStoreSize);
     }
 
     @Override
     protected void updateOutTupleToResult(TriTuple<A, B, C> outTuple, C c) {
-        outTuple.factC = c;
+        outTuple.setC(c);
     }
 
 }

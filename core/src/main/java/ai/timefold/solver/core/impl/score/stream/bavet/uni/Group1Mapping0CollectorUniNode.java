@@ -5,6 +5,7 @@ import java.util.function.Function;
 import ai.timefold.solver.core.config.solver.EnvironmentMode;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniTuple;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniversalTuple;
 
 final class Group1Mapping0CollectorUniNode<OldA, A>
         extends AbstractGroupUniNode<OldA, UniTuple<A>, A, Void, Void> {
@@ -20,12 +21,12 @@ final class Group1Mapping0CollectorUniNode<OldA, A>
     }
 
     static <A, OldA> A createGroupKey(Function<OldA, A> groupKeyMapping, UniTuple<OldA> tuple) {
-        return groupKeyMapping.apply(tuple.factA);
+        return groupKeyMapping.apply(tuple.getA());
     }
 
     @Override
     protected UniTuple<A> createOutTuple(A a) {
-        return new UniTuple<>(a, outputStoreSize);
+        return new UniversalTuple<>(a, outputStoreSize);
     }
 
     @Override

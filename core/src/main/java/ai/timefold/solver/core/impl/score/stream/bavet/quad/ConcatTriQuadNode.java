@@ -5,6 +5,7 @@ import ai.timefold.solver.core.impl.score.stream.bavet.common.AbstractConcatNode
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.QuadTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TriTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniversalTuple;
 
 final class ConcatTriQuadNode<A, B, C, D>
         extends AbstractConcatNode<TriTuple<A, B, C>, QuadTuple<A, B, C, D>, QuadTuple<A, B, C, D>> {
@@ -20,32 +21,33 @@ final class ConcatTriQuadNode<A, B, C, D>
 
     @Override
     protected QuadTuple<A, B, C, D> getOutTupleFromLeft(TriTuple<A, B, C> leftTuple) {
-        var factA = leftTuple.factA;
-        var factB = leftTuple.factB;
-        var factC = leftTuple.factC;
-        return new QuadTuple<>(factA, factB, factC,
+        var factA = leftTuple.getA();
+        var factB = leftTuple.getB();
+        var factC = leftTuple.getC();
+        return new UniversalTuple<>(factA, factB, factC,
                 paddingFunction.apply(factA, factB, factC),
                 outputStoreSize);
     }
 
     @Override
     protected QuadTuple<A, B, C, D> getOutTupleFromRight(QuadTuple<A, B, C, D> rightTuple) {
-        return new QuadTuple<>(rightTuple.factA, rightTuple.factB, rightTuple.factC, rightTuple.factD, outputStoreSize);
+        return new UniversalTuple<>(rightTuple.getA(), rightTuple.getB(), rightTuple.getC(), rightTuple.getD(),
+                outputStoreSize);
     }
 
     @Override
     protected void updateOutTupleFromLeft(TriTuple<A, B, C> leftTuple, QuadTuple<A, B, C, D> outTuple) {
-        outTuple.factA = leftTuple.factA;
-        outTuple.factB = leftTuple.factB;
-        outTuple.factC = leftTuple.factC;
+        outTuple.setA(leftTuple.getA());
+        outTuple.setB(leftTuple.getB());
+        outTuple.setC(leftTuple.getC());
     }
 
     @Override
     protected void updateOutTupleFromRight(QuadTuple<A, B, C, D> rightTuple, QuadTuple<A, B, C, D> outTuple) {
-        outTuple.factA = rightTuple.factA;
-        outTuple.factB = rightTuple.factB;
-        outTuple.factC = rightTuple.factC;
-        outTuple.factD = rightTuple.factD;
+        outTuple.setA(rightTuple.getA());
+        outTuple.setB(rightTuple.getB());
+        outTuple.setC(rightTuple.getC());
+        outTuple.setD(rightTuple.getD());
     }
 
 }

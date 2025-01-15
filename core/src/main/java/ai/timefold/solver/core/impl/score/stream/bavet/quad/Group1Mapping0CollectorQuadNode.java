@@ -5,6 +5,7 @@ import ai.timefold.solver.core.config.solver.EnvironmentMode;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.QuadTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniTuple;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniversalTuple;
 
 final class Group1Mapping0CollectorQuadNode<OldA, OldB, OldC, OldD, A>
         extends AbstractGroupQuadNode<OldA, OldB, OldC, OldD, UniTuple<A>, A, Void, Void> {
@@ -21,12 +22,12 @@ final class Group1Mapping0CollectorQuadNode<OldA, OldB, OldC, OldD, A>
 
     static <A, OldA, OldB, OldC, OldD> A createGroupKey(QuadFunction<OldA, OldB, OldC, OldD, A> groupKeyMapping,
             QuadTuple<OldA, OldB, OldC, OldD> tuple) {
-        return groupKeyMapping.apply(tuple.factA, tuple.factB, tuple.factC, tuple.factD);
+        return groupKeyMapping.apply(tuple.getA(), tuple.getB(), tuple.getC(), tuple.getD());
     }
 
     @Override
     protected UniTuple<A> createOutTuple(A a) {
-        return new UniTuple<>(a, outputStoreSize);
+        return new UniversalTuple<>(a, outputStoreSize);
     }
 
     @Override

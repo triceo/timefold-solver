@@ -6,6 +6,7 @@ import ai.timefold.solver.core.api.score.stream.bi.BiConstraintCollector;
 import ai.timefold.solver.core.config.solver.EnvironmentMode;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.QuadTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniversalTuple;
 import ai.timefold.solver.core.impl.util.Triple;
 
 final class Group3Mapping1CollectorBiNode<OldA, OldB, A, B, C, D, ResultContainer_>
@@ -30,12 +31,12 @@ final class Group3Mapping1CollectorBiNode<OldA, OldB, A, B, C, D, ResultContaine
 
     @Override
     protected QuadTuple<A, B, C, D> createOutTuple(Triple<A, B, C> groupKey) {
-        return new QuadTuple<>(groupKey.a(), groupKey.b(), groupKey.c(), null, outputStoreSize);
+        return new UniversalTuple<>(groupKey.a(), groupKey.b(), groupKey.c(), null, outputStoreSize);
     }
 
     @Override
     protected void updateOutTupleToResult(QuadTuple<A, B, C, D> outTuple, D d) {
-        outTuple.factD = d;
+        outTuple.setD(d);
     }
 
 }

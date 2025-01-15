@@ -12,10 +12,10 @@ import java.util.function.Supplier;
 import ai.timefold.solver.core.api.function.QuadFunction;
 import ai.timefold.solver.core.api.function.TriFunction;
 import ai.timefold.solver.core.impl.score.stream.JoinerType;
-import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.AbstractTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.BiTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.QuadTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TriTuple;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.Tuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniTuple;
 import ai.timefold.solver.core.impl.score.stream.common.AbstractJoiner;
 import ai.timefold.solver.core.impl.score.stream.common.bi.DefaultBiJoiner;
@@ -38,7 +38,7 @@ import ai.timefold.solver.core.impl.util.Triple;
  * <p>
  * Indexers have an id, which is the position of the indexer in the chain.
  * Top-most indexer has id 0, and the id increases as we go down the hierarchy.
- * Each {@link AbstractTuple tuple} is assigned an
+ * Each {@link Tuple tuple} is assigned an
  * {@link IndexKeys} instance,
  * which determines its location in the index.
  * {@link IndexKeys} instances are built from
@@ -169,7 +169,7 @@ public final class IndexerFactory<Right_> {
 
     private static <A> UniKeysExtractor<A> toKeysExtractor(Function<A, Object> keyFunction) {
         return tuple -> {
-            var a = tuple.factA;
+            var a = tuple.getA();
             return IndexKeys.of(keyFunction.apply(a));
         };
     }
@@ -182,12 +182,12 @@ public final class IndexerFactory<Right_> {
                 var keyFunction1 = keyFunctionList.get(0);
                 var keyFunction2 = keyFunctionList.get(1);
                 yield tuple -> {
-                    var a = tuple.factA;
+                    var a = tuple.getA();
                     return IndexKeys.of(keyFunction1.apply(a), keyFunction2.apply(a));
                 };
             }
             default -> tuple -> {
-                var a = tuple.factA;
+                var a = tuple.getA();
                 var arr = new Object[keyFunctionCount];
                 for (var i = 0; i < keyFunctionCount; i++) {
                     arr[i] = keyFunctionList.get(i).apply(a);
@@ -259,14 +259,14 @@ public final class IndexerFactory<Right_> {
                 var keyFunction1 = keyFunctionList.get(0);
                 var keyFunction2 = keyFunctionList.get(1);
                 yield tuple -> {
-                    var a = tuple.factA;
-                    var b = tuple.factB;
+                    var a = tuple.getA();
+                    var b = tuple.getB();
                     return IndexKeys.of(keyFunction1.apply(a, b), keyFunction2.apply(a, b));
                 };
             }
             default -> tuple -> {
-                var a = tuple.factA;
-                var b = tuple.factB;
+                var a = tuple.getA();
+                var b = tuple.getB();
                 var arr = new Object[keyFunctionCount];
                 for (var i = 0; i < keyFunctionCount; i++) {
                     arr[i] = keyFunctionList.get(i).apply(a, b);
@@ -278,8 +278,8 @@ public final class IndexerFactory<Right_> {
 
     private static <A, B> BiKeysExtractor<A, B> toKeysExtractor(BiFunction<A, B, Object> keyFunction) {
         return tuple -> {
-            var a = tuple.factA;
-            var b = tuple.factB;
+            var a = tuple.getA();
+            var b = tuple.getB();
             return IndexKeys.of(keyFunction.apply(a, b));
         };
     }
@@ -347,16 +347,16 @@ public final class IndexerFactory<Right_> {
                 var keyFunction1 = keyFunctionList.get(0);
                 var keyFunction2 = keyFunctionList.get(1);
                 yield tuple -> {
-                    var a = tuple.factA;
-                    var b = tuple.factB;
-                    var c = tuple.factC;
+                    var a = tuple.getA();
+                    var b = tuple.getB();
+                    var c = tuple.getC();
                     return IndexKeys.of(keyFunction1.apply(a, b, c), keyFunction2.apply(a, b, c));
                 };
             }
             default -> tuple -> {
-                var a = tuple.factA;
-                var b = tuple.factB;
-                var c = tuple.factC;
+                var a = tuple.getA();
+                var b = tuple.getB();
+                var c = tuple.getC();
                 var arr = new Object[keyFunctionCount];
                 for (var i = 0; i < keyFunctionCount; i++) {
                     arr[i] = keyFunctionList.get(i).apply(a, b, c);
@@ -368,9 +368,9 @@ public final class IndexerFactory<Right_> {
 
     private static <A, B, C> TriKeysExtractor<A, B, C> toKeysExtractor(TriFunction<A, B, C, Object> keyFunction) {
         return tuple -> {
-            var a = tuple.factA;
-            var b = tuple.factB;
-            var c = tuple.factC;
+            var a = tuple.getA();
+            var b = tuple.getB();
+            var c = tuple.getC();
             return IndexKeys.of(keyFunction.apply(a, b, c));
         };
     }
@@ -438,18 +438,18 @@ public final class IndexerFactory<Right_> {
                 var keyFunction1 = keyFunctionList.get(0);
                 var keyFunction2 = keyFunctionList.get(1);
                 yield tuple -> {
-                    var a = tuple.factA;
-                    var b = tuple.factB;
-                    var c = tuple.factC;
-                    var d = tuple.factD;
+                    var a = tuple.getA();
+                    var b = tuple.getB();
+                    var c = tuple.getC();
+                    var d = tuple.getD();
                     return IndexKeys.of(keyFunction1.apply(a, b, c, d), keyFunction2.apply(a, b, c, d));
                 };
             }
             default -> tuple -> {
-                var a = tuple.factA;
-                var b = tuple.factB;
-                var c = tuple.factC;
-                var d = tuple.factD;
+                var a = tuple.getA();
+                var b = tuple.getB();
+                var c = tuple.getC();
+                var d = tuple.getD();
                 var arr = new Object[keyFunctionCount];
                 for (var i = 0; i < keyFunctionCount; i++) {
                     arr[i] = keyFunctionList.get(i).apply(a, b, c, d);
@@ -461,10 +461,10 @@ public final class IndexerFactory<Right_> {
 
     private static <A, B, C, D> QuadKeysExtractor<A, B, C, D> toKeysExtractor(QuadFunction<A, B, C, D, Object> keyFunction) {
         return tuple -> {
-            var a = tuple.factA;
-            var b = tuple.factB;
-            var c = tuple.factC;
-            var d = tuple.factD;
+            var a = tuple.getA();
+            var b = tuple.getB();
+            var c = tuple.getC();
+            var d = tuple.getD();
             return IndexKeys.of(keyFunction.apply(a, b, c, d));
         };
     }
@@ -525,7 +525,7 @@ public final class IndexerFactory<Right_> {
      * @param <Tuple_>
      */
     @FunctionalInterface
-    public interface KeysExtractor<Tuple_ extends AbstractTuple> extends Function<Tuple_, Object> {
+    public interface KeysExtractor<Tuple_ extends Tuple> extends Function<Tuple_, Object> {
     }
 
     @FunctionalInterface

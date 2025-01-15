@@ -5,6 +5,7 @@ import java.util.function.Function;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.AbstractFlattenLastNode;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniTuple;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniversalTuple;
 
 final class FlattenLastUniNode<A, NewA> extends AbstractFlattenLastNode<UniTuple<A>, UniTuple<NewA>, A, NewA> {
 
@@ -18,17 +19,17 @@ final class FlattenLastUniNode<A, NewA> extends AbstractFlattenLastNode<UniTuple
 
     @Override
     protected UniTuple<NewA> createTuple(UniTuple<A> originalTuple, NewA item) {
-        return new UniTuple<>(item, outputStoreSize);
+        return new UniversalTuple<>(item, outputStoreSize);
     }
 
     @Override
     protected A getEffectiveFactIn(UniTuple<A> tuple) {
-        return tuple.factA;
+        return tuple.getA();
     }
 
     @Override
     protected NewA getEffectiveFactOut(UniTuple<NewA> outTuple) {
-        return outTuple.factA;
+        return outTuple.getA();
     }
 
 }

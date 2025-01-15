@@ -7,6 +7,7 @@ import ai.timefold.solver.core.impl.score.stream.bavet.common.AbstractMapNode;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.BiTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TriTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniversalTuple;
 
 final class MapTriToBiNode<A, B, C, NewA, NewB> extends AbstractMapNode<TriTuple<A, B, C>, BiTuple<NewA, NewB>> {
 
@@ -22,10 +23,10 @@ final class MapTriToBiNode<A, B, C, NewA, NewB> extends AbstractMapNode<TriTuple
 
     @Override
     protected BiTuple<NewA, NewB> map(TriTuple<A, B, C> tuple) {
-        A factA = tuple.factA;
-        B factB = tuple.factB;
-        C factC = tuple.factC;
-        return new BiTuple<>(
+        A factA = tuple.getA();
+        B factB = tuple.getB();
+        C factC = tuple.getC();
+        return new UniversalTuple<>(
                 mappingFunctionA.apply(factA, factB, factC),
                 mappingFunctionB.apply(factA, factB, factC),
                 outputStoreSize);
@@ -33,13 +34,13 @@ final class MapTriToBiNode<A, B, C, NewA, NewB> extends AbstractMapNode<TriTuple
 
     @Override
     protected void remap(TriTuple<A, B, C> inTuple, BiTuple<NewA, NewB> outTuple) {
-        A factA = inTuple.factA;
-        B factB = inTuple.factB;
-        C factC = inTuple.factC;
+        A factA = inTuple.getA();
+        B factB = inTuple.getB();
+        C factC = inTuple.getC();
         NewA newA = mappingFunctionA.apply(factA, factB, factC);
         NewB newB = mappingFunctionB.apply(factA, factB, factC);
-        outTuple.factA = newA;
-        outTuple.factB = newB;
+        outTuple.setA(newA);
+        outTuple.setB(newB);
     }
 
 }

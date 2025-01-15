@@ -6,10 +6,10 @@ import java.util.Objects;
 import ai.timefold.solver.core.api.score.Score;
 import ai.timefold.solver.core.api.score.stream.ConstraintStream;
 import ai.timefold.solver.core.config.solver.EnvironmentMode;
-import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.AbstractTuple;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.Tuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
 
-final class GroupNodeConstructorWithoutAccumulate<Tuple_ extends AbstractTuple> implements GroupNodeConstructor<Tuple_> {
+final class GroupNodeConstructorWithoutAccumulate<Tuple_ extends Tuple> implements GroupNodeConstructor<Tuple_> {
 
     private final Object equalityKey;
     private final NodeConstructorWithoutAccumulate<Tuple_> nodeConstructorFunction;

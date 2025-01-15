@@ -5,6 +5,7 @@ import java.util.function.Function;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.AbstractFlattenLastNode;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.QuadTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniversalTuple;
 
 final class FlattenLastQuadNode<A, B, C, D, NewD>
         extends AbstractFlattenLastNode<QuadTuple<A, B, C, D>, QuadTuple<A, B, C, NewD>, D, NewD> {
@@ -19,17 +20,17 @@ final class FlattenLastQuadNode<A, B, C, D, NewD>
 
     @Override
     protected QuadTuple<A, B, C, NewD> createTuple(QuadTuple<A, B, C, D> originalTuple, NewD newD) {
-        return new QuadTuple<>(originalTuple.factA, originalTuple.factB, originalTuple.factC, newD,
+        return new UniversalTuple<>(originalTuple.getA(), originalTuple.getB(), originalTuple.getC(), newD,
                 outputStoreSize);
     }
 
     @Override
     protected D getEffectiveFactIn(QuadTuple<A, B, C, D> tuple) {
-        return tuple.factD;
+        return tuple.getD();
     }
 
     @Override
     protected NewD getEffectiveFactOut(QuadTuple<A, B, C, NewD> outTuple) {
-        return outTuple.factD;
+        return outTuple.getD();
     }
 }

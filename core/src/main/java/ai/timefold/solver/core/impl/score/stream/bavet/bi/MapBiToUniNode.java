@@ -7,6 +7,7 @@ import ai.timefold.solver.core.impl.score.stream.bavet.common.AbstractMapNode;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.BiTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniTuple;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniversalTuple;
 
 final class MapBiToUniNode<A, B, NewA> extends AbstractMapNode<BiTuple<A, B>, UniTuple<NewA>> {
 
@@ -20,19 +21,19 @@ final class MapBiToUniNode<A, B, NewA> extends AbstractMapNode<BiTuple<A, B>, Un
 
     @Override
     protected UniTuple<NewA> map(BiTuple<A, B> tuple) {
-        A factA = tuple.factA;
-        B factB = tuple.factB;
-        return new UniTuple<>(
+        A factA = tuple.getA();
+        B factB = tuple.getB();
+        return new UniversalTuple<>(
                 mappingFunction.apply(factA, factB),
                 outputStoreSize);
     }
 
     @Override
     protected void remap(BiTuple<A, B> inTuple, UniTuple<NewA> outTuple) {
-        A factA = inTuple.factA;
-        B factB = inTuple.factB;
+        A factA = inTuple.getA();
+        B factB = inTuple.getB();
         NewA newA = mappingFunction.apply(factA, factB);
-        outTuple.factA = newA;
+        outTuple.setA(newA);
     }
 
 }

@@ -5,7 +5,7 @@ import java.util.BitSet;
 import java.util.List;
 import java.util.function.Consumer;
 
-import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.AbstractTuple;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.Tuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleState;
 
@@ -16,7 +16,7 @@ import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleState;
  * @param <Carrier_>
  * @param <Tuple_>
  */
-final class DynamicPropagationQueue<Tuple_ extends AbstractTuple, Carrier_ extends AbstractPropagationMetadataCarrier<Tuple_>>
+final class DynamicPropagationQueue<Tuple_ extends Tuple, Carrier_ extends AbstractPropagationMetadataCarrier<Tuple_>>
         implements PropagationQueue<Carrier_> {
 
     private final Consumer<Carrier_> preprocessor;
@@ -136,7 +136,7 @@ final class DynamicPropagationQueue<Tuple_ extends AbstractTuple, Carrier_ exten
         }
     }
 
-    private static <Tuple_ extends AbstractTuple, Carrier_ extends AbstractPropagationMetadataCarrier<Tuple_>> void
+    private static <Tuple_ extends Tuple, Carrier_ extends AbstractPropagationMetadataCarrier<Tuple_>> void
             propagate(Carrier_ carrier, Consumer<Tuple_> propagator, TupleState tupleState) {
         clean(carrier, tupleState); // Hide original state from the next node by doing this before propagation.
         propagator.accept(carrier.getTuple());

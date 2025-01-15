@@ -7,6 +7,7 @@ import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.QuadTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TriTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniTuple;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniversalTuple;
 
 final class IndexedJoinQuadNode<A, B, C, D>
         extends AbstractIndexedJoinNode<TriTuple<A, B, C>, D, QuadTuple<A, B, C, D>> {
@@ -30,25 +31,25 @@ final class IndexedJoinQuadNode<A, B, C, D>
 
     @Override
     protected QuadTuple<A, B, C, D> createOutTuple(TriTuple<A, B, C> leftTuple, UniTuple<D> rightTuple) {
-        return new QuadTuple<>(leftTuple.factA, leftTuple.factB, leftTuple.factC, rightTuple.factA,
+        return new UniversalTuple<>(leftTuple.getA(), leftTuple.getB(), leftTuple.getC(), rightTuple.getA(),
                 outputStoreSize);
     }
 
     @Override
     protected void setOutTupleLeftFacts(QuadTuple<A, B, C, D> outTuple, TriTuple<A, B, C> leftTuple) {
-        outTuple.factA = leftTuple.factA;
-        outTuple.factB = leftTuple.factB;
-        outTuple.factC = leftTuple.factC;
+        outTuple.setA(leftTuple.getA());
+        outTuple.setB(leftTuple.getB());
+        outTuple.setC(leftTuple.getC());
     }
 
     @Override
     protected void setOutTupleRightFact(QuadTuple<A, B, C, D> outTuple, UniTuple<D> rightTuple) {
-        outTuple.factD = rightTuple.factA;
+        outTuple.setD(rightTuple.getA());
     }
 
     @Override
     protected boolean testFiltering(TriTuple<A, B, C> leftTuple, UniTuple<D> rightTuple) {
-        return filtering.test(leftTuple.factA, leftTuple.factB, leftTuple.factC, rightTuple.factA);
+        return filtering.test(leftTuple.getA(), leftTuple.getB(), leftTuple.getC(), rightTuple.getA());
     }
 
 }

@@ -7,6 +7,7 @@ import ai.timefold.solver.core.impl.score.stream.bavet.common.AbstractMapNode;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.BiTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.QuadTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniversalTuple;
 
 final class MapBiToQuadNode<A, B, NewA, NewB, NewC, NewD>
         extends AbstractMapNode<BiTuple<A, B>, QuadTuple<NewA, NewB, NewC, NewD>> {
@@ -28,9 +29,9 @@ final class MapBiToQuadNode<A, B, NewA, NewB, NewC, NewD>
 
     @Override
     protected QuadTuple<NewA, NewB, NewC, NewD> map(BiTuple<A, B> tuple) {
-        A factA = tuple.factA;
-        B factB = tuple.factB;
-        return new QuadTuple<>(
+        A factA = tuple.getA();
+        B factB = tuple.getB();
+        return new UniversalTuple<>(
                 mappingFunctionA.apply(factA, factB),
                 mappingFunctionB.apply(factA, factB),
                 mappingFunctionC.apply(factA, factB),
@@ -40,16 +41,16 @@ final class MapBiToQuadNode<A, B, NewA, NewB, NewC, NewD>
 
     @Override
     protected void remap(BiTuple<A, B> inTuple, QuadTuple<NewA, NewB, NewC, NewD> outTuple) {
-        A factA = inTuple.factA;
-        B factB = inTuple.factB;
+        A factA = inTuple.getA();
+        B factB = inTuple.getB();
         NewA newA = mappingFunctionA.apply(factA, factB);
         NewB newB = mappingFunctionB.apply(factA, factB);
         NewC newC = mappingFunctionC.apply(factA, factB);
         NewD newD = mappingFunctionD.apply(factA, factB);
-        outTuple.factA = newA;
-        outTuple.factB = newB;
-        outTuple.factC = newC;
-        outTuple.factD = newD;
+        outTuple.setA(newA);
+        outTuple.setB(newB);
+        outTuple.setC(newC);
+        outTuple.setD(newD);
     }
 
 }

@@ -1,8 +1,8 @@
 package ai.timefold.solver.core.impl.score.stream.bavet.common;
 
-import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.AbstractTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.LeftTupleLifecycle;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.RightTupleLifecycle;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.Tuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleState;
 
@@ -26,7 +26,7 @@ import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleState;
  * the tuple's store. If the same tuple is inserted twice (i.e. when the left and right parent
  * have the same {@link TupleSource}), it creates another clone.
  */
-public abstract class AbstractConcatNode<LeftTuple_ extends AbstractTuple, RightTuple_ extends AbstractTuple, OutTuple_ extends AbstractTuple>
+public abstract class AbstractConcatNode<LeftTuple_ extends Tuple, RightTuple_ extends Tuple, OutTuple_ extends Tuple>
         extends AbstractNode
         implements LeftTupleLifecycle<LeftTuple_>, RightTupleLifecycle<RightTuple_> {
     private final int leftSourceTupleCloneStoreIndex;
@@ -71,7 +71,7 @@ public abstract class AbstractConcatNode<LeftTuple_ extends AbstractTuple, Right
         updateOutTupleFromLeft(tuple, outTuple);
         // Even if the facts of tuple do not change, an update MUST be done so
         // downstream nodes get notified of updates in planning variables.
-        TupleState previousState = outTuple.state;
+        TupleState previousState = outTuple.getState();
         if (previousState == TupleState.CREATING || previousState == TupleState.UPDATING) {
             return;
         }
@@ -85,7 +85,7 @@ public abstract class AbstractConcatNode<LeftTuple_ extends AbstractTuple, Right
             // No fail fast if null because we don't track which tuples made it through the filter predicate(s)
             return;
         }
-        TupleState state = outTuple.state;
+        TupleState state = outTuple.getState();
         if (!state.isActive()) {
             // No fail fast for inactive tuples, since the same tuple can be
             // passed twice if they are from the same source;
@@ -114,7 +114,7 @@ public abstract class AbstractConcatNode<LeftTuple_ extends AbstractTuple, Right
         updateOutTupleFromRight(tuple, outTuple);
         // Even if the facts of tuple do not change, an update MUST be done so
         // downstream nodes get notified of updates in planning variables.
-        TupleState previousState = outTuple.state;
+        TupleState previousState = outTuple.getState();
         if (previousState == TupleState.CREATING || previousState == TupleState.UPDATING) {
             return;
         }
@@ -128,7 +128,7 @@ public abstract class AbstractConcatNode<LeftTuple_ extends AbstractTuple, Right
             // No fail fast if null because we don't track which tuples made it through the filter predicate(s)
             return;
         }
-        TupleState state = outTuple.state;
+        TupleState state = outTuple.getState();
         if (!state.isActive()) {
             // No fail fast for inactive tuples, since the same tuple can be
             // passed twice if they are from the same source;

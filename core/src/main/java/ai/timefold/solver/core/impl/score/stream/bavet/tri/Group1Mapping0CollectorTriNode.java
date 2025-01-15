@@ -5,6 +5,7 @@ import ai.timefold.solver.core.config.solver.EnvironmentMode;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TriTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniTuple;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniversalTuple;
 
 final class Group1Mapping0CollectorTriNode<OldA, OldB, OldC, A>
         extends AbstractGroupTriNode<OldA, OldB, OldC, UniTuple<A>, A, Void, Void> {
@@ -21,12 +22,12 @@ final class Group1Mapping0CollectorTriNode<OldA, OldB, OldC, A>
 
     static <A, OldA, OldB, OldC> A createGroupKey(TriFunction<OldA, OldB, OldC, A> groupKeyMapping,
             TriTuple<OldA, OldB, OldC> tuple) {
-        return groupKeyMapping.apply(tuple.factA, tuple.factB, tuple.factC);
+        return groupKeyMapping.apply(tuple.getA(), tuple.getB(), tuple.getC());
     }
 
     @Override
     protected UniTuple<A> createOutTuple(A a) {
-        return new UniTuple<>(a, outputStoreSize);
+        return new UniversalTuple<>(a, outputStoreSize);
     }
 
     @Override

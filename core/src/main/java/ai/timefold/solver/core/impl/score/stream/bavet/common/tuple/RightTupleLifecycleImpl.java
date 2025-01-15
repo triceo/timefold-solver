@@ -2,7 +2,7 @@ package ai.timefold.solver.core.impl.score.stream.bavet.common.tuple;
 
 import java.util.Objects;
 
-final class RightTupleLifecycleImpl<Tuple_ extends AbstractTuple>
+final class RightTupleLifecycleImpl<Tuple_ extends Tuple>
         implements TupleLifecycle<Tuple_> {
 
     private final RightTupleLifecycle<Tuple_> rightTupleLifecycle;

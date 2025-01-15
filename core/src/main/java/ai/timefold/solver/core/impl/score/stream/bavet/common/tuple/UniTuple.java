@@ -1,18 +1,9 @@
 package ai.timefold.solver.core.impl.score.stream.bavet.common.tuple;
 
-public final class UniTuple<A> extends AbstractTuple {
+public sealed interface UniTuple<A> extends Tuple permits BiTuple {
 
-    // Only a tuple's origin node may modify a fact.
-    public A factA;
+    A getA();
 
-    public UniTuple(A factA, int storeSize) {
-        super(storeSize);
-        this.factA = factA;
-    }
-
-    @Override
-    public String toString() {
-        return "{" + factA + "}";
-    }
+    void setA(A a);
 
 }

@@ -6,6 +6,7 @@ import java.util.function.BiFunction;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.AbstractMapNode;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.BiTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniversalTuple;
 
 final class MapBiToBiNode<A, B, NewA, NewB> extends AbstractMapNode<BiTuple<A, B>, BiTuple<NewA, NewB>> {
 
@@ -21,9 +22,9 @@ final class MapBiToBiNode<A, B, NewA, NewB> extends AbstractMapNode<BiTuple<A, B
 
     @Override
     protected BiTuple<NewA, NewB> map(BiTuple<A, B> tuple) {
-        A factA = tuple.factA;
-        B factB = tuple.factB;
-        return new BiTuple<>(
+        A factA = tuple.getA();
+        B factB = tuple.getB();
+        return new UniversalTuple<>(
                 mappingFunctionA.apply(factA, factB),
                 mappingFunctionB.apply(factA, factB),
                 outputStoreSize);
@@ -31,12 +32,12 @@ final class MapBiToBiNode<A, B, NewA, NewB> extends AbstractMapNode<BiTuple<A, B
 
     @Override
     protected void remap(BiTuple<A, B> inTuple, BiTuple<NewA, NewB> outTuple) {
-        A factA = inTuple.factA;
-        B factB = inTuple.factB;
+        A factA = inTuple.getA();
+        B factB = inTuple.getB();
         NewA newA = mappingFunctionA.apply(factA, factB);
         NewB newB = mappingFunctionB.apply(factA, factB);
-        outTuple.factA = newA;
-        outTuple.factB = newB;
+        outTuple.setA(newA);
+        outTuple.setB(newB);
     }
 
 }

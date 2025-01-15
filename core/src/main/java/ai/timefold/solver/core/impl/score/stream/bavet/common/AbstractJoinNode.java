@@ -2,9 +2,9 @@ package ai.timefold.solver.core.impl.score.stream.bavet.common;
 
 import java.util.function.Consumer;
 
-import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.AbstractTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.LeftTupleLifecycle;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.RightTupleLifecycle;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.Tuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleState;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniTuple;
@@ -20,7 +20,7 @@ import ai.timefold.solver.core.impl.util.ElementAwareListEntry;
  * @param <LeftTuple_>
  * @param <Right_>
  */
-public abstract class AbstractJoinNode<LeftTuple_ extends AbstractTuple, Right_, OutTuple_ extends AbstractTuple>
+public abstract class AbstractJoinNode<LeftTuple_ extends Tuple, Right_, OutTuple_ extends Tuple>
         extends AbstractNode
         implements LeftTupleLifecycle<LeftTuple_>, RightTupleLifecycle<UniTuple<Right_>> {
 
@@ -89,10 +89,10 @@ public abstract class AbstractJoinNode<LeftTuple_ extends AbstractTuple, Right_,
     }
 
     private void doUpdateOutTuple(OutTuple_ outTuple) {
-        var state = outTuple.state;
+        var state = outTuple.getState();
         if (!state.isActive()) { // Impossible because they shouldn't linger in the indexes.
-            throw new IllegalStateException("Impossible state: The tuple (" + outTuple.state + ") in node (" +
-                    this + ") is in an unexpected state (" + outTuple.state + ").");
+            throw new IllegalStateException("Impossible state: The tuple (" + outTuple + ") in node (" +
+                    this + ") is in an unexpected state (" + state + ").");
         } else if (state != TupleState.OK) { // Already in the queue in the correct state.
             return;
         }
@@ -132,7 +132,7 @@ public abstract class AbstractJoinNode<LeftTuple_ extends AbstractTuple, Right_,
         }
     }
 
-    private static <Tuple_ extends AbstractTuple> Tuple_ findOutTuple(ElementAwareList<Tuple_> outTupleList,
+    private static <Tuple_ extends Tuple> Tuple_ findOutTuple(ElementAwareList<Tuple_> outTupleList,
             ElementAwareList<Tuple_> outList, int outputStoreIndexOutEntry) {
         // Hack: the outTuple has no left/right input tuple reference, use the left/right outList reference instead.
         var item = outTupleList.first();
@@ -154,11 +154,11 @@ public abstract class AbstractJoinNode<LeftTuple_ extends AbstractTuple, Right_,
         outEntryLeft.remove();
         ElementAwareListEntry<OutTuple_> outEntryRight = outTuple.removeStore(outputStoreIndexRightOutEntry);
         outEntryRight.remove();
-        var state = outTuple.state;
+        var state = outTuple.getState();
         if (!state.isActive()) {
             // Impossible because they shouldn't linger in the indexes.
-            throw new IllegalStateException("Impossible state: The tuple (" + outTuple.state + ") in node (" + this
-                    + ") is in an unexpected state (" + outTuple.state + ").");
+            throw new IllegalStateException("Impossible state: The tuple (" + outTuple + ") in node (" + this
+                    + ") is in an unexpected state (" + state + ").");
         }
         propagationQueue.retract(outTuple, state == TupleState.CREATING ? TupleState.ABORTING : TupleState.DYING);
     }

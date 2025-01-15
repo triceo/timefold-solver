@@ -9,6 +9,7 @@ import ai.timefold.solver.core.impl.score.stream.bavet.common.StaticPropagationQ
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleState;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniTuple;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniversalTuple;
 
 /**
  * Filtering nodes are expensive.
@@ -35,7 +36,7 @@ public abstract sealed class AbstractForEachUniNode<A>
     }
 
     public void insert(A a) {
-        UniTuple<A> tuple = new UniTuple<>(a, outputStoreSize);
+        UniTuple<A> tuple = new UniversalTuple<>(a, outputStoreSize);
         UniTuple<A> old = tupleMap.put(a, tuple);
         if (old != null) {
             throw new IllegalStateException("The fact (" + a + ") was already inserted, so it cannot insert again.");
@@ -46,7 +47,7 @@ public abstract sealed class AbstractForEachUniNode<A>
     public abstract void update(A a);
 
     protected final void innerUpdate(A a, UniTuple<A> tuple) {
-        TupleState state = tuple.state;
+        TupleState state = tuple.getState();
         if (state.isDirty()) {
             if (state == TupleState.DYING || state == TupleState.ABORTING) {
                 throw new IllegalStateException("The fact (" + a + ") was retracted, so it cannot update.");
@@ -62,7 +63,7 @@ public abstract sealed class AbstractForEachUniNode<A>
         if (tuple == null) {
             throw new IllegalStateException("The fact (" + a + ") was never inserted, so it cannot retract.");
         }
-        TupleState state = tuple.state;
+        TupleState state = tuple.getState();
         if (state.isDirty()) {
             if (state == TupleState.DYING || state == TupleState.ABORTING) {
                 throw new IllegalStateException("The fact (" + a + ") was already retracted, so it cannot retract.");

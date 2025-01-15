@@ -5,6 +5,7 @@ import java.util.function.Function;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.AbstractFlattenLastNode;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TriTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniversalTuple;
 
 final class FlattenLastTriNode<A, B, C, NewC>
         extends AbstractFlattenLastNode<TriTuple<A, B, C>, TriTuple<A, B, NewC>, C, NewC> {
@@ -19,16 +20,16 @@ final class FlattenLastTriNode<A, B, C, NewC>
 
     @Override
     protected TriTuple<A, B, NewC> createTuple(TriTuple<A, B, C> originalTuple, NewC newC) {
-        return new TriTuple<>(originalTuple.factA, originalTuple.factB, newC, outputStoreSize);
+        return new UniversalTuple<>(originalTuple.getA(), originalTuple.getB(), newC, outputStoreSize);
     }
 
     @Override
     protected C getEffectiveFactIn(TriTuple<A, B, C> tuple) {
-        return tuple.factC;
+        return tuple.getC();
     }
 
     @Override
     protected NewC getEffectiveFactOut(TriTuple<A, B, NewC> outTuple) {
-        return outTuple.factC;
+        return outTuple.getC();
     }
 }

@@ -16,7 +16,7 @@ final class ConditionalBiTupleLifecycle<A, B> extends AbstractConditionalTupleLi
 
     @Override
     protected boolean test(BiTuple<A, B> tuple) {
-        return predicate.test(tuple.factA, tuple.factB);
+        return predicate.test(tuple.getA(), tuple.getB());
     }
 
 }

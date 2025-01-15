@@ -6,6 +6,7 @@ import ai.timefold.solver.core.impl.score.stream.bavet.common.AbstractConcatNode
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.QuadTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniTuple;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniversalTuple;
 
 final class ConcatUniQuadNode<A, B, C, D>
         extends AbstractConcatNode<UniTuple<A>, QuadTuple<A, B, C, D>, QuadTuple<A, B, C, D>> {
@@ -27,28 +28,29 @@ final class ConcatUniQuadNode<A, B, C, D>
 
     @Override
     protected QuadTuple<A, B, C, D> getOutTupleFromLeft(UniTuple<A> leftTuple) {
-        var factA = leftTuple.factA;
-        return new QuadTuple<>(factA,
+        var factA = leftTuple.getA();
+        return new UniversalTuple<>(factA,
                 paddingFunctionB.apply(factA), paddingFunctionC.apply(factA), paddingFunctionD.apply(factA),
                 outputStoreSize);
     }
 
     @Override
     protected QuadTuple<A, B, C, D> getOutTupleFromRight(QuadTuple<A, B, C, D> rightTuple) {
-        return new QuadTuple<>(rightTuple.factA, rightTuple.factB, rightTuple.factC, rightTuple.factD, outputStoreSize);
+        return new UniversalTuple<>(rightTuple.getA(), rightTuple.getB(), rightTuple.getC(), rightTuple.getD(),
+                outputStoreSize);
     }
 
     @Override
     protected void updateOutTupleFromLeft(UniTuple<A> leftTuple, QuadTuple<A, B, C, D> outTuple) {
-        outTuple.factA = leftTuple.factA;
+        outTuple.setA(leftTuple.getA());
     }
 
     @Override
     protected void updateOutTupleFromRight(QuadTuple<A, B, C, D> rightTuple, QuadTuple<A, B, C, D> outTuple) {
-        outTuple.factA = rightTuple.factA;
-        outTuple.factB = rightTuple.factB;
-        outTuple.factC = rightTuple.factC;
-        outTuple.factD = rightTuple.factD;
+        outTuple.setA(rightTuple.getA());
+        outTuple.setB(rightTuple.getB());
+        outTuple.setC(rightTuple.getC());
+        outTuple.setD(rightTuple.getD());
     }
 
 }

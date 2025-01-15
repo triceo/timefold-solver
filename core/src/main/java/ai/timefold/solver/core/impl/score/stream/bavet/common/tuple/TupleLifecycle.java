@@ -1,16 +1,16 @@
 package ai.timefold.solver.core.impl.score.stream.bavet.common.tuple;
 
-public interface TupleLifecycle<Tuple_ extends AbstractTuple> {
+public interface TupleLifecycle<Tuple_ extends Tuple> {
 
-    static <Tuple_ extends AbstractTuple> TupleLifecycle<Tuple_> ofLeft(LeftTupleLifecycle<Tuple_> leftTupleLifecycle) {
+    static <Tuple_ extends Tuple> TupleLifecycle<Tuple_> ofLeft(LeftTupleLifecycle<Tuple_> leftTupleLifecycle) {
         return new LeftTupleLifecycleImpl<>(leftTupleLifecycle);
     }
 
-    static <Tuple_ extends AbstractTuple> TupleLifecycle<Tuple_> ofRight(RightTupleLifecycle<Tuple_> rightTupleLifecycle) {
+    static <Tuple_ extends Tuple> TupleLifecycle<Tuple_> ofRight(RightTupleLifecycle<Tuple_> rightTupleLifecycle) {
         return new RightTupleLifecycleImpl<>(rightTupleLifecycle);
     }
 
-    static <Tuple_ extends AbstractTuple> TupleLifecycle<Tuple_> of(TupleLifecycle<Tuple_>... tupleLifecycles) {
+    static <Tuple_ extends Tuple> TupleLifecycle<Tuple_> of(TupleLifecycle<Tuple_>... tupleLifecycles) {
         return new AggregatedTupleLifecycle<>(tupleLifecycles);
     }
 

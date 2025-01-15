@@ -6,6 +6,7 @@ import ai.timefold.solver.core.config.solver.EnvironmentMode;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.BiTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniTuple;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniversalTuple;
 
 final class Group1Mapping0CollectorBiNode<OldA, OldB, A>
         extends AbstractGroupBiNode<OldA, OldB, UniTuple<A>, A, Void, Void> {
@@ -21,12 +22,12 @@ final class Group1Mapping0CollectorBiNode<OldA, OldB, A>
     }
 
     static <A, OldA, OldB> A createGroupKey(BiFunction<OldA, OldB, A> groupKeyMapping, BiTuple<OldA, OldB> tuple) {
-        return groupKeyMapping.apply(tuple.factA, tuple.factB);
+        return groupKeyMapping.apply(tuple.getA(), tuple.getB());
     }
 
     @Override
     protected UniTuple<A> createOutTuple(A a) {
-        return new UniTuple<>(a, outputStoreSize);
+        return new UniversalTuple<>(a, outputStoreSize);
     }
 
     @Override

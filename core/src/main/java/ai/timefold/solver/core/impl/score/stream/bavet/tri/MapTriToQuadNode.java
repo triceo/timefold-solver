@@ -7,6 +7,7 @@ import ai.timefold.solver.core.impl.score.stream.bavet.common.AbstractMapNode;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.QuadTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TriTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniversalTuple;
 
 final class MapTriToQuadNode<A, B, C, NewA, NewB, NewC, NewD>
         extends AbstractMapNode<TriTuple<A, B, C>, QuadTuple<NewA, NewB, NewC, NewD>> {
@@ -29,10 +30,10 @@ final class MapTriToQuadNode<A, B, C, NewA, NewB, NewC, NewD>
 
     @Override
     protected QuadTuple<NewA, NewB, NewC, NewD> map(TriTuple<A, B, C> tuple) {
-        A factA = tuple.factA;
-        B factB = tuple.factB;
-        C factC = tuple.factC;
-        return new QuadTuple<>(
+        A factA = tuple.getA();
+        B factB = tuple.getB();
+        C factC = tuple.getC();
+        return new UniversalTuple<>(
                 mappingFunctionA.apply(factA, factB, factC),
                 mappingFunctionB.apply(factA, factB, factC),
                 mappingFunctionC.apply(factA, factB, factC),
@@ -42,17 +43,17 @@ final class MapTriToQuadNode<A, B, C, NewA, NewB, NewC, NewD>
 
     @Override
     protected void remap(TriTuple<A, B, C> inTuple, QuadTuple<NewA, NewB, NewC, NewD> outTuple) {
-        A factA = inTuple.factA;
-        B factB = inTuple.factB;
-        C factC = inTuple.factC;
+        A factA = inTuple.getA();
+        B factB = inTuple.getB();
+        C factC = inTuple.getC();
         NewA newA = mappingFunctionA.apply(factA, factB, factC);
         NewB newB = mappingFunctionB.apply(factA, factB, factC);
         NewC newC = mappingFunctionC.apply(factA, factB, factC);
         NewD newD = mappingFunctionD.apply(factA, factB, factC);
-        outTuple.factA = newA;
-        outTuple.factB = newB;
-        outTuple.factC = newC;
-        outTuple.factD = newD;
+        outTuple.setA(newA);
+        outTuple.setB(newB);
+        outTuple.setC(newC);
+        outTuple.setD(newD);
     }
 
 }

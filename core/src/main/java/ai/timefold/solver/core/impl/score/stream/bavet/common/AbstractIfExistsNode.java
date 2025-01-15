@@ -1,8 +1,8 @@
 package ai.timefold.solver.core.impl.score.stream.bavet.common;
 
-import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.AbstractTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.LeftTupleLifecycle;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.RightTupleLifecycle;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.Tuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleState;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniTuple;
@@ -18,7 +18,7 @@ import ai.timefold.solver.core.impl.util.ElementAwareListEntry;
  * @param <LeftTuple_>
  * @param <Right_>
  */
-public abstract class AbstractIfExistsNode<LeftTuple_ extends AbstractTuple, Right_>
+public abstract class AbstractIfExistsNode<LeftTuple_ extends Tuple, Right_>
         extends AbstractNode
         implements LeftTupleLifecycle<LeftTuple_>, RightTupleLifecycle<UniTuple<Right_>> {
 
@@ -172,7 +172,7 @@ public abstract class AbstractIfExistsNode<LeftTuple_ extends AbstractTuple, Rig
         return propagationQueue;
     }
 
-    protected static final class FilteringTracker<LeftTuple_ extends AbstractTuple> {
+    protected static final class FilteringTracker<LeftTuple_ extends Tuple> {
         final ExistsCounter<LeftTuple_> counter;
         private final ElementAwareListEntry<FilteringTracker<LeftTuple_>> leftTrackerEntry;
         private final ElementAwareListEntry<FilteringTracker<LeftTuple_>> rightTrackerEntry;

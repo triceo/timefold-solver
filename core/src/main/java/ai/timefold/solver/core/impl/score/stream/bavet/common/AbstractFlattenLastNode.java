@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
-import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.AbstractTuple;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.Tuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleState;
 
-public abstract class AbstractFlattenLastNode<InTuple_ extends AbstractTuple, OutTuple_ extends AbstractTuple, EffectiveItem_, FlattenedItem_>
+public abstract class AbstractFlattenLastNode<InTuple_ extends Tuple, OutTuple_ extends Tuple, EffectiveItem_, FlattenedItem_>
         extends AbstractNode
         implements TupleLifecycle<InTuple_> {
 
@@ -156,10 +156,10 @@ public abstract class AbstractFlattenLastNode<InTuple_ extends AbstractTuple, Ou
     }
 
     private void removeTuple(OutTuple_ outTuple) {
-        TupleState state = outTuple.state;
+        TupleState state = outTuple.getState();
         if (!state.isActive()) {
             throw new IllegalStateException("Impossible state: The tuple (" + outTuple +
-                    ") is in an unexpected state (" + outTuple.state + ").");
+                    ") is in an unexpected state (" + outTuple.getState() + ").");
         }
         propagationQueue.retract(outTuple, state == TupleState.CREATING ? TupleState.ABORTING : TupleState.DYING);
     }

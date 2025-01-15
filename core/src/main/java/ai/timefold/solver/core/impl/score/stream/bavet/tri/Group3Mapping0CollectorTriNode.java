@@ -4,6 +4,7 @@ import ai.timefold.solver.core.api.function.TriFunction;
 import ai.timefold.solver.core.config.solver.EnvironmentMode;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TriTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniversalTuple;
 import ai.timefold.solver.core.impl.util.Triple;
 
 final class Group3Mapping0CollectorTriNode<OldA, OldB, OldC, A, B, C>
@@ -24,9 +25,9 @@ final class Group3Mapping0CollectorTriNode<OldA, OldB, OldC, A, B, C>
     static <A, B, C, OldA, OldB, OldC> Triple<A, B, C> createGroupKey(TriFunction<OldA, OldB, OldC, A> groupKeyMappingA,
             TriFunction<OldA, OldB, OldC, B> groupKeyMappingB, TriFunction<OldA, OldB, OldC, C> groupKeyMappingC,
             TriTuple<OldA, OldB, OldC> tuple) {
-        OldA oldA = tuple.factA;
-        OldB oldB = tuple.factB;
-        OldC oldC = tuple.factC;
+        OldA oldA = tuple.getA();
+        OldB oldB = tuple.getB();
+        OldC oldC = tuple.getC();
         A a = groupKeyMappingA.apply(oldA, oldB, oldC);
         B b = groupKeyMappingB.apply(oldA, oldB, oldC);
         C c = groupKeyMappingC.apply(oldA, oldB, oldC);
@@ -35,7 +36,7 @@ final class Group3Mapping0CollectorTriNode<OldA, OldB, OldC, A, B, C>
 
     @Override
     protected TriTuple<A, B, C> createOutTuple(Triple<A, B, C> groupKey) {
-        return new TriTuple<>(groupKey.a(), groupKey.b(), groupKey.c(), outputStoreSize);
+        return new UniversalTuple<>(groupKey.a(), groupKey.b(), groupKey.c(), outputStoreSize);
     }
 
     @Override

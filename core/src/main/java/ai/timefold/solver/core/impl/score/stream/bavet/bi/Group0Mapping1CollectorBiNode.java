@@ -4,6 +4,7 @@ import ai.timefold.solver.core.api.score.stream.bi.BiConstraintCollector;
 import ai.timefold.solver.core.config.solver.EnvironmentMode;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniTuple;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniversalTuple;
 
 final class Group0Mapping1CollectorBiNode<OldA, OldB, A, ResultContainer_>
         extends AbstractGroupBiNode<OldA, OldB, UniTuple<A>, Void, ResultContainer_, A> {
@@ -20,12 +21,12 @@ final class Group0Mapping1CollectorBiNode<OldA, OldB, A, ResultContainer_>
 
     @Override
     protected UniTuple<A> createOutTuple(Void groupKey) {
-        return new UniTuple<>(null, outputStoreSize);
+        return new UniversalTuple<>(null, outputStoreSize);
     }
 
     @Override
     protected void updateOutTupleToResult(UniTuple<A> outTuple, A a) {
-        outTuple.factA = a;
+        outTuple.setA(a);
     }
 
 }

@@ -3,6 +3,7 @@ package ai.timefold.solver.core.impl.score.stream.bavet.uni;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.AbstractConcatNode;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniTuple;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniversalTuple;
 
 final class ConcatUniUniNode<A>
         extends AbstractConcatNode<UniTuple<A>, UniTuple<A>, UniTuple<A>> {
@@ -16,22 +17,22 @@ final class ConcatUniUniNode<A>
 
     @Override
     protected UniTuple<A> getOutTupleFromLeft(UniTuple<A> leftTuple) {
-        return new UniTuple<>(leftTuple.factA, outputStoreSize);
+        return new UniversalTuple<>(leftTuple.getA(), outputStoreSize);
     }
 
     @Override
     protected UniTuple<A> getOutTupleFromRight(UniTuple<A> rightTuple) {
-        return new UniTuple<>(rightTuple.factA, outputStoreSize);
+        return new UniversalTuple<>(rightTuple.getA(), outputStoreSize);
     }
 
     @Override
     protected void updateOutTupleFromLeft(UniTuple<A> leftTuple, UniTuple<A> outTuple) {
-        outTuple.factA = leftTuple.factA;
+        outTuple.setA(leftTuple.getA());
     }
 
     @Override
     protected void updateOutTupleFromRight(UniTuple<A> rightTuple, UniTuple<A> outTuple) {
-        outTuple.factA = rightTuple.factA;
+        outTuple.setA(rightTuple.getA());
     }
 
 }

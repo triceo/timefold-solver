@@ -5,6 +5,7 @@ import ai.timefold.solver.core.config.solver.EnvironmentMode;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.QuadTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TriTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniversalTuple;
 import ai.timefold.solver.core.impl.util.Triple;
 
 final class Group3Mapping0CollectorQuadNode<OldA, OldB, OldC, OldD, A, B, C>
@@ -28,10 +29,10 @@ final class Group3Mapping0CollectorQuadNode<OldA, OldB, OldC, OldD, A, B, C>
             QuadFunction<OldA, OldB, OldC, OldD, B> groupKeyMappingB,
             QuadFunction<OldA, OldB, OldC, OldD, C> groupKeyMappingC,
             QuadTuple<OldA, OldB, OldC, OldD> tuple) {
-        OldA oldA = tuple.factA;
-        OldB oldB = tuple.factB;
-        OldC oldC = tuple.factC;
-        OldD oldD = tuple.factD;
+        OldA oldA = tuple.getA();
+        OldB oldB = tuple.getB();
+        OldC oldC = tuple.getC();
+        OldD oldD = tuple.getD();
         A a = groupKeyMappingA.apply(oldA, oldB, oldC, oldD);
         B b = groupKeyMappingB.apply(oldA, oldB, oldC, oldD);
         C c = groupKeyMappingC.apply(oldA, oldB, oldC, oldD);
@@ -40,7 +41,7 @@ final class Group3Mapping0CollectorQuadNode<OldA, OldB, OldC, OldD, A, B, C>
 
     @Override
     protected TriTuple<A, B, C> createOutTuple(Triple<A, B, C> groupKey) {
-        return new TriTuple<>(groupKey.a(), groupKey.b(), groupKey.c(), outputStoreSize);
+        return new UniversalTuple<>(groupKey.a(), groupKey.b(), groupKey.c(), outputStoreSize);
     }
 
     @Override

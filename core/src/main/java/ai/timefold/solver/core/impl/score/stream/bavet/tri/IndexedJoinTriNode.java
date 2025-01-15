@@ -7,6 +7,7 @@ import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.BiTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TriTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniTuple;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniversalTuple;
 
 final class IndexedJoinTriNode<A, B, C>
         extends AbstractIndexedJoinNode<BiTuple<A, B>, C, TriTuple<A, B, C>> {
@@ -30,23 +31,23 @@ final class IndexedJoinTriNode<A, B, C>
 
     @Override
     protected TriTuple<A, B, C> createOutTuple(BiTuple<A, B> leftTuple, UniTuple<C> rightTuple) {
-        return new TriTuple<>(leftTuple.factA, leftTuple.factB, rightTuple.factA, outputStoreSize);
+        return new UniversalTuple<>(leftTuple.getA(), leftTuple.getB(), rightTuple.getA(), outputStoreSize);
     }
 
     @Override
     protected void setOutTupleLeftFacts(TriTuple<A, B, C> outTuple, BiTuple<A, B> leftTuple) {
-        outTuple.factA = leftTuple.factA;
-        outTuple.factB = leftTuple.factB;
+        outTuple.setA(leftTuple.getA());
+        outTuple.setB(leftTuple.getB());
     }
 
     @Override
     protected void setOutTupleRightFact(TriTuple<A, B, C> outTuple, UniTuple<C> rightTuple) {
-        outTuple.factC = rightTuple.factA;
+        outTuple.setC(rightTuple.getA());
     }
 
     @Override
     protected boolean testFiltering(BiTuple<A, B> leftTuple, UniTuple<C> rightTuple) {
-        return filtering.test(leftTuple.factA, leftTuple.factB, rightTuple.factA);
+        return filtering.test(leftTuple.getA(), leftTuple.getB(), rightTuple.getA());
     }
 
 }

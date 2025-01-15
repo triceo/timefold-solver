@@ -4,7 +4,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.function.Consumer;
 
-import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.AbstractTuple;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.Tuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleState;
 
@@ -16,7 +16,7 @@ import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleState;
  *
  * @param <Tuple_>
  */
-public final class StaticPropagationQueue<Tuple_ extends AbstractTuple>
+public final class StaticPropagationQueue<Tuple_ extends Tuple>
         implements PropagationQueue<Tuple_> {
 
     private final Deque<Tuple_> retractQueue;
@@ -43,33 +43,34 @@ public final class StaticPropagationQueue<Tuple_ extends AbstractTuple>
 
     @Override
     public void insert(Tuple_ carrier) {
-        if (carrier.state == TupleState.CREATING) {
+        if (carrier.getState() == TupleState.CREATING) {
             throw new IllegalStateException("Impossible state: The tuple (" + carrier + ") is already in the insert queue.");
         }
-        carrier.state = TupleState.CREATING;
+        carrier.setState(TupleState.CREATING);
         insertQueue.add(carrier);
     }
 
     @Override
     public void update(Tuple_ carrier) {
-        if (carrier.state == TupleState.UPDATING) { // Skip double updates.
+        if (carrier.getState() == TupleState.UPDATING) { // Skip double updates.
             return;
         }
-        carrier.state = TupleState.UPDATING;
+        carrier.setState(TupleState.UPDATING);
         updateQueue.add(carrier);
     }
 
     @Override
-    public void retract(Tuple_ carrier, TupleState state) {
-        if (carrier.state == state) { // Skip double retracts.
+    public void retract(Tuple_ carrier, TupleState newState) {
+        var currentState = carrier.getState();
+        if (currentState == newState) { // Skip double retracts.
             return;
         }
-        if (state.isActive() || state == TupleState.DEAD) {
-            throw new IllegalArgumentException("Impossible state: The state (" + state + ") is not a valid retract state.");
-        } else if (carrier.state == TupleState.ABORTING || carrier.state == TupleState.DYING) {
+        if (newState.isActive() || newState == TupleState.DEAD) {
+            throw new IllegalArgumentException("Impossible state: The state (" + newState + ") is not a valid retract state.");
+        } else if (currentState == TupleState.ABORTING || currentState == TupleState.DYING) {
             throw new IllegalStateException("Impossible state: The tuple (" + carrier + ") is already in the retract queue.");
         }
-        carrier.state = state;
+        carrier.setState(newState);
         retractQueue.add(carrier);
     }
 
@@ -79,9 +80,9 @@ public final class StaticPropagationQueue<Tuple_ extends AbstractTuple>
             return;
         }
         for (Tuple_ tuple : retractQueue) {
-            switch (tuple.state) {
+            switch (tuple.getState()) {
                 case DYING -> propagate(tuple, retractPropagator, TupleState.DEAD);
-                case ABORTING -> tuple.state = TupleState.DEAD;
+                case ABORTING -> tuple.setState(TupleState.DEAD);
             }
         }
         retractQueue.clear();
@@ -89,7 +90,7 @@ public final class StaticPropagationQueue<Tuple_ extends AbstractTuple>
 
     private void propagate(Tuple_ tuple, Consumer<Tuple_> propagator, TupleState tupleState) {
         // Change state before propagation, so that the next node can't make decisions on the original state.
-        tuple.state = tupleState;
+        tuple.setState(tupleState);
         propagator.accept(tuple);
     }
 
@@ -103,7 +104,7 @@ public final class StaticPropagationQueue<Tuple_ extends AbstractTuple>
             return;
         }
         for (Tuple_ tuple : dirtyQueue) {
-            if (tuple.state == TupleState.DEAD) {
+            if (tuple.getState() == TupleState.DEAD) {
                 /*
                  * DEAD signifies the tuple was both in insert/update and retract queues.
                  * This happens when a tuple was inserted/updated and subsequently retracted, all before propagation.

@@ -6,6 +6,7 @@ import ai.timefold.solver.core.impl.score.stream.bavet.common.AbstractConcatNode
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.BiTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TriTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniversalTuple;
 
 final class ConcatBiTriNode<A, B, C>
         extends AbstractConcatNode<BiTuple<A, B>, TriTuple<A, B, C>, TriTuple<A, B, C>> {
@@ -22,27 +23,27 @@ final class ConcatBiTriNode<A, B, C>
 
     @Override
     protected TriTuple<A, B, C> getOutTupleFromLeft(BiTuple<A, B> leftTuple) {
-        var factA = leftTuple.factA;
-        var factB = leftTuple.factB;
-        return new TriTuple<>(factA, factB, paddingFunction.apply(factA, factB), outputStoreSize);
+        var factA = leftTuple.getA();
+        var factB = leftTuple.getB();
+        return new UniversalTuple<>(factA, factB, paddingFunction.apply(factA, factB), outputStoreSize);
     }
 
     @Override
     protected TriTuple<A, B, C> getOutTupleFromRight(TriTuple<A, B, C> rightTuple) {
-        return new TriTuple<>(rightTuple.factA, rightTuple.factB, rightTuple.factC, outputStoreSize);
+        return new UniversalTuple<>(rightTuple.getA(), rightTuple.getB(), rightTuple.getC(), outputStoreSize);
     }
 
     @Override
     protected void updateOutTupleFromLeft(BiTuple<A, B> leftTuple, TriTuple<A, B, C> outTuple) {
-        outTuple.factA = leftTuple.factA;
-        outTuple.factB = leftTuple.factB;
+        outTuple.setA(leftTuple.getA());
+        outTuple.setB(leftTuple.getB());
     }
 
     @Override
     protected void updateOutTupleFromRight(TriTuple<A, B, C> rightTuple, TriTuple<A, B, C> outTuple) {
-        outTuple.factA = rightTuple.factA;
-        outTuple.factB = rightTuple.factB;
-        outTuple.factC = rightTuple.factC;
+        outTuple.setA(rightTuple.getA());
+        outTuple.setB(rightTuple.getB());
+        outTuple.setC(rightTuple.getC());
     }
 
 }

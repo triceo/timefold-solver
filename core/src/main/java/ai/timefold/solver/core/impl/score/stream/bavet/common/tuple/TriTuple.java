@@ -1,22 +1,9 @@
 package ai.timefold.solver.core.impl.score.stream.bavet.common.tuple;
 
-public final class TriTuple<A, B, C> extends AbstractTuple {
+public sealed interface TriTuple<A, B, C> extends BiTuple<A, B> permits QuadTuple {
 
-    // Only a tuple's origin node may modify a fact.
-    public A factA;
-    public B factB;
-    public C factC;
+    C getC();
 
-    public TriTuple(A factA, B factB, C factC, int storeSize) {
-        super(storeSize);
-        this.factA = factA;
-        this.factB = factB;
-        this.factC = factC;
-    }
-
-    @Override
-    public String toString() {
-        return "{" + factA + ", " + factB + ", " + factC + "}";
-    }
+    void setC(C c);
 
 }

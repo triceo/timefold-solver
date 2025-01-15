@@ -5,6 +5,7 @@ import ai.timefold.solver.core.api.score.stream.quad.QuadConstraintCollector;
 import ai.timefold.solver.core.config.solver.EnvironmentMode;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.QuadTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniversalTuple;
 import ai.timefold.solver.core.impl.util.Quadruple;
 
 final class Group0Mapping4CollectorQuadNode<OldA, OldB, OldC, OldD, A, B, C, D, ResultContainerA_, ResultContainerB_, ResultContainerC_, ResultContainerD_>
@@ -38,15 +39,15 @@ final class Group0Mapping4CollectorQuadNode<OldA, OldB, OldC, OldD, A, B, C, D, 
 
     @Override
     protected QuadTuple<A, B, C, D> createOutTuple(Void groupKey) {
-        return new QuadTuple<>(null, null, null, null, outputStoreSize);
+        return new UniversalTuple<>(null, null, null, null, outputStoreSize);
     }
 
     @Override
     protected void updateOutTupleToResult(QuadTuple<A, B, C, D> outTuple, Quadruple<A, B, C, D> result) {
-        outTuple.factA = result.a();
-        outTuple.factB = result.b();
-        outTuple.factC = result.c();
-        outTuple.factD = result.d();
+        outTuple.setA(result.a());
+        outTuple.setB(result.b());
+        outTuple.setC(result.c());
+        outTuple.setD(result.d());
     }
 
 }
