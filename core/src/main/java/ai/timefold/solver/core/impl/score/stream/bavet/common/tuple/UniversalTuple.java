@@ -2,25 +2,18 @@ package ai.timefold.solver.core.impl.score.stream.bavet.common.tuple;
 
 public final class UniversalTuple<A, B, C, D> implements QuadTuple<A, B, C, D> {
 
+    private final TupleStore store;
+
     // Only a tuple's origin node may modify a fact.
     private A factA;
     private B factB;
     private C factC;
     private D factD;
 
-    /*
-     * We create a lot of tuples, many of them having store size of 1.
-     * If an array of size 1 was created for each such tuple, memory would be wasted and indirection created.
-     * This trade-off of increased memory efficiency for marginally slower access time is proven beneficial.
-     */
-    private final boolean storeIsArray;
-
-    private Object store;
-    public TupleState state = TupleState.DEAD; // It's the node's job to mark a new tuple as CREATING.
+    private TupleState state = TupleState.DEAD; // It's the node's job to mark a new tuple as CREATING.
 
     public UniversalTuple(A factA, int storeSize) {
-        this.store = (storeSize < 2) ? null : new Object[storeSize];
-        this.storeIsArray = store != null;
+        this.store = storeSize < 2 ? new SingleItemTupleStore() : new ArrayBackedTupleStore(storeSize);
         this.setA(factA);
     }
 
@@ -91,30 +84,17 @@ public final class UniversalTuple<A, B, C, D> implements QuadTuple<A, B, C, D> {
 
     @Override
     public <Value_> Value_ getStore(int index) {
-        return (Value_) (storeIsArray ? ((Object[]) store)[index] : store);
+        return store.get(index);
     }
 
     @Override
     public void setStore(int index, Object value) {
-        if (storeIsArray) {
-            ((Object[]) store)[index] = value;
-        } else {
-            store = value;
-        }
+        store.set(index, value);
     }
 
     @Override
     public <Value_> Value_ removeStore(int index) {
-        Value_ value;
-        if (storeIsArray) {
-            Object[] array = (Object[]) store;
-            value = (Value_) array[index];
-            array[index] = null;
-        } else {
-            value = (Value_) store;
-            store = null;
-        }
-        return value;
+        return store.remove(index);
     }
 
     @Override
