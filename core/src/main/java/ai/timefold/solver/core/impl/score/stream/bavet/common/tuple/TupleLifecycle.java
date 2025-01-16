@@ -16,8 +16,13 @@ public interface TupleLifecycle<Tuple_ extends AbstractTuple> {
         return new RightTupleLifecycleImpl<>(rightTupleLifecycle);
     }
 
-    static <Tuple_ extends AbstractTuple> TupleLifecycle<Tuple_> of(TupleLifecycle<Tuple_>... tupleLifecycles) {
-        return new AggregatedTupleLifecycle<>(tupleLifecycles);
+    @SafeVarargs
+    static <Tuple_ extends AbstractTuple> TupleLifecycle<Tuple_> aggregate(TupleLifecycle<Tuple_>... tupleLifecycles) {
+        return switch (tupleLifecycles.length) {
+            case 0 -> throw new IllegalStateException("Impossible state: there are no tuple lifecycles.");
+            case 1 -> tupleLifecycles[0];
+            default -> new AggregatedTupleLifecycle<>(tupleLifecycles);
+        };
     }
 
     static <A> TupleLifecycle<UniTuple<A>> conditionally(TupleLifecycle<UniTuple<A>> tupleLifecycle, Predicate<A> predicate) {

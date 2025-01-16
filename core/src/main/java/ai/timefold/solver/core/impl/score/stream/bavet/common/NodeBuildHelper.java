@@ -80,23 +80,23 @@ public final class NodeBuildHelper<Score_ extends Score<Score_>> {
         putInsertUpdateRetract(stream, tupleLifecycleFunction.apply(tupleLifecycle));
     }
 
+    @SuppressWarnings("unchecked")
     public <Tuple_ extends AbstractTuple> TupleLifecycle<Tuple_>
             getAggregatedTupleLifecycle(List<? extends ConstraintStream> streamList) {
-        TupleLifecycle<Tuple_>[] tupleLifecycles = streamList.stream()
+        var tupleLifecycles = streamList.stream()
                 .filter(this::isStreamActive)
                 .map(s -> getTupleLifecycle(s, tupleLifecycleMap))
                 .toArray(TupleLifecycle[]::new);
-        return switch (tupleLifecycles.length) {
-            case 0 -> throw new IllegalStateException("Impossible state: None of the streamList (%s) are active."
-                    .formatted(streamList));
-            case 1 -> tupleLifecycles[0];
-            default -> TupleLifecycle.of(tupleLifecycles);
-        };
+        if (tupleLifecycles.length == 0) {
+            throw new IllegalStateException("Impossible state: None of the streamList (%s) are active.".formatted(streamList));
+        }
+        return TupleLifecycle.aggregate(tupleLifecycles);
     }
 
+    @SuppressWarnings("unchecked")
     private static <Tuple_ extends AbstractTuple> TupleLifecycle<Tuple_> getTupleLifecycle(ConstraintStream stream,
             Map<ConstraintStream, TupleLifecycle<? extends AbstractTuple>> tupleLifecycleMap) {
-        TupleLifecycle<Tuple_> tupleLifecycle = (TupleLifecycle<Tuple_>) tupleLifecycleMap.get(stream);
+        var tupleLifecycle = (TupleLifecycle<Tuple_>) tupleLifecycleMap.get(stream);
         if (tupleLifecycle == null) {
             throw new IllegalStateException("Impossible state: the stream (" + stream + ") hasn't built a node yet.");
         }
