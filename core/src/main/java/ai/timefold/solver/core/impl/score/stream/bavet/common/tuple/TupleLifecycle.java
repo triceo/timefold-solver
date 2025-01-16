@@ -1,5 +1,7 @@
 package ai.timefold.solver.core.impl.score.stream.bavet.common.tuple;
 
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
@@ -16,12 +18,16 @@ public interface TupleLifecycle<Tuple_ extends AbstractTuple> {
         return new RightTupleLifecycleImpl<>(rightTupleLifecycle);
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @SafeVarargs
     static <Tuple_ extends AbstractTuple> TupleLifecycle<Tuple_> aggregate(TupleLifecycle<Tuple_>... tupleLifecycles) {
-        return switch (tupleLifecycles.length) {
+        var distinctTupleLifecycles = Arrays.stream(Objects.requireNonNull(tupleLifecycles))
+                .distinct()
+                .toArray(TupleLifecycle[]::new);
+        return switch (distinctTupleLifecycles.length) {
             case 0 -> throw new IllegalStateException("Impossible state: there are no tuple lifecycles.");
-            case 1 -> tupleLifecycles[0];
-            default -> new AggregatedTupleLifecycle<>(tupleLifecycles);
+            case 1 -> distinctTupleLifecycles[0];
+            default -> new AggregatedTupleLifecycle<>(distinctTupleLifecycles);
         };
     }
 
