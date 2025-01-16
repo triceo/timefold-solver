@@ -10,7 +10,6 @@ import java.util.function.Function;
 
 import ai.timefold.solver.core.api.score.Score;
 import ai.timefold.solver.core.api.score.stream.ConstraintStream;
-import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.AbstractConditionalTupleLifecycle;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.AbstractTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.score.stream.bavet.uni.AbstractForEachUniNode;
@@ -76,7 +75,7 @@ public final class NodeBuildHelper<Score_ extends Score<Score_>> {
 
     public <Tuple_ extends AbstractTuple> void putInsertUpdateRetract(ConstraintStream stream,
             List<? extends AbstractConstraintStream<?>> childStreamList,
-            Function<TupleLifecycle<Tuple_>, AbstractConditionalTupleLifecycle<Tuple_>> tupleLifecycleFunction) {
+            Function<TupleLifecycle<Tuple_>, TupleLifecycle<Tuple_>> tupleLifecycleFunction) {
         TupleLifecycle<Tuple_> tupleLifecycle = getAggregatedTupleLifecycle(childStreamList);
         putInsertUpdateRetract(stream, tupleLifecycleFunction.apply(tupleLifecycle));
     }

@@ -118,7 +118,7 @@ public record NodeGraph<Solution_>(Solution_ solution, List<AbstractNode> source
             metadata.put("style", "filled");
             metadata.put("fillcolor", "#3e00ff");
             metadata.put("fontcolor", "white");
-        } else if (node instanceof AbstractTwoInputNode<?,?>) {
+        } else if (node instanceof AbstractTwoInputNode<?, ?>) {
             // Nodes that join get a different color.
             metadata.put("style", "filled");
             metadata.put("fillcolor", "#ff7700");
