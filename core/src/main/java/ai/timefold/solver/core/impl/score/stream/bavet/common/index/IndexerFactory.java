@@ -97,17 +97,15 @@ public final class IndexerFactory<Right_> {
     private <A> UniKeysExtractor<A> buildUniKeysExtractor(IntFunction<UniMappingFunction<A>> mappingExtractor) {
         var joinerCount = joiner.getJoinerCount();
         if (joinerCount == 0) {
-            return tuple -> IndexKeys.none();
+            return (tuple, oldKeys) -> IndexKeys.none();
         } else if (joinerCount == 1) {
-            return UniKeysExtractor.of(mappingExtractor.apply(0));
+            return UniKeysExtractor.of(new UniKeyFunction<>(mappingExtractor.apply(0)));
         }
         var keyFunctions = extractKeyFunctions(mappingExtractor, UniKeyFunction::new);
-        return UniKeysExtractor.of(keyFunctions.stream()
-                .map(mappingFunction -> (UniMappingFunction<A>) mappingFunction)
-                .toList());
+        return UniKeysExtractor.of(keyFunctions);
     }
 
-    private <MappingFunction_, KeyFunction_ extends KeyFunction<MappingFunction_>>
+    private <MappingFunction_, KeyFunction_ extends KeyFunction>
             List<KeyFunction_> extractKeyFunctions(IntFunction<MappingFunction_> mappingExtractor,
                     Function<List<MappingFunction_>, KeyFunction_> constructor) {
         var joinerCount = joiner.getJoinerCount();
@@ -146,46 +144,40 @@ public final class IndexerFactory<Right_> {
     public <A, B> BiKeysExtractor<A, B> buildBiLeftKeysExtractor() {
         var joinerCount = joiner.getJoinerCount();
         if (joinerCount == 0) {
-            return tuple -> IndexKeys.none();
+            return (tuple, oldKeys) -> IndexKeys.none();
         } else if (joinerCount == 1) {
-            return BiKeysExtractor.of(BiMappingFunction.of(joiner, 0));
+            return BiKeysExtractor.of(new BiKeyFunction<>(BiMappingFunction.of(joiner, 0)));
         }
         var keyFunctions = extractKeyFunctions(
                 value -> BiMappingFunction.<A, B> of(joiner, value),
                 BiKeyFunction::new);
-        return BiKeysExtractor.of(keyFunctions.stream()
-                .map(mappingFunction -> (BiMappingFunction<A, B>) mappingFunction)
-                .toList());
+        return BiKeysExtractor.of(keyFunctions);
     }
 
     public <A, B, C> TriKeysExtractor<A, B, C> buildTriLeftKeysExtractor() {
         var joinerCount = joiner.getJoinerCount();
         if (joinerCount == 0) {
-            return tuple -> IndexKeys.none();
+            return (tuple, oldKeys) -> IndexKeys.none();
         } else if (joinerCount == 1) {
-            return TriKeysExtractor.of(TriMappingFunction.of(joiner, 0));
+            return TriKeysExtractor.of(new TriKeyFunction<>(TriMappingFunction.of(joiner, 0)));
         }
         var keyFunctions = extractKeyFunctions(
                 value -> TriMappingFunction.<A, B, C> of(joiner, value),
                 TriKeyFunction::new);
-        return TriKeysExtractor.of(keyFunctions.stream()
-                .map(mappingFunction -> (TriMappingFunction<A, B, C>) mappingFunction)
-                .toList());
+        return TriKeysExtractor.of(keyFunctions);
     }
 
     public <A, B, C, D> QuadKeysExtractor<A, B, C, D> buildQuadLeftKeysExtractor() {
         var joinerCount = joiner.getJoinerCount();
         if (joinerCount == 0) {
-            return tuple -> IndexKeys.none();
+            return (tuple, oldKeys) -> IndexKeys.none();
         } else if (joinerCount == 1) {
-            return QuadKeysExtractor.of(QuadMappingFunction.of(joiner, 0));
+            return QuadKeysExtractor.of(new QuadKeyFunction<>(QuadMappingFunction.of(joiner, 0)));
         }
         var keyFunctions = extractKeyFunctions(
                 (value) -> QuadMappingFunction.<A, B, C, D> of(joiner, value),
                 QuadKeyFunction::new);
-        return QuadKeysExtractor.of(keyFunctions.stream()
-                .map(mappingFunction -> (QuadMappingFunction<A, B, C, D>) mappingFunction)
-                .toList());
+        return QuadKeysExtractor.of(keyFunctions);
     }
 
     public UniKeysExtractor<Right_> buildRightKeysExtractor() {

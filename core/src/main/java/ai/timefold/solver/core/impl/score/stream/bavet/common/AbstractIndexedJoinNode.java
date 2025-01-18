@@ -58,7 +58,7 @@ public abstract class AbstractIndexedJoinNode<LeftTuple_ extends AbstractTuple, 
             throw new IllegalStateException("Impossible state: the input for the tuple (" + leftTuple
                     + ") was already added in the tupleStore.");
         }
-        var indexKeys = keysExtractorLeft.apply(leftTuple);
+        var indexKeys = keysExtractorLeft.apply(leftTuple, null);
         var outTupleListLeft = new ElementAwareList<OutTuple_>();
         leftTuple.setStore(inputStoreIndexLeftOutTupleList, outTupleListLeft);
         indexAndPropagateLeft(leftTuple, indexKeys);
@@ -72,7 +72,7 @@ public abstract class AbstractIndexedJoinNode<LeftTuple_ extends AbstractTuple, 
             insertLeft(leftTuple);
             return;
         }
-        var newIndexKeys = keysExtractorLeft.apply(leftTuple);
+        var newIndexKeys = keysExtractorLeft.apply(leftTuple, oldIndexKeys);
         if (oldIndexKeys.equals(newIndexKeys)) {
             // No need for re-indexing because the index keys didn't change
             // Prefer an update over retract-insert if possible
@@ -114,7 +114,7 @@ public abstract class AbstractIndexedJoinNode<LeftTuple_ extends AbstractTuple, 
             throw new IllegalStateException("Impossible state: the input for the tuple (" + rightTuple
                     + ") was already added in the tupleStore.");
         }
-        var indexKeys = keysExtractorRight.apply(rightTuple);
+        var indexKeys = keysExtractorRight.apply(rightTuple, null);
         var outTupleListRight = new ElementAwareList<OutTuple_>();
         rightTuple.setStore(inputStoreIndexRightOutTupleList, outTupleListRight);
         indexAndPropagateRight(rightTuple, indexKeys);
@@ -128,7 +128,7 @@ public abstract class AbstractIndexedJoinNode<LeftTuple_ extends AbstractTuple, 
             insertRight(rightTuple);
             return;
         }
-        var newIndexKeys = keysExtractorRight.apply(rightTuple);
+        var newIndexKeys = keysExtractorRight.apply(rightTuple, oldIndexKeys);
         if (oldIndexKeys.equals(newIndexKeys)) {
             // No need for re-indexing because the index keys didn't change
             // Prefer an update over retract-insert if possible

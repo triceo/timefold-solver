@@ -1,6 +1,6 @@
 package ai.timefold.solver.core.impl.score.stream.bavet.common.index;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.AbstractTuple;
 
@@ -10,5 +10,5 @@ import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.AbstractTupl
  * @param <Tuple_>
  */
 @FunctionalInterface
-public interface KeysExtractor<Tuple_ extends AbstractTuple> extends Function<Tuple_, Object> {
+public interface KeysExtractor<Tuple_ extends AbstractTuple> extends BiFunction<Tuple_, Object, Object> {
 }
