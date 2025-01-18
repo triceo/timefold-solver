@@ -121,6 +121,9 @@ final class QuadKeyFunction<A, B, C, D>
             subKeysEqual = subKeysEqual && Objects.equals(subkey, oldArray[i]);
             result[i] = subkey;
         }
+        if (subKeysEqual) {
+            return oldKey;
+        }
         return new IndexerKey(result);
     }
 }

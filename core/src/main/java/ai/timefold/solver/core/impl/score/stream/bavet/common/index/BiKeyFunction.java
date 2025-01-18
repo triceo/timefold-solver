@@ -121,6 +121,9 @@ final class BiKeyFunction<A, B>
             subKeysEqual = subKeysEqual && Objects.equals(subkey, oldArray[i]);
             result[i] = subkey;
         }
+        if (subKeysEqual) {
+            return oldKey;
+        }
         return new IndexerKey(result);
     }
 }
