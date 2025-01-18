@@ -1,5 +1,6 @@
 package ai.timefold.solver.core.impl.score.stream.bavet.common.index;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -8,78 +9,118 @@ import ai.timefold.solver.core.impl.util.Pair;
 import ai.timefold.solver.core.impl.util.Quadruple;
 import ai.timefold.solver.core.impl.util.Triple;
 
-record QuadKeyFunction<A, B, C, D>(QuadMappingFunction<A, B, C, D>... mappingFunctions)
-        implements
-            PentaFunction<A, B, C, D, Object, Object>,
-            KeyFunction {
+final class QuadKeyFunction<A, B, C, D>
+        implements PentaFunction<A, B, C, D, Object, Object>, KeyFunction {
 
-    @SafeVarargs
-    public QuadKeyFunction {
+    private final QuadMappingFunction<A, B, C, D>[] mappingFunctions;
+    private final QuadMappingFunction<A, B, C, D> mappingFunction0;
+    private final QuadMappingFunction<A, B, C, D> mappingFunction1;
+    private final QuadMappingFunction<A, B, C, D> mappingFunction2;
+    private final QuadMappingFunction<A, B, C, D> mappingFunction3;
+    private final PentaFunction<A, B, C, D, Object, Object> path;
+
+    public QuadKeyFunction(QuadMappingFunction<A, B, C, D> mappingFunction) {
+        this(Collections.singletonList(mappingFunction));
     }
 
     @SuppressWarnings("unchecked")
     public QuadKeyFunction(List<QuadMappingFunction<A, B, C, D>> mappingFunctionList) {
-        this(mappingFunctionList.toArray(new QuadMappingFunction[0]));
-    }
-
-    public Object apply(A a, B b, C c, D d, Object oldKey) {
-        var nonNullOldKey = oldKey != null;
-        return switch (mappingFunctions.length) {
-            case 1 -> mappingFunctions[0].apply(a, b, c, d);
-            case 2 -> {
-                var oldPair = nonNullOldKey ? (Pair<Object, Object>) oldKey : null;
-                var subkey1 = mappingFunctions[0].apply(a, b, c, d);
-                var firstSubKeyEqual = nonNullOldKey && subkey1.equals(oldPair.key());
-                var subkey2 = mappingFunctions[1].apply(a, b, c, d);
-                var subKeysEqual = firstSubKeyEqual && subkey2.equals(oldPair.value());
-                if (subKeysEqual) {
-                    yield oldPair;
-                } else {
-                    yield new Pair<>(subkey1, subkey2);
-                }
-            }
-            case 3 -> {
-                var oldTriple = nonNullOldKey ? (Triple<Object, Object, Object>) oldKey : null;
-                var subkey1 = mappingFunctions[0].apply(a, b, c, d);
-                var subKey1Equal = nonNullOldKey && subkey1.equals(oldTriple.a());
-                var subkey2 = mappingFunctions[1].apply(a, b, c, d);
-                var subKey2Equal = subKey1Equal && subkey2.equals(oldTriple.b());
-                var subkey3 = mappingFunctions[2].apply(a, b, c, d);
-                var subKeysEqual = subKey2Equal && subkey3.equals(oldTriple.c());
-                if (subKeysEqual) {
-                    yield oldTriple;
-                } else {
-                    yield new Triple<>(subkey1, subkey2, subkey3);
-                }
-            }
-            case 4 -> {
-                var oldQuadruple = nonNullOldKey ? (Quadruple<Object, Object, Object, Object>) oldKey : null;
-                var subkey1 = mappingFunctions[0].apply(a, b, c, d);
-                var subKey1Equal = nonNullOldKey && Objects.equals(subkey1, oldQuadruple.a());
-                var subkey2 = mappingFunctions[1].apply(a, b, c, d);
-                var subKey2Equal = subKey1Equal && Objects.equals(subkey2, oldQuadruple.b());
-                var subkey3 = mappingFunctions[2].apply(a, b, c, d);
-                var subKey3Equal = subKey2Equal && Objects.equals(subkey3, oldQuadruple.c());
-                var subkey4 = mappingFunctions[3].apply(a, b, c, d);
-                var subKeysEqual = subKey3Equal && Objects.equals(subkey4, oldQuadruple.d());
-                if (subKeysEqual) {
-                    yield oldQuadruple;
-                } else {
-                    yield new Quadruple<>(subkey1, subkey2, subkey3, subkey4);
-                }
-            }
-            default -> {
-                var oldArray = nonNullOldKey ? (Object[]) oldKey : null;
-                var result = new Object[mappingFunctions.length];
-                var subKeysEqual = nonNullOldKey;
-                for (var i = 0; i < mappingFunctions.length; i++) {
-                    var subkey = mappingFunctions[i].apply(a, b, c, d);
-                    subKeysEqual = subKeysEqual && Objects.equals(subkey, oldArray[i]);
-                    result[i] = subkey;
-                }
-                yield new IndexerKey(result);
-            }
+        this.mappingFunctions = mappingFunctionList.toArray(new QuadMappingFunction[0]);
+        this.mappingFunction0 = mappingFunctions.length > 0 ? mappingFunctions[0] : null;
+        this.mappingFunction1 = mappingFunctions.length > 1 ? mappingFunctions[1] : null;
+        this.mappingFunction2 = mappingFunctions.length > 2 ? mappingFunctions[2] : null;
+        this.mappingFunction3 = mappingFunctions.length > 3 ? mappingFunctions[3] : null;
+        this.path = switch (mappingFunctions.length) {
+            case 1 -> this::apply1;
+            case 2 -> this::apply2;
+            case 3 -> this::apply3;
+            case 4 -> this::apply4;
+            default -> this::applyMany;
         };
     }
 
+    @Override
+    public Object apply(A a, B b, C c, D d, Object oldKey) {
+        return path.apply(a, b, c, d, oldKey);
+    }
+
+    private Object apply1(A a, B b, C c, D d, Object oldKey) {
+        return mappingFunction0.apply(a, b, c, d);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Object apply2(A a, B b, C c, D d, Object oldKey) {
+        var subkey1 = mappingFunction0.apply(a, b, c, d);
+        var subkey2 = mappingFunction1.apply(a, b, c, d);
+        if (oldKey == null) {
+            return new Pair<>(subkey1, subkey2);
+        }
+        var oldPair = (Pair<Object, Object>) oldKey;
+        var subKey1Equal = Objects.equals(subkey1, oldPair.key());
+        var subKeysEqual = subKey1Equal && Objects.equals(subkey2, oldPair.value());
+        if (subKeysEqual) {
+            return oldPair;
+        } else {
+            return new Pair<>(subkey1, subkey2);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Object apply3(A a, B b, C c, D d, Object oldKey) {
+        var subkey1 = mappingFunction0.apply(a, b, c, d);
+        var subkey2 = mappingFunction1.apply(a, b, c, d);
+        var subkey3 = mappingFunction2.apply(a, b, c, d);
+        if (oldKey == null) {
+            return new Triple<>(subkey1, subkey2, subkey3);
+        }
+        var oldTriple = (Triple<Object, Object, Object>) oldKey;
+        var subKey1Equal = Objects.equals(subkey1, oldTriple.a());
+        var subKey2Equal = subKey1Equal && Objects.equals(subkey2, oldTriple.b());
+        var subKeysEqual = subKey2Equal && Objects.equals(subkey3, oldTriple.c());
+        if (subKeysEqual) {
+            return oldTriple;
+        } else {
+            return new Triple<>(subkey1, subkey2, subkey3);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Object apply4(A a, B b, C c, D d, Object oldKey) {
+        var subkey1 = mappingFunction0.apply(a, b, c, d);
+        var subkey2 = mappingFunction1.apply(a, b, c, d);
+        var subkey3 = mappingFunction2.apply(a, b, c, d);
+        var subkey4 = mappingFunction3.apply(a, b, c, d);
+        if (oldKey == null) {
+            return new Quadruple<>(subkey1, subkey2, subkey3, subkey4);
+        }
+        var oldQuadruple = (Quadruple<Object, Object, Object, Object>) oldKey;
+        var subKey1Equal = Objects.equals(subkey1, oldQuadruple.a());
+        var subKey2Equal = subKey1Equal && Objects.equals(subkey2, oldQuadruple.b());
+        var subKey3Equal = subKey2Equal && Objects.equals(subkey3, oldQuadruple.c());
+        var subKeysEqual = subKey3Equal && Objects.equals(subkey4, oldQuadruple.d());
+        if (subKeysEqual) {
+            return oldQuadruple;
+        } else {
+            return new Quadruple<>(subkey1, subkey2, subkey3, subkey4);
+        }
+    }
+
+    private Object applyMany(A a, B b, C c, D d, Object oldKey) {
+        if (oldKey == null) {
+            var result = new Object[mappingFunctions.length];
+            for (var i = 0; i < mappingFunctions.length; i++) {
+                result[i] = mappingFunctions[i].apply(a, b, c, d);
+            }
+            return new IndexerKey(result);
+        }
+        var oldArray = (Object[]) oldKey;
+        var result = new Object[mappingFunctions.length];
+        var subKeysEqual = true;
+        for (var i = 0; i < mappingFunctions.length; i++) {
+            var subkey = mappingFunctions[i].apply(a, b, c, d);
+            subKeysEqual = subKeysEqual && Objects.equals(subkey, oldArray[i]);
+            result[i] = subkey;
+        }
+        return new IndexerKey(result);
+    }
 }
