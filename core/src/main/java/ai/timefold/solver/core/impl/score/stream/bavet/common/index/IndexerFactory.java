@@ -99,10 +99,10 @@ public final class IndexerFactory<Right_> {
         if (joinerCount == 0) {
             return (tuple, oldKeys) -> IndexKeys.none();
         } else if (joinerCount == 1) {
-            return UniKeysExtractor.of(new UniKeyFunction<>(mappingExtractor.apply(0)));
+            return buildUniKeysExtractor(new UniKeyFunction<>(mappingExtractor.apply(0)));
         }
         var keyFunctions = extractKeyFunctions(mappingExtractor, UniKeyFunction::new);
-        return UniKeysExtractor.of(keyFunctions);
+        return buildUniKeysExtractor(keyFunctions);
     }
 
     private <MappingFunction_, KeyFunction_ extends KeyFunction>
@@ -146,12 +146,12 @@ public final class IndexerFactory<Right_> {
         if (joinerCount == 0) {
             return (tuple, oldKeys) -> IndexKeys.none();
         } else if (joinerCount == 1) {
-            return BiKeysExtractor.of(new BiKeyFunction<>(BiMappingFunction.of(joiner, 0)));
+            return buildBiKeysExtractor(new BiKeyFunction<>(BiMappingFunction.of(joiner, 0)));
         }
         var keyFunctions = extractKeyFunctions(
                 value -> BiMappingFunction.<A, B> of(joiner, value),
                 BiKeyFunction::new);
-        return BiKeysExtractor.of(keyFunctions);
+        return buildBiKeysExtractor(keyFunctions);
     }
 
     public <A, B, C> TriKeysExtractor<A, B, C> buildTriLeftKeysExtractor() {
@@ -159,12 +159,12 @@ public final class IndexerFactory<Right_> {
         if (joinerCount == 0) {
             return (tuple, oldKeys) -> IndexKeys.none();
         } else if (joinerCount == 1) {
-            return TriKeysExtractor.of(new TriKeyFunction<>(TriMappingFunction.of(joiner, 0)));
+            return buildTriKeysExtractor(new TriKeyFunction<>(TriMappingFunction.of(joiner, 0)));
         }
         var keyFunctions = extractKeyFunctions(
                 value -> TriMappingFunction.<A, B, C> of(joiner, value),
                 TriKeyFunction::new);
-        return TriKeysExtractor.of(keyFunctions);
+        return buildTriKeysExtractor(keyFunctions);
     }
 
     public <A, B, C, D> QuadKeysExtractor<A, B, C, D> buildQuadLeftKeysExtractor() {
@@ -172,12 +172,12 @@ public final class IndexerFactory<Right_> {
         if (joinerCount == 0) {
             return (tuple, oldKeys) -> IndexKeys.none();
         } else if (joinerCount == 1) {
-            return QuadKeysExtractor.of(new QuadKeyFunction<>(QuadMappingFunction.of(joiner, 0)));
+            return buildQuadKeysExtractor(new QuadKeyFunction<>(QuadMappingFunction.of(joiner, 0)));
         }
         var keyFunctions = extractKeyFunctions(
                 (value) -> QuadMappingFunction.<A, B, C, D> of(joiner, value),
                 QuadKeyFunction::new);
-        return QuadKeysExtractor.of(keyFunctions);
+        return buildQuadKeysExtractor(keyFunctions);
     }
 
     public UniKeysExtractor<Right_> buildRightKeysExtractor() {
@@ -228,6 +228,201 @@ public final class IndexerFactory<Right_> {
             indexPropertyId--;
         }
         return downstreamIndexerSupplier.get();
+    }
+
+    private static <A> UniKeysExtractor<A> buildUniKeysExtractor(UniKeyFunction<A> keyFunction) {
+        return (tuple, oldKeys) -> {
+            var a = tuple.factA;
+            return IndexKeys.of(keyFunction.apply(a, oldKeys));
+        };
+    }
+
+    private static <A> UniKeysExtractor<A> buildUniKeysExtractor(List<UniKeyFunction<A>> keyFunctionList) {
+        var keyFunctionCount = keyFunctionList.size();
+        return switch (keyFunctionCount) {
+            case 1 -> buildUniKeysExtractor(keyFunctionList.get(0));
+            case 2 -> {
+                var keyFunction1 = keyFunctionList.get(0);
+                var keyFunction2 = keyFunctionList.get(1);
+                yield (tuple, oldKeys) -> {
+                    var a = tuple.factA;
+                    if (oldKeys == null) {
+                        return IndexKeys.of(keyFunction1.apply(a, null),
+                                keyFunction2.apply(a, null));
+                    }
+                    var oldIndexKeys = (IndexKeys) oldKeys;
+                    return IndexKeys.of(keyFunction1.apply(a, oldIndexKeys.get(0)),
+                            keyFunction2.apply(a, oldIndexKeys.get(1)));
+                };
+            }
+            default -> (tuple, oldKeys) -> {
+                var a = tuple.factA;
+                if (oldKeys == null) {
+                    var arr = new Object[keyFunctionCount];
+                    for (var i = 0; i < keyFunctionCount; i++) {
+                        arr[i] = keyFunctionList.get(i).apply(a, null);
+                    }
+                    return IndexKeys.ofMany(arr);
+                }
+                var oldIndexKeys = (IndexKeys) oldKeys;
+                var arr = new Object[keyFunctionCount];
+                for (var i = 0; i < keyFunctionCount; i++) {
+                    arr[i] = keyFunctionList.get(i).apply(a, oldIndexKeys.get(i));
+                }
+                return IndexKeys.ofMany(arr);
+            };
+        };
+    }
+
+    private static <A, B> BiKeysExtractor<A, B> buildBiKeysExtractor(BiKeyFunction<A, B> keyFunction) {
+        return (tuple, oldKeys) -> {
+            var a = tuple.factA;
+            var b = tuple.factB;
+            return IndexKeys.of(keyFunction.apply(a, b, oldKeys));
+        };
+    }
+
+    private static <A, B> BiKeysExtractor<A, B> buildBiKeysExtractor(List<BiKeyFunction<A, B>> keyFunctionList) {
+        var keyFunctionCount = keyFunctionList.size();
+        return switch (keyFunctionCount) {
+            case 1 -> buildBiKeysExtractor(keyFunctionList.get(0));
+            case 2 -> {
+                var keyFunction1 = keyFunctionList.get(0);
+                var keyFunction2 = keyFunctionList.get(1);
+                yield (tuple, oldKeys) -> {
+                    var a = tuple.factA;
+                    var b = tuple.factB;
+                    if (oldKeys == null) {
+                        return IndexKeys.of(keyFunction1.apply(a, b, null),
+                                keyFunction2.apply(a, b, null));
+                    }
+                    var oldIndexKeys = (IndexKeys) oldKeys;
+                    return IndexKeys.of(keyFunction1.apply(a, b, oldIndexKeys.get(0)),
+                            keyFunction2.apply(a, b, oldIndexKeys.get(1)));
+                };
+            }
+            default -> (tuple, oldKeys) -> {
+                var a = tuple.factA;
+                var b = tuple.factB;
+                if (oldKeys == null) {
+                    var arr = new Object[keyFunctionCount];
+                    for (var i = 0; i < keyFunctionCount; i++) {
+                        arr[i] = keyFunctionList.get(i).apply(a, b, null);
+                    }
+                    return IndexKeys.ofMany(arr);
+                }
+                var oldIndexKeys = (IndexKeys) oldKeys;
+                var arr = new Object[keyFunctionCount];
+                for (var i = 0; i < keyFunctionCount; i++) {
+                    arr[i] = keyFunctionList.get(i).apply(a, b, oldIndexKeys.get(i));
+                }
+                return IndexKeys.ofMany(arr);
+            };
+        };
+    }
+
+    private static <A, B, C> TriKeysExtractor<A, B, C> buildTriKeysExtractor(TriKeyFunction<A, B, C> keyFunction) {
+        return (tuple, oldKeys) -> {
+            var a = tuple.factA;
+            var b = tuple.factB;
+            var c = tuple.factC;
+            return IndexKeys.of(keyFunction.apply(a, b, c, oldKeys));
+        };
+    }
+
+    private static <A, B, C> TriKeysExtractor<A, B, C> buildTriKeysExtractor(List<TriKeyFunction<A, B, C>> keyFunctionList) {
+        var keyFunctionCount = keyFunctionList.size();
+        return switch (keyFunctionCount) {
+            case 1 -> buildTriKeysExtractor(keyFunctionList.get(0));
+            case 2 -> {
+                var keyFunction1 = keyFunctionList.get(0);
+                var keyFunction2 = keyFunctionList.get(1);
+                yield (tuple, oldKeys) -> {
+                    var a = tuple.factA;
+                    var b = tuple.factB;
+                    var c = tuple.factC;
+                    if (oldKeys == null) {
+                        return IndexKeys.of(keyFunction1.apply(a, b, c, null),
+                                keyFunction2.apply(a, b, c, null));
+                    }
+                    var oldIndexKeys = (IndexKeys) oldKeys;
+                    return IndexKeys.of(keyFunction1.apply(a, b, c, oldIndexKeys.get(0)),
+                            keyFunction2.apply(a, b, c, oldIndexKeys.get(1)));
+                };
+            }
+            default -> (tuple, oldKeys) -> {
+                var a = tuple.factA;
+                var b = tuple.factB;
+                var c = tuple.factC;
+                if (oldKeys == null) {
+                    var arr = new Object[keyFunctionCount];
+                    for (var i = 0; i < keyFunctionCount; i++) {
+                        arr[i] = keyFunctionList.get(i).apply(a, b, c, null);
+                    }
+                    return IndexKeys.ofMany(arr);
+                }
+                var oldIndexKeys = (IndexKeys) oldKeys;
+                var arr = new Object[keyFunctionCount];
+                for (var i = 0; i < keyFunctionCount; i++) {
+                    arr[i] = keyFunctionList.get(i).apply(a, b, c, oldIndexKeys.get(i));
+                }
+                return IndexKeys.ofMany(arr);
+            };
+        };
+    }
+
+    private static <A, B, C, D> QuadKeysExtractor<A, B, C, D> buildQuadKeysExtractor(QuadKeyFunction<A, B, C, D> keyFunction) {
+        return (tuple, oldKeys) -> {
+            var a = tuple.factA;
+            var b = tuple.factB;
+            var c = tuple.factC;
+            var d = tuple.factD;
+            return IndexKeys.of(keyFunction.apply(a, b, c, d, oldKeys));
+        };
+    }
+
+    private static <A, B, C, D> QuadKeysExtractor<A, B, C, D>
+            buildQuadKeysExtractor(List<QuadKeyFunction<A, B, C, D>> keyFunctionList) {
+        var keyFunctionCount = keyFunctionList.size();
+        return switch (keyFunctionCount) {
+            case 1 -> buildQuadKeysExtractor(keyFunctionList.get(0));
+            case 2 -> {
+                var keyFunction1 = keyFunctionList.get(0);
+                var keyFunction2 = keyFunctionList.get(1);
+                yield (tuple, oldKeys) -> {
+                    var a = tuple.factA;
+                    var b = tuple.factB;
+                    var c = tuple.factC;
+                    var d = tuple.factD;
+                    if (oldKeys == null) {
+                        return IndexKeys.of(keyFunction1.apply(a, b, c, d, null),
+                                keyFunction2.apply(a, b, c, d, null));
+                    }
+                    var oldIndexKeys = (IndexKeys) oldKeys;
+                    return IndexKeys.of(keyFunction1.apply(a, b, c, d, oldIndexKeys.get(0)),
+                            keyFunction2.apply(a, b, c, d, oldIndexKeys.get(1)));
+                };
+            }
+            default -> (tuple, oldKeys) -> {
+                var a = tuple.factA;
+                var b = tuple.factB;
+                var c = tuple.factC;
+                var d = tuple.factD;
+                if (oldKeys == null) {
+                    var arr = new Object[keyFunctionCount];
+                    for (var i = 0; i < keyFunctionCount; i++) {
+                        arr[i] = keyFunctionList.get(i).apply(a, b, c, d, null);
+                    }
+                    return IndexKeys.ofMany(arr);
+                }
+                var oldIndexKeys = (IndexKeys) oldKeys;
+                var arr = new Object[keyFunctionCount];
+                for (var i = 0; i < keyFunctionCount; i++) {
+                    arr[i] = keyFunctionList.get(i).apply(a, b, c, d, oldIndexKeys.get(i));
+                }
+                return IndexKeys.ofMany(arr);
+            };
+        };
     }
 
 }
