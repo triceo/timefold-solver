@@ -257,17 +257,16 @@ public final class IndexerFactory<Right_> {
             }
             default -> (tuple, oldKeys) -> {
                 var a = tuple.factA;
+                var arr = new Object[keyFunctionCount];
                 if (oldKeys == null) {
-                    var arr = new Object[keyFunctionCount];
                     for (var i = 0; i < keyFunctionCount; i++) {
                         arr[i] = keyFunctionList.get(i).apply(a, null);
                     }
-                    return IndexKeys.ofMany(arr);
-                }
-                var oldIndexKeys = (IndexKeys) oldKeys;
-                var arr = new Object[keyFunctionCount];
-                for (var i = 0; i < keyFunctionCount; i++) {
-                    arr[i] = keyFunctionList.get(i).apply(a, oldIndexKeys.get(i));
+                } else {
+                    var oldIndexKeys = (IndexKeys) oldKeys;
+                    for (var i = 0; i < keyFunctionCount; i++) {
+                        arr[i] = keyFunctionList.get(i).apply(a, oldIndexKeys.get(i));
+                    }
                 }
                 return IndexKeys.ofMany(arr);
             };
@@ -304,17 +303,16 @@ public final class IndexerFactory<Right_> {
             default -> (tuple, oldKeys) -> {
                 var a = tuple.factA;
                 var b = tuple.factB;
+                var arr = new Object[keyFunctionCount];
                 if (oldKeys == null) {
-                    var arr = new Object[keyFunctionCount];
                     for (var i = 0; i < keyFunctionCount; i++) {
                         arr[i] = keyFunctionList.get(i).apply(a, b, null);
                     }
-                    return IndexKeys.ofMany(arr);
-                }
-                var oldIndexKeys = (IndexKeys) oldKeys;
-                var arr = new Object[keyFunctionCount];
-                for (var i = 0; i < keyFunctionCount; i++) {
-                    arr[i] = keyFunctionList.get(i).apply(a, b, oldIndexKeys.get(i));
+                } else {
+                    var oldIndexKeys = (IndexKeys) oldKeys;
+                    for (var i = 0; i < keyFunctionCount; i++) {
+                        arr[i] = keyFunctionList.get(i).apply(a, b, oldIndexKeys.get(i));
+                    }
                 }
                 return IndexKeys.ofMany(arr);
             };
@@ -354,17 +352,16 @@ public final class IndexerFactory<Right_> {
                 var a = tuple.factA;
                 var b = tuple.factB;
                 var c = tuple.factC;
+                var arr = new Object[keyFunctionCount];
                 if (oldKeys == null) {
-                    var arr = new Object[keyFunctionCount];
                     for (var i = 0; i < keyFunctionCount; i++) {
                         arr[i] = keyFunctionList.get(i).apply(a, b, c, null);
                     }
-                    return IndexKeys.ofMany(arr);
-                }
-                var oldIndexKeys = (IndexKeys) oldKeys;
-                var arr = new Object[keyFunctionCount];
-                for (var i = 0; i < keyFunctionCount; i++) {
-                    arr[i] = keyFunctionList.get(i).apply(a, b, c, oldIndexKeys.get(i));
+                } else {
+                    var oldIndexKeys = (IndexKeys) oldKeys;
+                    for (var i = 0; i < keyFunctionCount; i++) {
+                        arr[i] = keyFunctionList.get(i).apply(a, b, c, oldIndexKeys.get(i));
+                    }
                 }
                 return IndexKeys.ofMany(arr);
             };
@@ -408,17 +405,16 @@ public final class IndexerFactory<Right_> {
                 var b = tuple.factB;
                 var c = tuple.factC;
                 var d = tuple.factD;
+                var arr = new Object[keyFunctionCount];
                 if (oldKeys == null) {
-                    var arr = new Object[keyFunctionCount];
                     for (var i = 0; i < keyFunctionCount; i++) {
                         arr[i] = keyFunctionList.get(i).apply(a, b, c, d, null);
                     }
-                    return IndexKeys.ofMany(arr);
-                }
-                var oldIndexKeys = (IndexKeys) oldKeys;
-                var arr = new Object[keyFunctionCount];
-                for (var i = 0; i < keyFunctionCount; i++) {
-                    arr[i] = keyFunctionList.get(i).apply(a, b, c, d, oldIndexKeys.get(i));
+                } else {
+                    var oldIndexKeys = (IndexKeys) oldKeys;
+                    for (var i = 0; i < keyFunctionCount; i++) {
+                        arr[i] = keyFunctionList.get(i).apply(a, b, c, d, oldIndexKeys.get(i));
+                    }
                 }
                 return IndexKeys.ofMany(arr);
             };

@@ -12,6 +12,7 @@ import ai.timefold.solver.core.impl.util.Triple;
 final class BiKeyFunction<A, B>
         implements TriFunction<A, B, Object, Object>, KeyFunction {
 
+    private final int mappingFunctionCount;
     private final BiMappingFunction<A, B>[] mappingFunctions;
     private final BiMappingFunction<A, B> mappingFunction0;
     private final BiMappingFunction<A, B> mappingFunction1;
@@ -25,12 +26,13 @@ final class BiKeyFunction<A, B>
 
     @SuppressWarnings("unchecked")
     public BiKeyFunction(List<BiMappingFunction<A, B>> mappingFunctionList) {
+        this.mappingFunctionCount = mappingFunctionList.size();
         this.mappingFunctions = mappingFunctionList.toArray(new BiMappingFunction[0]);
-        this.mappingFunction0 = mappingFunctions.length > 0 ? mappingFunctions[0] : null;
-        this.mappingFunction1 = mappingFunctions.length > 1 ? mappingFunctions[1] : null;
-        this.mappingFunction2 = mappingFunctions.length > 2 ? mappingFunctions[2] : null;
-        this.mappingFunction3 = mappingFunctions.length > 3 ? mappingFunctions[3] : null;
-        this.path = switch (mappingFunctions.length) {
+        this.mappingFunction0 = mappingFunctions[0];
+        this.mappingFunction1 = mappingFunctionCount > 1 ? mappingFunctions[1] : null;
+        this.mappingFunction2 = mappingFunctionCount > 2 ? mappingFunctions[2] : null;
+        this.mappingFunction3 = mappingFunctionCount > 3 ? mappingFunctions[3] : null;
+        this.path = switch (mappingFunctionCount) {
             case 1 -> this::apply1;
             case 2 -> this::apply2;
             case 3 -> this::apply3;
@@ -106,23 +108,22 @@ final class BiKeyFunction<A, B>
     }
 
     private Object applyMany(A a, B b, Object oldKey) {
+        var result = new Object[mappingFunctionCount];
         if (oldKey == null) {
-            var result = new Object[mappingFunctions.length];
-            for (var i = 0; i < mappingFunctions.length; i++) {
+            for (var i = 0; i < mappingFunctionCount; i++) {
                 result[i] = mappingFunctions[i].apply(a, b);
             }
-            return new IndexerKey(result);
-        }
-        var oldArray = (Object[]) oldKey;
-        var result = new Object[mappingFunctions.length];
-        var subKeysEqual = true;
-        for (var i = 0; i < mappingFunctions.length; i++) {
-            var subkey = mappingFunctions[i].apply(a, b);
-            subKeysEqual = subKeysEqual && Objects.equals(subkey, oldArray[i]);
-            result[i] = subkey;
-        }
-        if (subKeysEqual) {
-            return oldKey;
+        } else {
+            var oldArray = (Object[]) oldKey;
+            var subKeysEqual = true;
+            for (var i = 0; i < mappingFunctionCount; i++) {
+                var subkey = mappingFunctions[i].apply(a, b);
+                subKeysEqual = subKeysEqual && Objects.equals(subkey, oldArray[i]);
+                result[i] = subkey;
+            }
+            if (subKeysEqual) {
+                return oldKey;
+            }
         }
         return new IndexerKey(result);
     }
