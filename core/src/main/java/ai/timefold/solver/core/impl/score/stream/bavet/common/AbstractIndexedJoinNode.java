@@ -2,8 +2,8 @@ package ai.timefold.solver.core.impl.score.stream.bavet.common;
 
 import ai.timefold.solver.core.impl.score.stream.bavet.common.index.Indexer;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.index.IndexerFactory;
-import ai.timefold.solver.core.impl.score.stream.bavet.common.index.IndexerFactory.KeysExtractor;
-import ai.timefold.solver.core.impl.score.stream.bavet.common.index.IndexerFactory.UniKeysExtractor;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.index.KeysExtractor;
+import ai.timefold.solver.core.impl.score.stream.bavet.common.index.UniKeysExtractor;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.AbstractTuple;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.LeftTupleLifecycle;
 import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.RightTupleLifecycle;
