@@ -24,27 +24,33 @@ public interface TriKeysExtractor<A, B, C> extends KeysExtractor<TriTuple<A, B, 
                 var keyFunction1 = keyFunctionList.get(0);
                 var keyFunction2 = keyFunctionList.get(1);
                 yield (tuple, oldKeys) -> {
-                    var nonNullOldKey = oldKeys != null;
-                    var oldIndexKeys = nonNullOldKey ? (IndexKeys) oldKeys : null;
-                    var oldIndex0 = nonNullOldKey ? oldIndexKeys.get(0) : null;
-                    var oldIndex1 = nonNullOldKey ? oldIndexKeys.get(1) : null;
                     var a = tuple.factA;
                     var b = tuple.factB;
                     var c = tuple.factC;
-                    return IndexKeys.of(keyFunction1.apply(a, b, c, oldIndex0),
-                            keyFunction2.apply(a, b, c, oldIndex1));
+                    if (oldKeys == null) {
+                        return IndexKeys.of(keyFunction1.apply(a, b, c, null),
+                                keyFunction2.apply(a, b, c, null));
+                    }
+                    var oldIndexKeys = (IndexKeys) oldKeys;
+                    return IndexKeys.of(keyFunction1.apply(a, b, c, oldIndexKeys.get(0)),
+                            keyFunction2.apply(a, b, c, oldIndexKeys.get(1)));
                 };
             }
             default -> (tuple, oldKeys) -> {
-                var nonNullOldKey = oldKeys != null;
-                var oldIndexKeys = nonNullOldKey ? (IndexKeys) oldKeys : null;
                 var a = tuple.factA;
                 var b = tuple.factB;
                 var c = tuple.factC;
+                if (oldKeys == null) {
+                    var arr = new Object[keyFunctionCount];
+                    for (var i = 0; i < keyFunctionCount; i++) {
+                        arr[i] = keyFunctionList.get(i).apply(a, b, c, null);
+                    }
+                    return IndexKeys.ofMany(arr);
+                }
+                var oldIndexKeys = (IndexKeys) oldKeys;
                 var arr = new Object[keyFunctionCount];
                 for (var i = 0; i < keyFunctionCount; i++) {
-                    var oldIndexKey = nonNullOldKey ? oldIndexKeys.get(i) : null;
-                    arr[i] = keyFunctionList.get(i).apply(a, b, c, oldIndexKey);
+                    arr[i] = keyFunctionList.get(i).apply(a, b, c, oldIndexKeys.get(i));
                 }
                 return IndexKeys.ofMany(arr);
             };
