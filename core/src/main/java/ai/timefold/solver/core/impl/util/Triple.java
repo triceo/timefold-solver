@@ -1,5 +1,7 @@
 package ai.timefold.solver.core.impl.util;
 
+import java.util.Objects;
+
 /**
  * An immutable tuple of three values.
  * Two instances {@link Object#equals(Object) are equal} if all three values in the first instance
@@ -10,5 +12,30 @@ package ai.timefold.solver.core.impl.util;
  * @param <C>
  */
 public record Triple<A, B, C>(A a, B b, C c) {
+
+    public Triple<A, B, C> newIfDifferent(A newA, B newB, C newC) {
+        return equals(newA, newB, newC) ? this : new Triple<>(newA, newB, newC);
+    }
+
+    private boolean equals(Object newA, Object newB, Object newC) {
+        return Objects.equals(a, newA) && Objects.equals(b, newB) && Objects.equals(c, newC);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        return o instanceof Triple<?, ?, ?> triple && equals(triple.a, triple.b, triple.c);
+    }
+
+    @Override
+    public int hashCode() {
+        var hash = 1;
+        hash = 31 * hash + Objects.hashCode(a);
+        hash = 31 * hash + Objects.hashCode(b);
+        hash = 31 * hash + Objects.hashCode(c);
+        return hash;
+    }
 
 }
