@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.NavigableMap;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.function.IntFunction;
@@ -246,13 +247,13 @@ public final class IndexerFactory<Right_> {
                 var keyFunction2 = keyFunctionList.get(1);
                 yield (tuple, oldKeys) -> {
                     var a = tuple.factA;
+                    var key1 = keyFunction1.apply(a, oldKeys);
+                    var key2 = keyFunction2.apply(a, oldKeys);
                     if (oldKeys == null) {
-                        return IndexKeys.of(keyFunction1.apply(a, null),
-                                keyFunction2.apply(a, null));
+                        return IndexKeys.of(key1, key2);
                     }
                     var oldIndexKeys = (IndexKeys) oldKeys;
-                    return IndexKeys.of(keyFunction1.apply(a, oldIndexKeys.get(0)),
-                            keyFunction2.apply(a, oldIndexKeys.get(1)));
+                    return IndexKeys.of(key1, key2, oldIndexKeys);
                 };
             }
             default -> (tuple, oldKeys) -> {
@@ -264,8 +265,17 @@ public final class IndexerFactory<Right_> {
                     }
                 } else {
                     var oldIndexKeys = (IndexKeys) oldKeys;
+                    var sameOldIndexKeys = true;
                     for (var i = 0; i < keyFunctionCount; i++) {
-                        arr[i] = keyFunctionList.get(i).apply(a, oldIndexKeys.get(i));
+                        var oldIndexKey = oldIndexKeys.get(i);
+                        var key = keyFunctionList.get(i).apply(a, oldIndexKey);
+                        if (sameOldIndexKeys && !Objects.equals(key, oldIndexKey)) {
+                            sameOldIndexKeys = false;
+                        }
+                        arr[i] = key;
+                    }
+                    if (sameOldIndexKeys) {
+                        return oldIndexKeys;
                     }
                 }
                 return IndexKeys.ofMany(arr);
@@ -291,13 +301,13 @@ public final class IndexerFactory<Right_> {
                 yield (tuple, oldKeys) -> {
                     var a = tuple.factA;
                     var b = tuple.factB;
+                    var key1 = keyFunction1.apply(a, b, oldKeys);
+                    var key2 = keyFunction2.apply(a, b, oldKeys);
                     if (oldKeys == null) {
-                        return IndexKeys.of(keyFunction1.apply(a, b, null),
-                                keyFunction2.apply(a, b, null));
+                        return IndexKeys.of(key1, key2);
                     }
                     var oldIndexKeys = (IndexKeys) oldKeys;
-                    return IndexKeys.of(keyFunction1.apply(a, b, oldIndexKeys.get(0)),
-                            keyFunction2.apply(a, b, oldIndexKeys.get(1)));
+                    return IndexKeys.of(key1, key2, oldIndexKeys);
                 };
             }
             default -> (tuple, oldKeys) -> {
@@ -310,8 +320,17 @@ public final class IndexerFactory<Right_> {
                     }
                 } else {
                     var oldIndexKeys = (IndexKeys) oldKeys;
+                    var sameOldIndexKeys = true;
                     for (var i = 0; i < keyFunctionCount; i++) {
-                        arr[i] = keyFunctionList.get(i).apply(a, b, oldIndexKeys.get(i));
+                        var oldIndexKey = oldIndexKeys.get(i);
+                        var key = keyFunctionList.get(i).apply(a, b, oldIndexKey);
+                        if (sameOldIndexKeys && !Objects.equals(key, oldIndexKey)) {
+                            sameOldIndexKeys = false;
+                        }
+                        arr[i] = key;
+                    }
+                    if (sameOldIndexKeys) {
+                        return oldIndexKeys;
                     }
                 }
                 return IndexKeys.ofMany(arr);
@@ -339,13 +358,13 @@ public final class IndexerFactory<Right_> {
                     var a = tuple.factA;
                     var b = tuple.factB;
                     var c = tuple.factC;
+                    var key1 = keyFunction1.apply(a, b, c, oldKeys);
+                    var key2 = keyFunction2.apply(a, b, c, oldKeys);
                     if (oldKeys == null) {
-                        return IndexKeys.of(keyFunction1.apply(a, b, c, null),
-                                keyFunction2.apply(a, b, c, null));
+                        return IndexKeys.of(key1, key2);
                     }
                     var oldIndexKeys = (IndexKeys) oldKeys;
-                    return IndexKeys.of(keyFunction1.apply(a, b, c, oldIndexKeys.get(0)),
-                            keyFunction2.apply(a, b, c, oldIndexKeys.get(1)));
+                    return IndexKeys.of(key1, key2, oldIndexKeys);
                 };
             }
             default -> (tuple, oldKeys) -> {
@@ -359,8 +378,17 @@ public final class IndexerFactory<Right_> {
                     }
                 } else {
                     var oldIndexKeys = (IndexKeys) oldKeys;
+                    var sameOldIndexKeys = true;
                     for (var i = 0; i < keyFunctionCount; i++) {
-                        arr[i] = keyFunctionList.get(i).apply(a, b, c, oldIndexKeys.get(i));
+                        var oldIndexKey = oldIndexKeys.get(i);
+                        var key = keyFunctionList.get(i).apply(a, b, c, oldIndexKey);
+                        if (sameOldIndexKeys && !Objects.equals(key, oldIndexKey)) {
+                            sameOldIndexKeys = false;
+                        }
+                        arr[i] = key;
+                    }
+                    if (sameOldIndexKeys) {
+                        return oldIndexKeys;
                     }
                 }
                 return IndexKeys.ofMany(arr);
@@ -391,13 +419,13 @@ public final class IndexerFactory<Right_> {
                     var b = tuple.factB;
                     var c = tuple.factC;
                     var d = tuple.factD;
+                    var key1 = keyFunction1.apply(a, b, c, d, oldKeys);
+                    var key2 = keyFunction2.apply(a, b, c, d, oldKeys);
                     if (oldKeys == null) {
-                        return IndexKeys.of(keyFunction1.apply(a, b, c, d, null),
-                                keyFunction2.apply(a, b, c, d, null));
+                        return IndexKeys.of(key1, key2);
                     }
                     var oldIndexKeys = (IndexKeys) oldKeys;
-                    return IndexKeys.of(keyFunction1.apply(a, b, c, d, oldIndexKeys.get(0)),
-                            keyFunction2.apply(a, b, c, d, oldIndexKeys.get(1)));
+                    return IndexKeys.of(key1, key2, oldIndexKeys);
                 };
             }
             default -> (tuple, oldKeys) -> {
@@ -412,8 +440,17 @@ public final class IndexerFactory<Right_> {
                     }
                 } else {
                     var oldIndexKeys = (IndexKeys) oldKeys;
+                    var sameOldIndexKeys = true;
                     for (var i = 0; i < keyFunctionCount; i++) {
-                        arr[i] = keyFunctionList.get(i).apply(a, b, c, d, oldIndexKeys.get(i));
+                        var oldIndexKey = oldIndexKeys.get(i);
+                        var key = keyFunctionList.get(i).apply(a, b, c, d, oldIndexKey);
+                        if (sameOldIndexKeys && !Objects.equals(key, oldIndexKey)) {
+                            sameOldIndexKeys = false;
+                        }
+                        arr[i] = key;
+                    }
+                    if (sameOldIndexKeys) {
+                        return oldIndexKeys;
                     }
                 }
                 return IndexKeys.ofMany(arr);

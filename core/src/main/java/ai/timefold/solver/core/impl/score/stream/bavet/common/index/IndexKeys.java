@@ -1,5 +1,7 @@
 package ai.timefold.solver.core.impl.score.stream.bavet.common.index;
 
+import java.util.Objects;
+
 /**
  * Cached in tuples; each tuple carries its unique instance.
  * <p>
@@ -40,6 +42,15 @@ public sealed interface IndexKeys
     }
 
     static <Key1_, Key2_> IndexKeys of(Key1_ key1, Key2_ key2) {
+        return new TwoIndexKeys<>(key1, key2);
+    }
+
+    @SuppressWarnings("unchecked")
+    static <Key1_, Key2_> IndexKeys of(Key1_ key1, Key2_ key2, IndexKeys oldKeys) {
+        var oldIndexKeys = (TwoIndexKeys<Key1_, Key2_>) oldKeys;
+        if (Objects.equals(oldIndexKeys.get(0), key1) && Objects.equals(oldIndexKeys.get(1), key2)) {
+            return oldIndexKeys;
+        }
         return new TwoIndexKeys<>(key1, key2);
     }
 
