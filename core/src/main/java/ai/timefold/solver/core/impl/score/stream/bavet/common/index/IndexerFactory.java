@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.TreeMap;
-import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
@@ -108,7 +107,7 @@ public final class IndexerFactory<Right_> {
 
     private <MappingFunction_, KeyFunction_ extends KeyFunction>
             List<KeyFunction_> extractKeyFunctions(IntFunction<MappingFunction_> mappingExtractor,
-                    Function<List<MappingFunction_>, KeyFunction_> constructor) {
+                    MappingToKeyFunction<MappingFunction_, KeyFunction_> constructor) {
         var joinerCount = joiner.getJoinerCount();
         var startIndexInclusive = 0;
         var keyFunctionList = new ArrayList<KeyFunction_>();
@@ -136,10 +135,17 @@ public final class IndexerFactory<Right_> {
                     yield result;
                 }
             };
-            keyFunctionList.add(constructor.apply(keyFunctions));
+            keyFunctionList.add(constructor.apply(keyFunctionList.size(), keyFunctions));
             startIndexInclusive = endIndexExclusive;
         }
         return keyFunctionList;
+    }
+
+    @FunctionalInterface
+    private interface MappingToKeyFunction<MappingFunction_, KeyFunction_ extends KeyFunction> {
+
+        KeyFunction_ apply(int keyId, List<MappingFunction_> mappingFunctions);
+
     }
 
     public <A, B> BiKeysExtractor<A, B> buildBiLeftKeysExtractor() {

@@ -12,6 +12,7 @@ import ai.timefold.solver.core.impl.util.Triple;
 final class BiKeyFunction<A, B>
         implements TriFunction<A, B, Object, Object>, KeyFunction {
 
+    private final int keyId;
     private final int mappingFunctionCount;
     private final BiMappingFunction<A, B>[] mappingFunctions;
     private final BiMappingFunction<A, B> mappingFunction0;
@@ -20,11 +21,12 @@ final class BiKeyFunction<A, B>
     private final BiMappingFunction<A, B> mappingFunction3;
 
     public BiKeyFunction(BiMappingFunction<A, B> mappingFunction) {
-        this(Collections.singletonList(mappingFunction));
+        this(-1, Collections.singletonList(mappingFunction));
     }
 
     @SuppressWarnings("unchecked")
-    public BiKeyFunction(List<BiMappingFunction<A, B>> mappingFunctionList) {
+    public BiKeyFunction(int keyId, List<BiMappingFunction<A, B>> mappingFunctionList) {
+        this.keyId = keyId;
         this.mappingFunctionCount = mappingFunctionList.size();
         this.mappingFunctions = mappingFunctionList.toArray(new BiMappingFunction[0]);
         this.mappingFunction0 = mappingFunctions[0];
@@ -55,7 +57,8 @@ final class BiKeyFunction<A, B>
         if (oldKey == null) {
             return new Pair<>(subkey1, subkey2);
         }
-        return ((Pair<Object, Object>) oldKey).newIfDifferent(subkey1, subkey2);
+        return ((Pair<Object, Object>) UniKeyFunction.extractSubkey(keyId, oldKey))
+                .newIfDifferent(subkey1, subkey2);
     }
 
     @SuppressWarnings("unchecked")
@@ -66,7 +69,8 @@ final class BiKeyFunction<A, B>
         if (oldKey == null) {
             return new Triple<>(subkey1, subkey2, subkey3);
         }
-        return ((Triple<Object, Object, Object>) oldKey).newIfDifferent(subkey1, subkey2, subkey3);
+        return ((Triple<Object, Object, Object>) UniKeyFunction.extractSubkey(keyId, oldKey))
+                .newIfDifferent(subkey1, subkey2, subkey3);
     }
 
     @SuppressWarnings("unchecked")
@@ -78,7 +82,8 @@ final class BiKeyFunction<A, B>
         if (oldKey == null) {
             return new Quadruple<>(subkey1, subkey2, subkey3, subkey4);
         }
-        return ((Quadruple<Object, Object, Object, Object>) oldKey).newIfDifferent(subkey1, subkey2, subkey3, subkey4);
+        return ((Quadruple<Object, Object, Object, Object>) UniKeyFunction.extractSubkey(keyId, oldKey))
+                .newIfDifferent(subkey1, subkey2, subkey3, subkey4);
     }
 
     private Object applyMany(A a, B b, Object oldKey) {
@@ -88,7 +93,7 @@ final class BiKeyFunction<A, B>
                 result[i] = mappingFunctions[i].apply(a, b);
             }
         } else {
-            var oldArray = (Object[]) oldKey;
+            var oldArray = ((IndexerKey) UniKeyFunction.extractSubkey(keyId, oldKey)).properties();
             var subKeysEqual = true;
             for (var i = 0; i < mappingFunctionCount; i++) {
                 var subkey = mappingFunctions[i].apply(a, b);
@@ -101,4 +106,5 @@ final class BiKeyFunction<A, B>
         }
         return new IndexerKey(result);
     }
+
 }

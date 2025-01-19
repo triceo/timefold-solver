@@ -12,6 +12,7 @@ import ai.timefold.solver.core.impl.util.Triple;
 final class UniKeyFunction<A>
         implements BiFunction<A, Object, Object>, KeyFunction {
 
+    private final int keyId;
     private final int mappingFunctionCount;
     private final UniMappingFunction<A>[] mappingFunctions;
     private final UniMappingFunction<A> mappingFunction0;
@@ -20,11 +21,12 @@ final class UniKeyFunction<A>
     private final UniMappingFunction<A> mappingFunction3;
 
     public UniKeyFunction(UniMappingFunction<A> mappingFunction) {
-        this(Collections.singletonList(mappingFunction));
+        this(-1, Collections.singletonList(mappingFunction));
     }
 
     @SuppressWarnings("unchecked")
-    public UniKeyFunction(List<UniMappingFunction<A>> mappingFunctionList) {
+    public UniKeyFunction(int keyId, List<UniMappingFunction<A>> mappingFunctionList) {
+        this.keyId = keyId;
         this.mappingFunctionCount = mappingFunctionList.size();
         this.mappingFunctions = mappingFunctionList.toArray(new UniMappingFunction[0]);
         this.mappingFunction0 = mappingFunctions[0];
@@ -55,7 +57,18 @@ final class UniKeyFunction<A>
         if (oldKey == null) {
             return new Pair<>(subkey1, subkey2);
         }
-        return ((Pair<Object, Object>) oldKey).newIfDifferent(subkey1, subkey2);
+        return ((Pair<Object, Object>) extractSubkey(keyId, oldKey))
+                .newIfDifferent(subkey1, subkey2);
+    }
+
+    @SuppressWarnings("unchecked")
+    static <Key_> Key_ extractSubkey(int keyId, Object key) {
+        if (key instanceof IndexKeys indexKeys) {
+            return indexKeys.get(keyId);
+        }
+        // This is a single key, not an IndexKeys.
+        // See IndexKeys.of(Object o) for details.
+        return (Key_) key;
     }
 
     @SuppressWarnings("unchecked")
@@ -66,7 +79,8 @@ final class UniKeyFunction<A>
         if (oldKey == null) {
             return new Triple<>(subkey1, subkey2, subkey3);
         }
-        return ((Triple<Object, Object, Object>) oldKey).newIfDifferent(subkey1, subkey2, subkey3);
+        return ((Triple<Object, Object, Object>) extractSubkey(keyId, oldKey))
+                .newIfDifferent(subkey1, subkey2, subkey3);
     }
 
     @SuppressWarnings("unchecked")
@@ -78,7 +92,8 @@ final class UniKeyFunction<A>
         if (oldKey == null) {
             return new Quadruple<>(subkey1, subkey2, subkey3, subkey4);
         }
-        return ((Quadruple<Object, Object, Object, Object>) oldKey).newIfDifferent(subkey1, subkey2, subkey3, subkey4);
+        return ((Quadruple<Object, Object, Object, Object>) extractSubkey(keyId, oldKey))
+                .newIfDifferent(subkey1, subkey2, subkey3, subkey4);
     }
 
     private Object applyMany(A a, Object oldKey) {
@@ -88,7 +103,7 @@ final class UniKeyFunction<A>
                 result[i] = mappingFunctions[i].apply(a);
             }
         } else {
-            var oldArray = (Object[]) oldKey;
+            var oldArray = ((IndexerKey) extractSubkey(keyId, oldKey)).properties();
             var subKeysEqual = true;
             for (var i = 0; i < mappingFunctionCount; i++) {
                 var subkey = mappingFunctions[i].apply(a);

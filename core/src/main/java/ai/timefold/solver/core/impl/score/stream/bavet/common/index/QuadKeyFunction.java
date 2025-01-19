@@ -12,6 +12,7 @@ import ai.timefold.solver.core.impl.util.Triple;
 final class QuadKeyFunction<A, B, C, D>
         implements PentaFunction<A, B, C, D, Object, Object>, KeyFunction {
 
+    private final int keyId;
     private final int mappingFunctionCount;
     private final QuadMappingFunction<A, B, C, D>[] mappingFunctions;
     private final QuadMappingFunction<A, B, C, D> mappingFunction0;
@@ -20,11 +21,12 @@ final class QuadKeyFunction<A, B, C, D>
     private final QuadMappingFunction<A, B, C, D> mappingFunction3;
 
     public QuadKeyFunction(QuadMappingFunction<A, B, C, D> mappingFunction) {
-        this(Collections.singletonList(mappingFunction));
+        this(-1, Collections.singletonList(mappingFunction));
     }
 
     @SuppressWarnings("unchecked")
-    public QuadKeyFunction(List<QuadMappingFunction<A, B, C, D>> mappingFunctionList) {
+    public QuadKeyFunction(int keyId, List<QuadMappingFunction<A, B, C, D>> mappingFunctionList) {
+        this.keyId = keyId;
         this.mappingFunctionCount = mappingFunctionList.size();
         this.mappingFunctions = mappingFunctionList.toArray(new QuadMappingFunction[0]);
         this.mappingFunction0 = mappingFunctions[0];
@@ -55,7 +57,8 @@ final class QuadKeyFunction<A, B, C, D>
         if (oldKey == null) {
             return new Pair<>(subkey1, subkey2);
         }
-        return ((Pair<Object, Object>) oldKey).newIfDifferent(subkey1, subkey2);
+        return ((Pair<Object, Object>) UniKeyFunction.extractSubkey(keyId, keyId))
+                .newIfDifferent(subkey1, subkey2);
     }
 
     @SuppressWarnings("unchecked")
@@ -66,7 +69,8 @@ final class QuadKeyFunction<A, B, C, D>
         if (oldKey == null) {
             return new Triple<>(subkey1, subkey2, subkey3);
         }
-        return ((Triple<Object, Object, Object>) oldKey).newIfDifferent(subkey1, subkey2, subkey3);
+        return ((Triple<Object, Object, Object>) UniKeyFunction.extractSubkey(keyId, keyId))
+                .newIfDifferent(subkey1, subkey2, subkey3);
     }
 
     @SuppressWarnings("unchecked")
@@ -78,7 +82,8 @@ final class QuadKeyFunction<A, B, C, D>
         if (oldKey == null) {
             return new Quadruple<>(subkey1, subkey2, subkey3, subkey4);
         }
-        return ((Quadruple<Object, Object, Object, Object>) oldKey).newIfDifferent(subkey1, subkey2, subkey3, subkey4);
+        return ((Quadruple<Object, Object, Object, Object>) UniKeyFunction.extractSubkey(keyId, keyId))
+                .newIfDifferent(subkey1, subkey2, subkey3, subkey4);
     }
 
     private Object applyMany(A a, B b, C c, D d, Object oldKey) {
@@ -88,7 +93,7 @@ final class QuadKeyFunction<A, B, C, D>
                 result[i] = mappingFunctions[i].apply(a, b, c, d);
             }
         } else {
-            var oldArray = (Object[]) oldKey;
+            var oldArray = ((IndexerKey) UniKeyFunction.extractSubkey(keyId, keyId)).properties();
             var subKeysEqual = true;
             for (var i = 0; i < mappingFunctionCount; i++) {
                 var subkey = mappingFunctions[i].apply(a, b, c, d);
@@ -101,4 +106,5 @@ final class QuadKeyFunction<A, B, C, D>
         }
         return new IndexerKey(result);
     }
+
 }

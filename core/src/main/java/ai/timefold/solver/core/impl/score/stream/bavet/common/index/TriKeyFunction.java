@@ -12,6 +12,7 @@ import ai.timefold.solver.core.impl.util.Triple;
 final class TriKeyFunction<A, B, C>
         implements QuadFunction<A, B, C, Object, Object>, KeyFunction {
 
+    private final int keyId;
     private final int mappingFunctionCount;
     private final TriMappingFunction<A, B, C>[] mappingFunctions;
     private final TriMappingFunction<A, B, C> mappingFunction0;
@@ -20,11 +21,12 @@ final class TriKeyFunction<A, B, C>
     private final TriMappingFunction<A, B, C> mappingFunction3;
 
     public TriKeyFunction(TriMappingFunction<A, B, C> mappingFunction) {
-        this(Collections.singletonList(mappingFunction));
+        this(0, Collections.singletonList(mappingFunction));
     }
 
     @SuppressWarnings("unchecked")
-    public TriKeyFunction(List<TriMappingFunction<A, B, C>> mappingFunctionList) {
+    public TriKeyFunction(int keyId, List<TriMappingFunction<A, B, C>> mappingFunctionList) {
+        this.keyId = keyId;
         this.mappingFunctionCount = mappingFunctionList.size();
         this.mappingFunctions = mappingFunctionList.toArray(new TriMappingFunction[0]);
         this.mappingFunction0 = mappingFunctions[0];
@@ -55,7 +57,8 @@ final class TriKeyFunction<A, B, C>
         if (oldKey == null) {
             return new Pair<>(subkey1, subkey2);
         }
-        return ((Pair<Object, Object>) oldKey).newIfDifferent(subkey1, subkey2);
+        return ((Pair<Object, Object>) UniKeyFunction.extractSubkey(keyId, keyId))
+                .newIfDifferent(subkey1, subkey2);
     }
 
     @SuppressWarnings("unchecked")
@@ -66,7 +69,8 @@ final class TriKeyFunction<A, B, C>
         if (oldKey == null) {
             return new Triple<>(subkey1, subkey2, subkey3);
         }
-        return ((Triple<Object, Object, Object>) oldKey).newIfDifferent(subkey1, subkey2, subkey3);
+        return ((Triple<Object, Object, Object>) UniKeyFunction.extractSubkey(keyId, keyId))
+                .newIfDifferent(subkey1, subkey2, subkey3);
     }
 
     @SuppressWarnings("unchecked")
@@ -78,7 +82,9 @@ final class TriKeyFunction<A, B, C>
         if (oldKey == null) {
             return new Quadruple<>(subkey1, subkey2, subkey3, subkey4);
         }
-        return ((Quadruple<Object, Object, Object, Object>) oldKey).newIfDifferent(subkey1, subkey2, subkey3, subkey4);
+        var oldIndexKeys = (IndexKeys) oldKey;
+        return ((Quadruple<Object, Object, Object, Object>) oldIndexKeys.get(keyId)).newIfDifferent(subkey1, subkey2, subkey3,
+                subkey4);
     }
 
     private Object applyMany(A a, B b, C c, Object oldKey) {
@@ -87,9 +93,8 @@ final class TriKeyFunction<A, B, C>
             for (var i = 0; i < mappingFunctionCount; i++) {
                 result[i] = mappingFunctions[i].apply(a, b, c);
             }
-            return new IndexerKey(result);
         } else {
-            var oldArray = (Object[]) oldKey;
+            var oldArray = ((IndexerKey) UniKeyFunction.extractSubkey(keyId, keyId)).properties();
             var subKeysEqual = true;
             for (var i = 0; i < mappingFunctionCount; i++) {
                 var subkey = mappingFunctions[i].apply(a, b, c);
@@ -102,4 +107,5 @@ final class TriKeyFunction<A, B, C>
         }
         return new IndexerKey(result);
     }
+
 }
