@@ -57,7 +57,7 @@ final class TriKeyFunction<A, B, C>
         if (oldKey == null) {
             return new Pair<>(subkey1, subkey2);
         }
-        return ((Pair<Object, Object>) UniKeyFunction.extractSubkey(keyId, keyId))
+        return ((Pair<Object, Object>) UniKeyFunction.extractSubkey(keyId, oldKey))
                 .newIfDifferent(subkey1, subkey2);
     }
 
@@ -69,7 +69,7 @@ final class TriKeyFunction<A, B, C>
         if (oldKey == null) {
             return new Triple<>(subkey1, subkey2, subkey3);
         }
-        return ((Triple<Object, Object, Object>) UniKeyFunction.extractSubkey(keyId, keyId))
+        return ((Triple<Object, Object, Object>) UniKeyFunction.extractSubkey(keyId, oldKey))
                 .newIfDifferent(subkey1, subkey2, subkey3);
     }
 
@@ -82,9 +82,8 @@ final class TriKeyFunction<A, B, C>
         if (oldKey == null) {
             return new Quadruple<>(subkey1, subkey2, subkey3, subkey4);
         }
-        var oldIndexKeys = (IndexKeys) oldKey;
-        return ((Quadruple<Object, Object, Object, Object>) oldIndexKeys.get(keyId)).newIfDifferent(subkey1, subkey2, subkey3,
-                subkey4);
+        return ((Quadruple<Object, Object, Object, Object>) UniKeyFunction.extractSubkey(keyId, oldKey))
+                .newIfDifferent(subkey1, subkey2, subkey3, subkey4);
     }
 
     private Object applyMany(A a, B b, C c, Object oldKey) {
@@ -94,7 +93,7 @@ final class TriKeyFunction<A, B, C>
                 result[i] = mappingFunctions[i].apply(a, b, c);
             }
         } else {
-            var oldArray = ((IndexerKey) UniKeyFunction.extractSubkey(keyId, keyId)).properties();
+            var oldArray = ((IndexerKey) UniKeyFunction.extractSubkey(keyId, oldKey)).properties();
             var subKeysEqual = true;
             for (var i = 0; i < mappingFunctionCount; i++) {
                 var subkey = mappingFunctions[i].apply(a, b, c);

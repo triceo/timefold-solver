@@ -57,7 +57,7 @@ final class QuadKeyFunction<A, B, C, D>
         if (oldKey == null) {
             return new Pair<>(subkey1, subkey2);
         }
-        return ((Pair<Object, Object>) UniKeyFunction.extractSubkey(keyId, keyId))
+        return ((Pair<Object, Object>) UniKeyFunction.extractSubkey(keyId, oldKey))
                 .newIfDifferent(subkey1, subkey2);
     }
 
@@ -69,7 +69,7 @@ final class QuadKeyFunction<A, B, C, D>
         if (oldKey == null) {
             return new Triple<>(subkey1, subkey2, subkey3);
         }
-        return ((Triple<Object, Object, Object>) UniKeyFunction.extractSubkey(keyId, keyId))
+        return ((Triple<Object, Object, Object>) UniKeyFunction.extractSubkey(keyId, oldKey))
                 .newIfDifferent(subkey1, subkey2, subkey3);
     }
 
@@ -82,7 +82,7 @@ final class QuadKeyFunction<A, B, C, D>
         if (oldKey == null) {
             return new Quadruple<>(subkey1, subkey2, subkey3, subkey4);
         }
-        return ((Quadruple<Object, Object, Object, Object>) UniKeyFunction.extractSubkey(keyId, keyId))
+        return ((Quadruple<Object, Object, Object, Object>) UniKeyFunction.extractSubkey(keyId, oldKey))
                 .newIfDifferent(subkey1, subkey2, subkey3, subkey4);
     }
 
@@ -93,7 +93,7 @@ final class QuadKeyFunction<A, B, C, D>
                 result[i] = mappingFunctions[i].apply(a, b, c, d);
             }
         } else {
-            var oldArray = ((IndexerKey) UniKeyFunction.extractSubkey(keyId, keyId)).properties();
+            var oldArray = ((IndexerKey) UniKeyFunction.extractSubkey(keyId, oldKey)).properties();
             var subKeysEqual = true;
             for (var i = 0; i < mappingFunctionCount; i++) {
                 var subkey = mappingFunctions[i].apply(a, b, c, d);
