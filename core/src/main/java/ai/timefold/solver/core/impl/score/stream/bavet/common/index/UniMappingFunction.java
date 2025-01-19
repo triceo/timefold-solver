@@ -10,7 +10,8 @@ interface UniMappingFunction<A> extends Function<A, Object> {
 
     static <A> UniMappingFunction<A> of(AbstractJoiner<?> joiner, int index) {
         var castJoiner = (DefaultBiJoiner<A, ?>) joiner;
-        return a -> castJoiner.getLeftMapping(index).apply(a);
+        var mapping = castJoiner.getLeftMapping(index);
+        return mapping::apply;
     }
 
 }

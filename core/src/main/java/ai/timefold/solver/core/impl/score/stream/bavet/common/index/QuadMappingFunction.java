@@ -9,7 +9,8 @@ interface QuadMappingFunction<A, B, C, D> extends QuadFunction<A, B, C, D, Objec
 
     static <A, B, C, D> QuadMappingFunction<A, B, C, D> of(AbstractJoiner<?> joiner, int index) {
         var castJoiner = (DefaultPentaJoiner<A, B, C, D, ?>) joiner;
-        return (a, b, c, d) -> castJoiner.getLeftMapping(index).apply(a, b, c, d);
+        var mapping = castJoiner.getLeftMapping(index);
+        return mapping::apply;
     }
 
 }

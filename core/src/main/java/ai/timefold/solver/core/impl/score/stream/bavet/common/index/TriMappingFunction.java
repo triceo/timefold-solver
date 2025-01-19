@@ -9,7 +9,8 @@ interface TriMappingFunction<A, B, C> extends TriFunction<A, B, C, Object> {
 
     static <A, B, C> TriMappingFunction<A, B, C> of(AbstractJoiner<?> joiner, int index) {
         var castJoiner = (DefaultQuadJoiner<A, B, C, ?>) joiner;
-        return (a, b, c) -> castJoiner.getLeftMapping(index).apply(a, b, c);
+        var mapping = castJoiner.getLeftMapping(index);
+        return mapping::apply;
     }
 
 }

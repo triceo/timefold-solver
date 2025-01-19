@@ -10,7 +10,8 @@ interface BiMappingFunction<A, B> extends BiFunction<A, B, Object> {
 
     static <A, B> BiMappingFunction<A, B> of(AbstractJoiner<?> joiner, int index) {
         var castJoiner = (DefaultTriJoiner<A, B, ?>) joiner;
-        return (a, b) -> castJoiner.getLeftMapping(index).apply(a, b);
+        var mapping = castJoiner.getLeftMapping(index);
+        return mapping::apply;
     }
 
 }

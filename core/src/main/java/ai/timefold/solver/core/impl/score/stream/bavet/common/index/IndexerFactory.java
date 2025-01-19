@@ -188,7 +188,10 @@ public final class IndexerFactory<Right_> {
     }
 
     public UniKeysExtractor<Right_> buildRightKeysExtractor() {
-        return buildUniKeysExtractor(value -> a -> joiner.getRightMapping(value).apply(a));
+        return buildUniKeysExtractor(value -> {
+            var mapping = joiner.getRightMapping(value);
+            return mapping::apply;
+        });
     }
 
     public <T> Indexer<T> buildIndexer(boolean isLeftBridge) {
