@@ -30,7 +30,7 @@ public record Pair<Key_, Value_>(Key_ key, Value_ value) {
 
     @Override
     public int hashCode() {
-        var hash = 1;
+        var hash = 17;
         hash = 31 * hash + Objects.hashCode(key);
         hash = 31 * hash + Objects.hashCode(value);
         return hash;

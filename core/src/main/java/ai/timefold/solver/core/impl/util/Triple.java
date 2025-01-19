@@ -31,7 +31,7 @@ public record Triple<A, B, C>(A a, B b, C c) {
 
     @Override
     public int hashCode() {
-        var hash = 1;
+        var hash = 17;
         hash = 31 * hash + Objects.hashCode(a);
         hash = 31 * hash + Objects.hashCode(b);
         hash = 31 * hash + Objects.hashCode(c);

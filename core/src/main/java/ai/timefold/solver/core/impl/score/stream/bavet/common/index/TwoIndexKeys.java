@@ -27,6 +27,9 @@ record TwoIndexKeys<A, B>(A propertyA, B propertyB) implements IndexKeys {
 
     @Override
     public int hashCode() {
-        return Objects.hash(propertyA, propertyB);
+        var hash = 17;
+        hash = 31 * hash + Objects.hashCode(propertyA);
+        hash = 31 * hash + Objects.hashCode(propertyB);
+        return hash;
     }
 }
