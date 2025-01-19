@@ -18,7 +18,6 @@ final class BiKeyFunction<A, B>
     private final BiMappingFunction<A, B> mappingFunction1;
     private final BiMappingFunction<A, B> mappingFunction2;
     private final BiMappingFunction<A, B> mappingFunction3;
-    private final TriFunction<A, B, Object, Object> path;
 
     public BiKeyFunction(BiMappingFunction<A, B> mappingFunction) {
         this(Collections.singletonList(mappingFunction));
@@ -32,21 +31,20 @@ final class BiKeyFunction<A, B>
         this.mappingFunction1 = mappingFunctionCount > 1 ? mappingFunctions[1] : null;
         this.mappingFunction2 = mappingFunctionCount > 2 ? mappingFunctions[2] : null;
         this.mappingFunction3 = mappingFunctionCount > 3 ? mappingFunctions[3] : null;
-        this.path = switch (mappingFunctionCount) {
-            case 1 -> this::apply1;
-            case 2 -> this::apply2;
-            case 3 -> this::apply3;
-            case 4 -> this::apply4;
-            default -> this::applyMany;
-        };
     }
 
     @Override
     public Object apply(A a, B b, Object oldKey) {
-        return path.apply(a, b, oldKey);
+        return switch (mappingFunctionCount) {
+            case 1 -> apply1(a, b);
+            case 2 -> apply2(a, b, oldKey);
+            case 3 -> apply3(a, b, oldKey);
+            case 4 -> apply4(a, b, oldKey);
+            default -> applyMany(a, b, oldKey);
+        };
     }
 
-    private Object apply1(A a, B b, Object oldKey) {
+    private Object apply1(A a, B b) {
         return mappingFunction0.apply(a, b);
     }
 

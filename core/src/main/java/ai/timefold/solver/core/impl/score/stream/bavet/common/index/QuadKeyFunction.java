@@ -18,7 +18,6 @@ final class QuadKeyFunction<A, B, C, D>
     private final QuadMappingFunction<A, B, C, D> mappingFunction1;
     private final QuadMappingFunction<A, B, C, D> mappingFunction2;
     private final QuadMappingFunction<A, B, C, D> mappingFunction3;
-    private final PentaFunction<A, B, C, D, Object, Object> path;
 
     public QuadKeyFunction(QuadMappingFunction<A, B, C, D> mappingFunction) {
         this(Collections.singletonList(mappingFunction));
@@ -32,21 +31,20 @@ final class QuadKeyFunction<A, B, C, D>
         this.mappingFunction1 = mappingFunctionCount > 1 ? mappingFunctions[1] : null;
         this.mappingFunction2 = mappingFunctionCount > 2 ? mappingFunctions[2] : null;
         this.mappingFunction3 = mappingFunctionCount > 3 ? mappingFunctions[3] : null;
-        this.path = switch (mappingFunctionCount) {
-            case 1 -> this::apply1;
-            case 2 -> this::apply2;
-            case 3 -> this::apply3;
-            case 4 -> this::apply4;
-            default -> this::applyMany;
-        };
     }
 
     @Override
     public Object apply(A a, B b, C c, D d, Object oldKey) {
-        return path.apply(a, b, c, d, oldKey);
+        return switch (mappingFunctionCount) {
+            case 1 -> apply1(a, b, c, d);
+            case 2 -> apply2(a, b, c, d, oldKey);
+            case 3 -> apply3(a, b, c, d, oldKey);
+            case 4 -> apply4(a, b, c, d, oldKey);
+            default -> applyMany(a, b, c, d, oldKey);
+        };
     }
 
-    private Object apply1(A a, B b, C c, D d, Object oldKey) {
+    private Object apply1(A a, B b, C c, D d) {
         return mappingFunction0.apply(a, b, c, d);
     }
 

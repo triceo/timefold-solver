@@ -18,7 +18,6 @@ final class UniKeyFunction<A>
     private final UniMappingFunction<A> mappingFunction1;
     private final UniMappingFunction<A> mappingFunction2;
     private final UniMappingFunction<A> mappingFunction3;
-    private final BiFunction<A, Object, Object> path;
 
     public UniKeyFunction(UniMappingFunction<A> mappingFunction) {
         this(Collections.singletonList(mappingFunction));
@@ -32,21 +31,20 @@ final class UniKeyFunction<A>
         this.mappingFunction1 = mappingFunctionCount > 1 ? mappingFunctions[1] : null;
         this.mappingFunction2 = mappingFunctionCount > 2 ? mappingFunctions[2] : null;
         this.mappingFunction3 = mappingFunctionCount > 3 ? mappingFunctions[3] : null;
-        this.path = switch (mappingFunctionCount) {
-            case 1 -> this::apply1;
-            case 2 -> this::apply2;
-            case 3 -> this::apply3;
-            case 4 -> this::apply4;
-            default -> this::applyMany;
-        };
     }
 
     @Override
     public Object apply(A a, Object oldKey) {
-        return path.apply(a, oldKey);
+        return switch (mappingFunctionCount) {
+            case 1 -> apply1(a);
+            case 2 -> apply2(a, oldKey);
+            case 3 -> apply3(a, oldKey);
+            case 4 -> apply4(a, oldKey);
+            default -> applyMany(a, oldKey);
+        };
     }
 
-    private Object apply1(A a, Object oldKey) {
+    private Object apply1(A a) {
         return mappingFunction0.apply(a);
     }
 
