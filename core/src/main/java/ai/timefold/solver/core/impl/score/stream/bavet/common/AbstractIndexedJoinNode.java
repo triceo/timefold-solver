@@ -12,6 +12,8 @@ import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniTuple;
 import ai.timefold.solver.core.impl.util.ElementAwareList;
 import ai.timefold.solver.core.impl.util.ElementAwareListEntry;
 
+import java.util.Objects;
+
 /**
  * There is a strong likelihood that any change to this class, which is not related to indexing,
  * should also be made to {@link AbstractUnindexedJoinNode}.
@@ -73,7 +75,7 @@ public abstract class AbstractIndexedJoinNode<LeftTuple_ extends AbstractTuple, 
             return;
         }
         var newIndexKeys = keysExtractorLeft.apply(leftTuple, oldIndexKeys);
-        if (oldIndexKeys.equals(newIndexKeys)) {
+        if (Objects.equals(oldIndexKeys, newIndexKeys)) {
             // No need for re-indexing because the index keys didn't change
             // Prefer an update over retract-insert if possible
             innerUpdateLeft(leftTuple, consumer -> indexerRight.forEach(oldIndexKeys, consumer));
@@ -129,7 +131,7 @@ public abstract class AbstractIndexedJoinNode<LeftTuple_ extends AbstractTuple, 
             return;
         }
         var newIndexKeys = keysExtractorRight.apply(rightTuple, oldIndexKeys);
-        if (oldIndexKeys.equals(newIndexKeys)) {
+        if (Objects.equals(oldIndexKeys, newIndexKeys)) {
             // No need for re-indexing because the index keys didn't change
             // Prefer an update over retract-insert if possible
             innerUpdateRight(rightTuple, consumer -> indexerLeft.forEach(oldIndexKeys, consumer));

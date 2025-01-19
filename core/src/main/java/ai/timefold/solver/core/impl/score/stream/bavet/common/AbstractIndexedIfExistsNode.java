@@ -12,6 +12,8 @@ import ai.timefold.solver.core.impl.score.stream.bavet.common.tuple.UniTuple;
 import ai.timefold.solver.core.impl.util.ElementAwareList;
 import ai.timefold.solver.core.impl.util.ElementAwareListEntry;
 
+import java.util.Objects;
+
 /**
  * There is a strong likelihood that any change to this class, which is not related to indexing,
  * should also be made to {@link AbstractUnindexedIfExistsNode}.
@@ -91,7 +93,7 @@ public abstract class AbstractIndexedIfExistsNode<LeftTuple_ extends AbstractTup
         ElementAwareListEntry<ExistsCounter<LeftTuple_>> counterEntry = leftTuple.getStore(inputStoreIndexLeftCounterEntry);
         var counter = counterEntry.getElement();
 
-        if (oldIndexKeys.equals(newIndexKeys)) {
+        if (Objects.equals(oldIndexKeys, newIndexKeys)) {
             // No need for re-indexing because the index keys didn't change
             // The indexers contain counters in the DEAD state, to track the rightCount.
             if (!isFiltering) {
@@ -170,7 +172,7 @@ public abstract class AbstractIndexedIfExistsNode<LeftTuple_ extends AbstractTup
             return;
         }
         var newIndexKeys = keysExtractorRight.apply(rightTuple, oldIndexKeys);
-        if (oldIndexKeys.equals(newIndexKeys)) {
+        if (Objects.equals(oldIndexKeys, newIndexKeys)) {
             // No need for re-indexing because the index keys didn't change
             if (isFiltering) {
                 var rightTrackerList = updateRightTrackerList(rightTuple);
