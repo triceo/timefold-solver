@@ -14,10 +14,10 @@ import java.util.Objects;
 public record Triple<A, B, C>(A a, B b, C c) {
 
     public Triple<A, B, C> newIfDifferent(A newA, B newB, C newC) {
-        return equals(newA, newB, newC) ? this : new Triple<>(newA, newB, newC);
+        return innerEquals(newA, newB, newC) ? this : new Triple<>(newA, newB, newC);
     }
 
-    private boolean equals(Object newA, Object newB, Object newC) {
+    private boolean innerEquals(Object newA, Object newB, Object newC) {
         return Objects.equals(a, newA) && Objects.equals(b, newB) && Objects.equals(c, newC);
     }
 
@@ -26,7 +26,7 @@ public record Triple<A, B, C>(A a, B b, C c) {
         if (this == o) {
             return true;
         }
-        return o instanceof Triple<?, ?, ?> triple && equals(triple.a, triple.b, triple.c);
+        return o instanceof Triple<?, ?, ?> triple && innerEquals(triple.a, triple.b, triple.c);
     }
 
     @Override

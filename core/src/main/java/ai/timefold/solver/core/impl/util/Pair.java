@@ -13,10 +13,10 @@ import java.util.Objects;
 public record Pair<Key_, Value_>(Key_ key, Value_ value) {
 
     public Pair<Key_, Value_> newIfDifferent(Key_ newA, Value_ newB) {
-        return equals(newA, newB) ? this : new Pair<>(newA, newB);
+        return innerEquals(newA, newB) ? this : new Pair<>(newA, newB);
     }
 
-    private boolean equals(Object newA, Object newB) {
+    private boolean innerEquals(Object newA, Object newB) {
         return Objects.equals(key, newA) && Objects.equals(value, newB);
     }
 
@@ -25,7 +25,7 @@ public record Pair<Key_, Value_>(Key_ key, Value_ value) {
         if (this == o) {
             return true;
         }
-        return o instanceof Pair<?, ?> triple && equals(triple.key, triple.value);
+        return o instanceof Pair<?, ?> triple && innerEquals(triple.key, triple.value);
     }
 
     @Override
