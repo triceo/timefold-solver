@@ -241,10 +241,7 @@ public final class IndexerFactory<Right_> {
     }
 
     private static <A> UniKeysExtractor<A> buildUniKeysExtractor(UniKeyFunction<A> keyFunction) {
-        return (tuple, oldKeys) -> {
-            var a = tuple.factA;
-            return IndexKeys.of(keyFunction.apply(a, oldKeys));
-        };
+        return (tuple, oldKeys) -> IndexKeys.of(keyFunction.apply(tuple.factA, oldKeys));
     }
 
     private static <A> UniKeysExtractor<A> buildUniKeysExtractor(List<UniKeyFunction<A>> keyFunctionList) {
@@ -293,11 +290,7 @@ public final class IndexerFactory<Right_> {
     }
 
     private static <A, B> BiKeysExtractor<A, B> buildBiKeysExtractor(BiKeyFunction<A, B> keyFunction) {
-        return (tuple, oldKeys) -> {
-            var a = tuple.factA;
-            var b = tuple.factB;
-            return IndexKeys.of(keyFunction.apply(a, b, oldKeys));
-        };
+        return (tuple, oldKeys) -> IndexKeys.of(keyFunction.apply(tuple.factA, tuple.factB, oldKeys));
     }
 
     private static <A, B> BiKeysExtractor<A, B> buildBiKeysExtractor(List<BiKeyFunction<A, B>> keyFunctionList) {
@@ -348,12 +341,7 @@ public final class IndexerFactory<Right_> {
     }
 
     private static <A, B, C> TriKeysExtractor<A, B, C> buildTriKeysExtractor(TriKeyFunction<A, B, C> keyFunction) {
-        return (tuple, oldKeys) -> {
-            var a = tuple.factA;
-            var b = tuple.factB;
-            var c = tuple.factC;
-            return IndexKeys.of(keyFunction.apply(a, b, c, oldKeys));
-        };
+        return (tuple, oldKeys) -> IndexKeys.of(keyFunction.apply(tuple.factA, tuple.factB, tuple.factC, oldKeys));
     }
 
     private static <A, B, C> TriKeysExtractor<A, B, C> buildTriKeysExtractor(List<TriKeyFunction<A, B, C>> keyFunctionList) {
@@ -406,13 +394,7 @@ public final class IndexerFactory<Right_> {
     }
 
     private static <A, B, C, D> QuadKeysExtractor<A, B, C, D> buildQuadKeysExtractor(QuadKeyFunction<A, B, C, D> keyFunction) {
-        return (tuple, oldKeys) -> {
-            var a = tuple.factA;
-            var b = tuple.factB;
-            var c = tuple.factC;
-            var d = tuple.factD;
-            return IndexKeys.of(keyFunction.apply(a, b, c, d, oldKeys));
-        };
+        return (tuple, oldKeys) -> IndexKeys.of(keyFunction.apply(tuple.factA, tuple.factB, tuple.factC, tuple.factD, oldKeys));
     }
 
     private static <A, B, C, D> QuadKeysExtractor<A, B, C, D>

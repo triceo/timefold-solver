@@ -32,7 +32,7 @@ public record Quadruple<A, B, C, D>(A a, B b, C c, D d) {
 
     @Override
     public int hashCode() {
-        var hash = 17;
+        var hash = 1;
         hash = 31 * hash + Objects.hashCode(a);
         hash = 31 * hash + Objects.hashCode(b);
         hash = 31 * hash + Objects.hashCode(c);
