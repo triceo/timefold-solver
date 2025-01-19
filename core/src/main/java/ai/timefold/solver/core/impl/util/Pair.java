@@ -13,27 +13,7 @@ import java.util.Objects;
 public record Pair<Key_, Value_>(Key_ key, Value_ value) {
 
     public Pair<Key_, Value_> newIfDifferent(Key_ newA, Value_ newB) {
-        return innerEquals(newA, newB) ? this : new Pair<>(newA, newB);
-    }
-
-    private boolean innerEquals(Object newA, Object newB) {
-        return Objects.equals(key, newA) && Objects.equals(value, newB);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        return o instanceof Pair<?, ?> triple && innerEquals(triple.key, triple.value);
-    }
-
-    @Override
-    public int hashCode() {
-        var hash = 1;
-        hash = 31 * hash + Objects.hashCode(key);
-        hash = 31 * hash + Objects.hashCode(value);
-        return hash;
+        return Objects.equals(key, newA) && Objects.equals(value, newB) ? this : new Pair<>(newA, newB);
     }
 
 }

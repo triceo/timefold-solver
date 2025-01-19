@@ -1,7 +1,5 @@
 package ai.timefold.solver.core.impl.score.stream.bavet.common.index;
 
-import java.util.Objects;
-
 record TwoIndexKeys<A, B>(A keyA, B keyB) implements IndexKeys {
 
     @SuppressWarnings("unchecked")
@@ -15,21 +13,4 @@ record TwoIndexKeys<A, B>(A keyA, B keyB) implements IndexKeys {
         };
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        return o instanceof TwoIndexKeys<?, ?> that
-                && Objects.equals(keyA, that.keyA)
-                && Objects.equals(keyB, that.keyB);
-    }
-
-    @Override
-    public int hashCode() {
-        var hash = 1;
-        hash = 31 * hash + Objects.hashCode(keyA);
-        hash = 31 * hash + Objects.hashCode(keyB);
-        return hash;
-    }
 }
