@@ -1,6 +1,5 @@
 package ai.timefold.solver.core.impl.bavet.common.index;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -8,11 +7,13 @@ import java.util.function.Supplier;
 
 import ai.timefold.solver.core.impl.util.ElementAwareListEntry;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+
 final class EqualsIndexer<T, Key_> implements Indexer<T> {
 
     private final KeyRetriever<Key_> keyRetriever;
     private final Supplier<Indexer<T>> downstreamIndexerSupplier;
-    private final Map<Key_, Indexer<T>> downstreamIndexerMap = new HashMap<>();
+    private final Map<Key_, Indexer<T>> downstreamIndexerMap = new Object2ObjectOpenHashMap<>();
 
     /**
      * Construct an {@link EqualsIndexer} which immediately ends in a {@link NoneIndexer}.
