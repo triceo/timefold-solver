@@ -4,30 +4,37 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import ai.timefold.solver.core.api.score.stream.common.LoadBalance;
 
 import org.jspecify.annotations.NonNull;
 
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2LongLinkedOpenHashMap;
+
 public final class LoadBalanceImpl<Balanced_> implements LoadBalance<Balanced_> {
 
+    // The default count for both maps is zero.
+    private static final int DEFAULT_RETURN_VALUE = 0;
     // If need be, precision can be made configurable on the constraint collector level.
     private static final MathContext RESULT_MATH_CONTEXT = new MathContext(6, RoundingMode.HALF_EVEN);
 
-    private final Map<Balanced_, Integer> balancedItemCountMap = new HashMap<>();
-    private final Map<Balanced_, Long> balancedItemToMetricValueMap = new LinkedHashMap<>();
+    private final Object2IntOpenHashMap<Balanced_> balancedItemCountMap = new Object2IntOpenHashMap<>();
+    private final Object2LongLinkedOpenHashMap<Balanced_> balancedItemToMetricValueMap = new Object2LongLinkedOpenHashMap<>();
 
     private long sum = 0;
     private long squaredDeviationIntegralPart = 0;
     private long squaredDeviationFractionNumerator = 0;
 
+    public LoadBalanceImpl() {
+        balancedItemCountMap.defaultReturnValue(DEFAULT_RETURN_VALUE);
+        balancedItemToMetricValueMap.defaultReturnValue(DEFAULT_RETURN_VALUE);
+    }
+
     public Runnable registerBalanced(Balanced_ balanced, long metricValue, long initialMetricValue) {
-        var balancedItemCount = balancedItemCountMap.compute(balanced, (k, v) -> v == null ? 1 : v + 1);
-        if (balancedItemCount == 1) {
+        var balancedItemCount = balancedItemCountMap.addTo(balanced, 1);
+        if (balancedItemCount == 0) {
             addToMetric(balanced, metricValue + initialMetricValue);
         } else {
             addToMetric(balanced, metricValue);
@@ -36,8 +43,9 @@ public final class LoadBalanceImpl<Balanced_> implements LoadBalance<Balanced_> 
     }
 
     public void unregisterBalanced(Balanced_ balanced, long metricValue) {
-        var count = balancedItemCountMap.compute(balanced, (k, v) -> v == 1 ? null : v - 1);
-        if (count == null) {
+        var oldCount = balancedItemCountMap.addTo(balanced, -1);
+        if (oldCount == 1) {
+            balancedItemCountMap.removeInt(balanced);
             resetMetric(balanced);
         } else {
             addToMetric(balanced, -metricValue);
@@ -45,9 +53,8 @@ public final class LoadBalanceImpl<Balanced_> implements LoadBalance<Balanced_> 
     }
 
     private void addToMetric(Balanced_ balanced, long diff) {
-        long oldValue = balancedItemToMetricValueMap.getOrDefault(balanced, 0L);
+        var oldValue = balancedItemToMetricValueMap.addTo(balanced, diff);
         var newValue = oldValue + diff;
-        balancedItemToMetricValueMap.put(balanced, newValue);
         if (oldValue != newValue) {
             updateSquaredDeviation(oldValue, newValue);
             sum += diff;
@@ -55,7 +62,7 @@ public final class LoadBalanceImpl<Balanced_> implements LoadBalance<Balanced_> 
     }
 
     private void resetMetric(Balanced_ balanced) {
-        long oldValue = Objects.requireNonNullElse(balancedItemToMetricValueMap.remove(balanced), 0L);
+        var oldValue = balancedItemToMetricValueMap.removeLong(balanced);
         if (oldValue != 0) {
             updateSquaredDeviation(oldValue, 0);
             sum -= oldValue;

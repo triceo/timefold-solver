@@ -1,21 +1,19 @@
 package ai.timefold.solver.core.impl.score.stream.collector;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Set;
 
-import ai.timefold.solver.core.impl.util.MutableInt;
+import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
 
 public final class SetUndoableActionable<Mapped_> implements UndoableActionable<Mapped_, Set<Mapped_>> {
-    final Map<Mapped_, MutableInt> itemToCount = new LinkedHashMap<>();
+
+    private final Object2IntLinkedOpenHashMap<Mapped_> itemToCount = new Object2IntLinkedOpenHashMap<>();
 
     @Override
     public Runnable insert(Mapped_ result) {
-        MutableInt count = itemToCount.computeIfAbsent(result, ignored -> new MutableInt());
-        count.increment();
+        itemToCount.addTo(result, 1);
         return () -> {
-            if (count.decrement() == 0) {
-                itemToCount.remove(result);
+            if (itemToCount.addTo(result, -1) == 1) {
+                itemToCount.removeInt(result);
             }
         };
     }

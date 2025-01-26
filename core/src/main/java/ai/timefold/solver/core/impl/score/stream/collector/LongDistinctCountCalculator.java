@@ -1,23 +1,22 @@
 package ai.timefold.solver.core.impl.score.stream.collector;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import ai.timefold.solver.core.impl.util.MutableInt;
+import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 
 public final class LongDistinctCountCalculator<Input_> implements ObjectCalculator<Input_, Long, Input_> {
-    private final Map<Input_, MutableInt> countMap = new HashMap<>();
+
+    private final Object2LongOpenHashMap<Input_> countMap = new Object2LongOpenHashMap<>();
 
     @Override
     public Input_ insert(Input_ input) {
-        countMap.computeIfAbsent(input, ignored -> new MutableInt()).increment();
+        countMap.addTo(input, 1);
         return input;
     }
 
     @Override
     public void retract(Input_ mapped) {
-        if (countMap.get(mapped).decrement() == 0) {
-            countMap.remove(mapped);
+        var oldValue = countMap.addTo(mapped, -1);
+        if (oldValue == 1) {
+            countMap.removeLong(mapped);
         }
     }
 

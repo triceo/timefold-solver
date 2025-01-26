@@ -2,14 +2,15 @@ package ai.timefold.solver.core.impl.bavet.common.index;
 
 import java.util.Comparator;
 import java.util.Map;
-import java.util.NavigableMap;
 import java.util.Objects;
-import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import ai.timefold.solver.core.impl.bavet.common.joiner.JoinerType;
 import ai.timefold.solver.core.impl.util.ElementAwareListEntry;
+
+import it.unimi.dsi.fastutil.objects.Object2ObjectRBTreeMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectSortedMap;
 
 final class ComparisonIndexer<T, Key_ extends Comparable<Key_>>
         implements Indexer<T> {
@@ -18,7 +19,7 @@ final class ComparisonIndexer<T, Key_ extends Comparable<Key_>>
     private final Supplier<Indexer<T>> downstreamIndexerSupplier;
     private final Comparator<Key_> keyComparator;
     private final boolean hasOrEquals;
-    private final NavigableMap<Key_, Indexer<T>> comparisonMap;
+    private final Object2ObjectSortedMap<Key_, Indexer<T>> comparisonMap;
 
     /**
      * Construct an {@link ComparisonIndexer} which immediately ends in a {@link NoneIndexer}.
@@ -57,7 +58,7 @@ final class ComparisonIndexer<T, Key_ extends Comparable<Key_>>
                         : Comparator.naturalOrder();
         this.hasOrEquals = comparisonJoinerType == JoinerType.GREATER_THAN_OR_EQUAL
                 || comparisonJoinerType == JoinerType.LESS_THAN_OR_EQUAL;
-        this.comparisonMap = new TreeMap<>(keyComparator);
+        this.comparisonMap = new Object2ObjectRBTreeMap<>(keyComparator);
     }
 
     @Override
@@ -101,15 +102,15 @@ final class ComparisonIndexer<T, Key_ extends Comparable<Key_>>
         }
         Key_ indexKey = keyRetriever.apply(indexKeys);
         if (mapSize == 1) { // Avoid creation of the entry set and iterator.
-            var entry = comparisonMap.firstEntry();
-            var comparison = keyComparator.compare(entry.getKey(), indexKey);
+            var key = comparisonMap.firstKey();
+            var comparison = keyComparator.compare(key, indexKey);
             if (comparison >= 0) { // Possibility of reaching the boundary condition.
                 if (comparison > 0 || !hasOrEquals) {
                     // Boundary condition reached when we're out of bounds entirely, or when GTE/LTE is not allowed.
                     return 0;
                 }
             }
-            return entry.getValue().size(indexKeys);
+            return comparisonMap.get(key).size(indexKeys);
         } else {
             var size = 0;
             for (var entry : comparisonMap.entrySet()) {
@@ -135,8 +136,8 @@ final class ComparisonIndexer<T, Key_ extends Comparable<Key_>>
         }
         Key_ indexKey = keyRetriever.apply(indexKeys);
         if (size == 1) { // Avoid creation of the entry set and iterator.
-            var entry = comparisonMap.firstEntry();
-            visitEntry(indexKeys, tupleConsumer, indexKey, entry);
+            var key = comparisonMap.firstKey();
+            visitEntry(indexKeys, tupleConsumer, indexKey, Map.entry(key, comparisonMap.get(key)));
         } else {
             for (var entry : comparisonMap.entrySet()) {
                 var boundaryReached = visitEntry(indexKeys, tupleConsumer, indexKey, entry);

@@ -1,16 +1,17 @@
 package ai.timefold.solver.core.impl.score.stream.collector.connected_ranges;
 
 import java.util.Comparator;
-import java.util.IdentityHashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Objects;
+
+import it.unimi.dsi.fastutil.Hash;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenCustomHashMap;
 
 public class RangeSplitPoint<Range_, Point_ extends Comparable<Point_>>
         implements Comparable<RangeSplitPoint<Range_, Point_>> {
     final Point_ splitPoint;
-    Map<Range_, Integer> startpointRangeToCountMap;
-    Map<Range_, Integer> endpointRangeToCountMap;
+    Object2IntOpenCustomHashMap<Range_> startpointRangeToCountMap;
+    Object2IntOpenCustomHashMap<Range_> endpointRangeToCountMap;
     TreeMultiSet<Range<Range_, Point_>> rangesStartingAtSplitPointSet;
     TreeMultiSet<Range<Range_, Point_>> rangesEndingAtSplitPointSet;
 
@@ -18,9 +19,12 @@ public class RangeSplitPoint<Range_, Point_ extends Comparable<Point_>>
         this.splitPoint = splitPoint;
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     protected void createCollections() {
-        startpointRangeToCountMap = new IdentityHashMap<>();
-        endpointRangeToCountMap = new IdentityHashMap<>();
+        startpointRangeToCountMap =
+                new Object2IntOpenCustomHashMap<Range_>((IdentityHashingStrategy) IdentityHashingStrategy.INSTANCE);
+        endpointRangeToCountMap =
+                new Object2IntOpenCustomHashMap<Range_>((IdentityHashingStrategy) IdentityHashingStrategy.INSTANCE);
         rangesStartingAtSplitPointSet = new TreeMultiSet<>(
                 Comparator.<Range<Range_, Point_>, Point_> comparing(Range::getEnd)
                         .thenComparingInt(range -> System.identityHashCode(range.getValue())));
@@ -30,37 +34,37 @@ public class RangeSplitPoint<Range_, Point_ extends Comparable<Point_>>
     }
 
     public boolean addRangeStartingAtSplitPoint(Range<Range_, Point_> range) {
-        startpointRangeToCountMap.merge(range.getValue(), 1, Integer::sum);
-        return rangesStartingAtSplitPointSet.add(range);
+        return addRange(range, startpointRangeToCountMap, rangesStartingAtSplitPointSet);
+    }
+
+    private static <Range_, Point_ extends Comparable<Point_>> boolean addRange(Range<Range_, Point_> range,
+            Object2IntOpenCustomHashMap<Range_> rangeToCountMap,
+            TreeMultiSet<Range<Range_, Point_>> rangesAtSplitPointSet) {
+        rangeToCountMap.addTo(range.getValue(), 1);
+        return rangesAtSplitPointSet.add(range);
     }
 
     public void removeRangeStartingAtSplitPoint(Range<Range_, Point_> range) {
-        Integer newCount = startpointRangeToCountMap.computeIfPresent(range.getValue(), (key, count) -> {
-            if (count > 1) {
-                return count - 1;
-            }
-            return null;
-        });
-        if (null == newCount) {
-            rangesStartingAtSplitPointSet.remove(range);
+        removeRange(range, startpointRangeToCountMap, rangesStartingAtSplitPointSet);
+    }
+
+    private static <Range_, Point_ extends Comparable<Point_>> void removeRange(Range<Range_, Point_> range,
+            Object2IntOpenCustomHashMap<Range_> rangeToCountMap,
+            TreeMultiSet<Range<Range_, Point_>> rangesAtSplitPointSet) {
+        var value = range.getValue();
+        var newCount = rangeToCountMap.addTo(value, -1) - 1;
+        if (newCount == 0) {
+            rangeToCountMap.removeInt(value);
+            rangesAtSplitPointSet.remove(range);
         }
     }
 
     public boolean addRangeEndingAtSplitPoint(Range<Range_, Point_> range) {
-        endpointRangeToCountMap.merge(range.getValue(), 1, Integer::sum);
-        return rangesEndingAtSplitPointSet.add(range);
+        return addRange(range, endpointRangeToCountMap, rangesEndingAtSplitPointSet);
     }
 
     public void removeRangeEndingAtSplitPoint(Range<Range_, Point_> range) {
-        Integer newCount = endpointRangeToCountMap.computeIfPresent(range.getValue(), (key, count) -> {
-            if (count > 1) {
-                return count - 1;
-            }
-            return null;
-        });
-        if (null == newCount) {
-            rangesEndingAtSplitPointSet.remove(range);
-        }
+        removeRange(range, endpointRangeToCountMap, rangesEndingAtSplitPointSet);
     }
 
     public boolean containsRangeStarting(Range<Range_, Point_> range) {
@@ -113,4 +117,23 @@ public class RangeSplitPoint<Range_, Point_ extends Comparable<Point_>>
     public String toString() {
         return splitPoint.toString();
     }
+
+    private static final class IdentityHashingStrategy<K> implements Hash.Strategy<K> {
+
+        public static final IdentityHashingStrategy<?> INSTANCE = new IdentityHashingStrategy<>();
+
+        private IdentityHashingStrategy() {
+        }
+
+        @Override
+        public int hashCode(K k) {
+            return System.identityHashCode(k);
+        }
+
+        @Override
+        public boolean equals(K a, K b) {
+            return a == b;
+        }
+    }
+
 }
