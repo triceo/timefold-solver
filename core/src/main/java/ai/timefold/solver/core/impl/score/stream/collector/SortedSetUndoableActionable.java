@@ -3,18 +3,18 @@ package ai.timefold.solver.core.impl.score.stream.collector;
 import java.util.Comparator;
 import java.util.SortedSet;
 
-import it.unimi.dsi.fastutil.objects.Object2IntRBTreeMap;
+import it.unimi.dsi.fastutil.objects.Object2IntAVLTreeMap;
 
 public final class SortedSetUndoableActionable<Mapped_> implements UndoableActionable<Mapped_, SortedSet<Mapped_>> {
 
-    private final Object2IntRBTreeMap<Mapped_> itemToCount;
+    private final Object2IntAVLTreeMap<Mapped_> itemToCount;
 
-    private SortedSetUndoableActionable(Object2IntRBTreeMap<Mapped_> itemToCount) {
+    private SortedSetUndoableActionable(Object2IntAVLTreeMap<Mapped_> itemToCount) {
         this.itemToCount = itemToCount;
     }
 
     public static <Result> SortedSetUndoableActionable<Result> orderBy(Comparator<? super Result> comparator) {
-        return new SortedSetUndoableActionable<>(new Object2IntRBTreeMap<>(comparator));
+        return new SortedSetUndoableActionable<>(new Object2IntAVLTreeMap<>(comparator));
     }
 
     @Override

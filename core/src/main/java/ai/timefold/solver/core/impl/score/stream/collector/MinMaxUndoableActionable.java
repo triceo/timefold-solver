@@ -1,7 +1,6 @@
 package ai.timefold.solver.core.impl.score.stream.collector;
 
 import java.util.Comparator;
-import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.function.Function;
@@ -11,6 +10,7 @@ import ai.timefold.solver.core.impl.util.ConstantLambdaUtils;
 import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
 
 public final class MinMaxUndoableActionable<Result_, Property_> implements UndoableActionable<Result_, Result_> {
+
     private final boolean isMin;
     private final NavigableMap<Property_, Object2IntLinkedOpenHashMap<Result_>> propertyToItemCountMap;
     private final Function<? super Result_, ? extends Property_> propertyFunction;
@@ -72,10 +72,7 @@ public final class MinMaxUndoableActionable<Result_, Property_> implements Undoa
             return null;
         }
         var propertyToItemCountEntry = isMin ? propertyToItemCountMap.firstEntry() : propertyToItemCountMap.lastEntry();
-        return getFirstKey(propertyToItemCountEntry.getValue());
+        return propertyToItemCountEntry.getValue().firstKey();
     }
 
-    private static <Key_> Key_ getFirstKey(Map<Key_, ?> map) {
-        return map.keySet().iterator().next();
-    }
 }

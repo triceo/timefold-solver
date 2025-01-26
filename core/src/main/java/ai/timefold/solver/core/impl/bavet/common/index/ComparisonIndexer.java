@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 import ai.timefold.solver.core.impl.bavet.common.joiner.JoinerType;
 import ai.timefold.solver.core.impl.util.ElementAwareListEntry;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectRBTreeMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectAVLTreeMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectSortedMap;
 
 final class ComparisonIndexer<T, Key_ extends Comparable<Key_>>
@@ -58,7 +58,7 @@ final class ComparisonIndexer<T, Key_ extends Comparable<Key_>>
                         : Comparator.naturalOrder();
         this.hasOrEquals = comparisonJoinerType == JoinerType.GREATER_THAN_OR_EQUAL
                 || comparisonJoinerType == JoinerType.LESS_THAN_OR_EQUAL;
-        this.comparisonMap = new Object2ObjectRBTreeMap<>(keyComparator);
+        this.comparisonMap = new Object2ObjectAVLTreeMap<>(keyComparator);
     }
 
     @Override
