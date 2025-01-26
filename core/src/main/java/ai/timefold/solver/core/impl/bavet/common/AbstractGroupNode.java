@@ -1,5 +1,6 @@
 package ai.timefold.solver.core.impl.bavet.common;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -9,8 +10,6 @@ import ai.timefold.solver.core.config.solver.EnvironmentMode;
 import ai.timefold.solver.core.impl.bavet.common.tuple.AbstractTuple;
 import ai.timefold.solver.core.impl.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.bavet.common.tuple.TupleState;
-
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 
 public abstract class AbstractGroupNode<InTuple_ extends AbstractTuple, OutTuple_ extends AbstractTuple, GroupKey_, ResultContainer_, Result_>
         extends AbstractNode
@@ -73,7 +72,7 @@ public abstract class AbstractGroupNode<InTuple_ extends AbstractTuple, OutTuple
          * The number of groups can be very small, and that situation is not unlikely.
          * Therefore, the size of these collections is kept default.
          */
-        this.groupMap = hasMultipleGroups ? new Object2ObjectOpenHashMap<>() : null;
+        this.groupMap = hasMultipleGroups ? new HashMap<>() : null;
         this.propagationQueue = hasCollector ? new DynamicPropagationQueue<>(nextNodesTupleLifecycle,
                 group -> {
                     var outTuple = group.getTuple();
