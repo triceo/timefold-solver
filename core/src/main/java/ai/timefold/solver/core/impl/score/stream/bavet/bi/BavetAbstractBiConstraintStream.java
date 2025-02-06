@@ -460,7 +460,6 @@ public abstract class BavetAbstractBiConstraintStream<Solution_, A, B> extends B
     // Penalize/reward
     // ************************************************************************
 
-    @Override
     public <Score_ extends Score<Score_>> BiConstraintBuilder<A, B, Score_> innerImpact(Score_ constraintWeight,
             ToIntBiFunction<A, B> matchWeigher, ScoreImpactType scoreImpactType) {
         var stream = shareAndAddChild(new BavetScoringBiConstraintStream<>(constraintFactory, this, matchWeigher));
@@ -477,14 +476,12 @@ public abstract class BavetAbstractBiConstraintStream<Solution_, A, B> extends B
                 impactType, constraintWeight);
     }
 
-    @Override
     public <Score_ extends Score<Score_>> BiConstraintBuilder<A, B, Score_> innerImpact(Score_ constraintWeight,
             ToLongBiFunction<A, B> matchWeigher, ScoreImpactType scoreImpactType) {
         var stream = shareAndAddChild(new BavetScoringBiConstraintStream<>(constraintFactory, this, matchWeigher));
         return newTerminator(stream, scoreImpactType, constraintWeight);
     }
 
-    @Override
     public <Score_ extends Score<Score_>> BiConstraintBuilder<A, B, Score_> innerImpact(Score_ constraintWeight,
             BiFunction<A, B, BigDecimal> matchWeigher, ScoreImpactType scoreImpactType) {
         var stream = shareAndAddChild(new BavetScoringBiConstraintStream<>(constraintFactory, this, matchWeigher));

@@ -24,7 +24,8 @@ import org.jspecify.annotations.NonNull;
  * Unless {@link #indictWith(Function)} is called, the default indicted objects' mapping will be used.
  * The function takes the input arguments and converts them into a {@link java.util.List}.
  */
-public interface UniConstraintBuilder<A, Score_ extends Score<Score_>> extends ConstraintBuilder {
+public interface UniConstraintBuilder<A, Score_ extends Score<Score_>>
+        extends ConstraintBuilder {
 
     /**
      * Sets a custom function to apply on a constraint match to justify it.
