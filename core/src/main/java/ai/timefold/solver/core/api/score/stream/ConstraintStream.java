@@ -83,6 +83,39 @@ public interface ConstraintStream {
     // ************************************************************************
 
     /**
+     * Negatively impact the {@link Score}, with a match weight of 1.
+     * Use the fluent API returned by this method to declare attributes such as default weight.
+     * By using {@link ConstraintDefinition} to define constraints instead of {@link ConstraintProvider},
+     * many attributes can be omitted if their defaults are acceptable.
+     *
+     * @return fluent builder for the constraint
+     */
+    @NonNull
+    <Score_ extends @NonNull Score<Score_>> ConstraintStub<Score_> penalize();
+
+    /**
+     * Positively impact the {@link Score}, with a match weight of 1.
+     * Use the fluent API returned by this method to declare attributes such as default weight.
+     * By using {@link ConstraintDefinition} to define constraints instead of {@link ConstraintProvider},
+     * many attributes can be omitted if their defaults are acceptable.
+     *
+     * @return fluent builder for the constraint
+     */
+    @NonNull
+    <Score_ extends @NonNull Score<Score_>> ConstraintStub<Score_> reward();
+
+    /**
+     * Positively or negatively impact the {@link Score}, with a match weight of 1.
+     * Use the fluent API returned by this method to declare attributes such as default weight.
+     * By using {@link ConstraintDefinition} to define constraints instead of {@link ConstraintProvider},
+     * many attributes can be omitted if their defaults are acceptable.
+     *
+     * @return fluent builder for the constraint
+     */
+    @NonNull
+    <Score_ extends @NonNull Score<Score_>> ConstraintStub<Score_> impact();
+
+    /**
      * Negatively impact the {@link Score}: subtract the constraintWeight for each match.
      * <p>
      * To avoid hard-coding the constraintWeight, to allow end-users to tweak it,
@@ -93,18 +126,29 @@ public interface ConstraintStream {
      * @deprecated Prefer {@link UniConstraintStream#penalize(Score)} and equivalent bi/tri/... overloads.
      * @param constraintName shows up in {@link ConstraintMatchTotal} during score justification
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Deprecated(forRemoval = true)
     @NonNull
-    Constraint penalize(@NonNull String constraintName, @NonNull Score<?> constraintWeight);
+    default Constraint penalize(@NonNull String constraintName, @NonNull Score<?> constraintWeight) {
+        ConstraintStub stub = penalize();
+        return stub.usingDefaultConstraintWeight(constraintWeight)
+                .asConstraint(constraintName);
+    }
 
     /**
      * As defined by {@link #penalize(String, Score)}.
      *
      * @deprecated Prefer {@link UniConstraintStream#penalize(Score)} and equivalent bi/tri/... overloads.
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Deprecated(forRemoval = true)
     @NonNull
-    Constraint penalize(@NonNull String constraintPackage, @NonNull String constraintName, @NonNull Score<?> constraintWeight);
+    default Constraint penalize(@NonNull String constraintPackage, @NonNull String constraintName,
+            @NonNull Score<?> constraintWeight) {
+        ConstraintStub stub = penalize();
+        return stub.usingDefaultConstraintWeight(constraintWeight)
+                .asConstraint(constraintPackage, constraintName);
+    }
 
     /**
      * Negatively impact the {@link Score}: subtract the {@link ConstraintWeight} for each match.
@@ -121,7 +165,11 @@ public interface ConstraintStream {
      */
     @Deprecated(forRemoval = true)
     @NonNull
-    Constraint penalizeConfigurable(@NonNull String constraintName);
+    default Constraint penalizeConfigurable(@NonNull String constraintName) {
+        ConstraintStub<?> stub = penalize();
+        return stub.usingDefaultConstraintWeight(null)
+                .asConstraint(constraintName);
+    }
 
     /**
      * As defined by {@link #penalizeConfigurable(String)}.
@@ -130,7 +178,11 @@ public interface ConstraintStream {
      */
     @Deprecated(forRemoval = true)
     @NonNull
-    Constraint penalizeConfigurable(@NonNull String constraintPackage, @NonNull String constraintName);
+    default Constraint penalizeConfigurable(@NonNull String constraintPackage, @NonNull String constraintName) {
+        ConstraintStub<?> stub = penalize();
+        return stub.usingDefaultConstraintWeight(null)
+                .asConstraint(constraintPackage, constraintName);
+    }
 
     /**
      * Positively impact the {@link Score}: add the constraintWeight for each match.
@@ -143,18 +195,29 @@ public interface ConstraintStream {
      * @deprecated Prefer {@link UniConstraintStream#reward(Score)} and equivalent bi/tri/... overloads.
      * @param constraintName shows up in {@link ConstraintMatchTotal} during score justification
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Deprecated(forRemoval = true)
     @NonNull
-    Constraint reward(@NonNull String constraintName, @NonNull Score<?> constraintWeight);
+    default Constraint reward(@NonNull String constraintName, @NonNull Score<?> constraintWeight) {
+        ConstraintStub stub = reward();
+        return stub.usingDefaultConstraintWeight(constraintWeight)
+                .asConstraint(constraintName);
+    }
 
     /**
      * As defined by {@link #reward(String, Score)}.
      *
      * @deprecated Prefer {@link UniConstraintStream#reward(Score)} and equivalent bi/tri/... overloads.
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Deprecated(forRemoval = true)
     @NonNull
-    Constraint reward(@NonNull String constraintPackage, @NonNull String constraintName, @NonNull Score<?> constraintWeight);
+    default Constraint reward(@NonNull String constraintPackage, @NonNull String constraintName,
+            @NonNull Score<?> constraintWeight) {
+        ConstraintStub stub = reward();
+        return stub.usingDefaultConstraintWeight(constraintWeight)
+                .asConstraint(constraintPackage, constraintName);
+    }
 
     /**
      * Positively impact the {@link Score}: add the {@link ConstraintWeight} for each match.
@@ -171,7 +234,11 @@ public interface ConstraintStream {
      */
     @Deprecated(forRemoval = true)
     @NonNull
-    Constraint rewardConfigurable(@NonNull String constraintName);
+    default Constraint rewardConfigurable(@NonNull String constraintName) {
+        ConstraintStub<?> stub = reward();
+        return stub.usingDefaultConstraintWeight(null)
+                .asConstraint(constraintName);
+    }
 
     /**
      * As defined by {@link #rewardConfigurable(String)}.
@@ -180,7 +247,11 @@ public interface ConstraintStream {
      */
     @Deprecated(forRemoval = true)
     @NonNull
-    Constraint rewardConfigurable(@NonNull String constraintPackage, @NonNull String constraintName);
+    default Constraint rewardConfigurable(@NonNull String constraintPackage, @NonNull String constraintName) {
+        ConstraintStub<?> stub = reward();
+        return stub.usingDefaultConstraintWeight(null)
+                .asConstraint(constraintPackage, constraintName);
+    }
 
     /**
      * Positively or negatively impact the {@link Score} by the constraintWeight for each match.
@@ -193,17 +264,28 @@ public interface ConstraintStream {
      * @deprecated Prefer {@link UniConstraintStream#impact(Score)} and equivalent bi/tri/... overloads.
      * @param constraintName shows up in {@link ConstraintMatchTotal} during score justification
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Deprecated(forRemoval = true)
     @NonNull
-    Constraint impact(@NonNull String constraintName, @NonNull Score<?> constraintWeight);
+    default Constraint impact(@NonNull String constraintName, @NonNull Score<?> constraintWeight) {
+        ConstraintStub stub = impact();
+        return stub.usingDefaultConstraintWeight(constraintWeight)
+                .asConstraint(constraintName);
+    }
 
     /**
      * As defined by {@link #impact(String, Score)}.
      *
      * @deprecated Prefer {@link UniConstraintStream#impact(Score)} and equivalent bi/tri/... overloads.
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Deprecated(forRemoval = true)
     @NonNull
-    Constraint impact(@NonNull String constraintPackage, @NonNull String constraintName, @NonNull Score<?> constraintWeight);
+    default Constraint impact(@NonNull String constraintPackage, @NonNull String constraintName,
+            @NonNull Score<?> constraintWeight) {
+        ConstraintStub stub = impact();
+        return stub.usingDefaultConstraintWeight(constraintWeight)
+                .asConstraint(constraintPackage, constraintName);
+    }
 
 }

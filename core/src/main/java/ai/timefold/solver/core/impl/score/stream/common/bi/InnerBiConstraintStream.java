@@ -11,10 +11,10 @@ import java.util.function.ToLongBiFunction;
 
 import ai.timefold.solver.core.api.function.TriFunction;
 import ai.timefold.solver.core.api.score.Score;
-import ai.timefold.solver.core.api.score.stream.Constraint;
 import ai.timefold.solver.core.api.score.stream.DefaultConstraintJustification;
 import ai.timefold.solver.core.api.score.stream.bi.BiConstraintBuilder;
 import ai.timefold.solver.core.api.score.stream.bi.BiConstraintStream;
+import ai.timefold.solver.core.api.score.stream.bi.BiConstraintStub;
 import ai.timefold.solver.core.api.score.stream.tri.TriConstraintStream;
 import ai.timefold.solver.core.api.score.stream.tri.TriJoiner;
 import ai.timefold.solver.core.impl.score.stream.common.RetrievalSemantics;
@@ -105,183 +105,118 @@ public interface InnerBiConstraintStream<A, B> extends BiConstraintStream<A, B> 
     }
 
     @Override
-    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> penalize(@NonNull Score_ constraintWeight,
-            @NonNull ToIntBiFunction<A, B> matchWeigher) {
-        return innerImpact(constraintWeight, matchWeigher, ScoreImpactType.PENALTY);
+    @NonNull
+    default <Score_ extends @NonNull Score<Score_>> BiConstraintStub<A, B, Score_>
+            penalize(ToIntBiFunction<A, B> matchWeigher) {
+        return innerImpact(matchWeigher, ScoreImpactType.PENALTY);
+    }
+
+    <Score_ extends Score<Score_>> BiConstraintStub<A, B, Score_> innerImpact(ToIntBiFunction<A, B> matchWeigher,
+            ScoreImpactType scoreImpactType);
+
+    @Override
+    @NonNull
+    default <Score_ extends @NonNull Score<Score_>> BiConstraintStub<A, B, Score_>
+            penalizeLong(ToLongBiFunction<A, B> matchWeigher) {
+        return innerImpact(matchWeigher, ScoreImpactType.PENALTY);
+    }
+
+    <Score_ extends Score<Score_>> BiConstraintStub<A, B, Score_> innerImpact(ToLongBiFunction<A, B> matchWeigher,
+            ScoreImpactType scoreImpactType);
+
+    @Override
+    @NonNull
+    default <Score_ extends @NonNull Score<Score_>> BiConstraintStub<A, B, Score_>
+            penalizeBigDecimal(BiFunction<A, B, BigDecimal> matchWeigher) {
+        return innerImpact(matchWeigher, ScoreImpactType.PENALTY);
+    }
+
+    <Score_ extends Score<Score_>> BiConstraintStub<A, B, Score_> innerImpact(BiFunction<A, B, BigDecimal> matchWeigher,
+            ScoreImpactType scoreImpactType);
+
+    @Override
+    @NonNull
+    default <Score_ extends @NonNull Score<Score_>> BiConstraintStub<A, B, Score_> reward(ToIntBiFunction<A, B> matchWeigher) {
+        return innerImpact(matchWeigher, ScoreImpactType.REWARD);
     }
 
     @Override
-    default @NonNull <Score_ extends Score<Score_>> BiConstraintBuilder<A, B, Score_> penalizeLong(
-            @NonNull Score_ constraintWeight,
-            @NonNull ToLongBiFunction<A, B> matchWeigher) {
-        return innerImpact(constraintWeight, matchWeigher, ScoreImpactType.PENALTY);
+    @NonNull
+    default <Score_ extends @NonNull Score<Score_>> BiConstraintStub<A, B, Score_>
+            rewardBigDecimal(BiFunction<A, B, BigDecimal> matchWeigher) {
+        return innerImpact(matchWeigher, ScoreImpactType.REWARD);
     }
 
     @Override
-    default @NonNull <Score_ extends Score<Score_>> BiConstraintBuilder<A, B, Score_> penalizeBigDecimal(
-            @NonNull Score_ constraintWeight,
-            @NonNull BiFunction<A, B, BigDecimal> matchWeigher) {
-        return innerImpact(constraintWeight, matchWeigher, ScoreImpactType.PENALTY);
+    @NonNull
+    default <Score_ extends @NonNull Score<Score_>> BiConstraintStub<A, B, Score_>
+            rewardLong(ToLongBiFunction<A, B> matchWeigher) {
+        return innerImpact(matchWeigher, ScoreImpactType.REWARD);
+    }
+
+    @Override
+    @NonNull
+    default <Score_ extends @NonNull Score<Score_>> BiConstraintStub<A, B, Score_>
+            impactBigDecimal(BiFunction<A, B, BigDecimal> matchWeigher) {
+        return innerImpact(matchWeigher, ScoreImpactType.MIXED);
+    }
+
+    @Override
+    @NonNull
+    default <Score_ extends @NonNull Score<Score_>> BiConstraintStub<A, B, Score_> impact(ToIntBiFunction<A, B> matchWeigher) {
+        return innerImpact(matchWeigher, ScoreImpactType.MIXED);
+    }
+
+    @Override
+    @NonNull
+    default <Score_ extends @NonNull Score<Score_>> BiConstraintStub<A, B, Score_>
+            impactLong(ToLongBiFunction<A, B> matchWeigher) {
+        return innerImpact(matchWeigher, ScoreImpactType.MIXED);
     }
 
     @Override
     default BiConstraintBuilder<A, B, ?> penalizeConfigurable(ToIntBiFunction<A, B> matchWeigher) {
-        return innerImpact(null, matchWeigher, ScoreImpactType.PENALTY);
+        return innerImpact(matchWeigher, ScoreImpactType.PENALTY).usingDefaultConstraintWeight(null);
     }
 
     @Override
     default BiConstraintBuilder<A, B, ?> penalizeConfigurableLong(ToLongBiFunction<A, B> matchWeigher) {
-        return innerImpact(null, matchWeigher, ScoreImpactType.PENALTY);
+        return innerImpact(matchWeigher, ScoreImpactType.PENALTY).usingDefaultConstraintWeight(null);
     }
 
     @Override
     default BiConstraintBuilder<A, B, ?> penalizeConfigurableBigDecimal(BiFunction<A, B, BigDecimal> matchWeigher) {
-        return innerImpact(null, matchWeigher, ScoreImpactType.PENALTY);
-    }
-
-    @Override
-    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> reward(@NonNull Score_ constraintWeight,
-            @NonNull ToIntBiFunction<A, B> matchWeigher) {
-        return innerImpact(constraintWeight, matchWeigher, ScoreImpactType.REWARD);
-    }
-
-    @Override
-    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> rewardLong(
-            @NonNull Score_ constraintWeight,
-            @NonNull ToLongBiFunction<A, B> matchWeigher) {
-        return innerImpact(constraintWeight, matchWeigher, ScoreImpactType.REWARD);
-    }
-
-    @Override
-    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> rewardBigDecimal(
-            @NonNull Score_ constraintWeight,
-            @NonNull BiFunction<A, B, BigDecimal> matchWeigher) {
-        return innerImpact(constraintWeight, matchWeigher, ScoreImpactType.REWARD);
+        return innerImpact(matchWeigher, ScoreImpactType.PENALTY).usingDefaultConstraintWeight(null);
     }
 
     @Override
     default BiConstraintBuilder<A, B, ?> rewardConfigurable(ToIntBiFunction<A, B> matchWeigher) {
-        return innerImpact(null, matchWeigher, ScoreImpactType.REWARD);
+        return innerImpact(matchWeigher, ScoreImpactType.REWARD).usingDefaultConstraintWeight(null);
     }
 
     @Override
     default BiConstraintBuilder<A, B, ?> rewardConfigurableLong(ToLongBiFunction<A, B> matchWeigher) {
-        return innerImpact(null, matchWeigher, ScoreImpactType.REWARD);
+        return innerImpact(matchWeigher, ScoreImpactType.REWARD).usingDefaultConstraintWeight(null);
     }
 
     @Override
     default BiConstraintBuilder<A, B, ?> rewardConfigurableBigDecimal(BiFunction<A, B, BigDecimal> matchWeigher) {
-        return innerImpact(null, matchWeigher, ScoreImpactType.REWARD);
-    }
-
-    @Override
-    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> impact(@NonNull Score_ constraintWeight,
-            @NonNull ToIntBiFunction<A, B> matchWeigher) {
-        return innerImpact(constraintWeight, matchWeigher, ScoreImpactType.MIXED);
-    }
-
-    @Override
-    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> impactLong(
-            @NonNull Score_ constraintWeight,
-            @NonNull ToLongBiFunction<A, B> matchWeigher) {
-        return innerImpact(constraintWeight, matchWeigher, ScoreImpactType.MIXED);
-    }
-
-    @Override
-    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> impactBigDecimal(
-            @NonNull Score_ constraintWeight,
-            @NonNull BiFunction<A, B, BigDecimal> matchWeigher) {
-        return innerImpact(constraintWeight, matchWeigher, ScoreImpactType.MIXED);
+        return innerImpact(matchWeigher, ScoreImpactType.REWARD).usingDefaultConstraintWeight(null);
     }
 
     @Override
     default BiConstraintBuilder<A, B, ?> impactConfigurable(ToIntBiFunction<A, B> matchWeigher) {
-        return innerImpact(null, matchWeigher, ScoreImpactType.MIXED);
+        return innerImpact(matchWeigher, ScoreImpactType.MIXED).usingDefaultConstraintWeight(null);
     }
 
     @Override
     default BiConstraintBuilder<A, B, ?> impactConfigurableLong(ToLongBiFunction<A, B> matchWeigher) {
-        return innerImpact(null, matchWeigher, ScoreImpactType.MIXED);
+        return innerImpact(matchWeigher, ScoreImpactType.MIXED).usingDefaultConstraintWeight(null);
     }
 
     @Override
     default BiConstraintBuilder<A, B, ?> impactConfigurableBigDecimal(BiFunction<A, B, BigDecimal> matchWeigher) {
-        return innerImpact(null, matchWeigher, ScoreImpactType.MIXED);
-    }
-
-    <Score_ extends Score<Score_>> BiConstraintBuilder<A, B, Score_> innerImpact(Score_ constraintWeight,
-            ToIntBiFunction<A, B> matchWeigher,
-            ScoreImpactType scoreImpactType);
-
-    <Score_ extends Score<Score_>> BiConstraintBuilder<A, B, Score_> innerImpact(Score_ constraintWeight,
-            ToLongBiFunction<A, B> matchWeigher,
-            ScoreImpactType scoreImpactType);
-
-    <Score_ extends Score<Score_>> BiConstraintBuilder<A, B, Score_> innerImpact(Score_ constraintWeight,
-            BiFunction<A, B, BigDecimal> matchWeigher,
-            ScoreImpactType scoreImpactType);
-
-    @Override
-    default @NonNull Constraint penalize(@NonNull String constraintName, @NonNull Score<?> constraintWeight) {
-        return penalize((Score) constraintWeight)
-                .asConstraint(constraintName);
-    }
-
-    @Override
-    default @NonNull Constraint penalize(@NonNull String constraintPackage, @NonNull String constraintName,
-            @NonNull Score<?> constraintWeight) {
-        return penalize((Score) constraintWeight)
-                .asConstraint(constraintPackage, constraintName);
-    }
-
-    @Override
-    default @NonNull Constraint penalizeConfigurable(@NonNull String constraintName) {
-        return penalizeConfigurable()
-                .asConstraint(constraintName);
-    }
-
-    @Override
-    default @NonNull Constraint penalizeConfigurable(@NonNull String constraintPackage, @NonNull String constraintName) {
-        return penalizeConfigurable()
-                .asConstraint(constraintPackage, constraintName);
-    }
-
-    @Override
-    default @NonNull Constraint reward(@NonNull String constraintName, @NonNull Score<?> constraintWeight) {
-        return reward((Score) constraintWeight)
-                .asConstraint(constraintName);
-    }
-
-    @Override
-    default @NonNull Constraint reward(@NonNull String constraintPackage, @NonNull String constraintName,
-            @NonNull Score<?> constraintWeight) {
-        return reward((Score) constraintWeight)
-                .asConstraint(constraintPackage, constraintName);
-    }
-
-    @Override
-    default @NonNull Constraint rewardConfigurable(@NonNull String constraintName) {
-        return rewardConfigurable()
-                .asConstraint(constraintName);
-    }
-
-    @Override
-    default @NonNull Constraint rewardConfigurable(@NonNull String constraintPackage, @NonNull String constraintName) {
-        return penalizeConfigurable()
-                .asConstraint(constraintPackage, constraintName);
-    }
-
-    @Override
-    default @NonNull Constraint impact(@NonNull String constraintName, @NonNull Score<?> constraintWeight) {
-        return impact((Score) constraintWeight)
-                .asConstraint(constraintName);
-    }
-
-    @Override
-    default @NonNull Constraint impact(@NonNull String constraintPackage, @NonNull String constraintName,
-            @NonNull Score<?> constraintWeight) {
-        return impact((Score) constraintWeight)
-                .asConstraint(constraintPackage, constraintName);
+        return innerImpact(matchWeigher, ScoreImpactType.MIXED).usingDefaultConstraintWeight(null);
     }
 
 }
