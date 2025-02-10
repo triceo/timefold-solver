@@ -8,6 +8,7 @@ import java.util.function.BiFunction;
 import ai.timefold.solver.core.api.domain.entity.PlanningEntity;
 import ai.timefold.solver.core.api.domain.solution.PlanningSolution;
 import ai.timefold.solver.core.api.score.stream.Constraint;
+import ai.timefold.solver.core.api.score.stream.ConstraintDefinition;
 import ai.timefold.solver.core.api.score.stream.ConstraintFactory;
 import ai.timefold.solver.core.api.score.stream.ConstraintProvider;
 import ai.timefold.solver.core.api.score.stream.ConstraintStreamImplType;
@@ -94,6 +95,12 @@ public interface ConstraintVerifier<ConstraintProvider_ extends ConstraintProvid
     @NonNull
     SingleConstraintVerification<Solution_> verifyThat(
             @NonNull BiFunction<ConstraintProvider_, ConstraintFactory, Constraint> constraintFunction);
+
+    /**
+     * Creates a constraint verifier for a given {@link ConstraintDefinition}.
+     */
+    @NonNull
+    SingleConstraintVerification<Solution_> verifyThat(@NonNull ConstraintDefinition<?> constraintDefinition);
 
     /**
      * Creates a constraint verifier for all constraints of the {@link ConstraintProvider}.

@@ -4,12 +4,12 @@ import java.util.Objects;
 
 import ai.timefold.solver.core.api.score.Score;
 import ai.timefold.solver.core.api.score.stream.bi.BiConstraintBuilder;
-import ai.timefold.solver.core.api.score.stream.tmp.BiConstraintStub;
+import ai.timefold.solver.core.api.score.stream.bi.BiConstraintStub;
 import ai.timefold.solver.core.impl.score.stream.common.ScoreImpactType;
 
-import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
 
+@NullMarked
 public final class BiConstraintStubImpl<A, B, Score_ extends Score<Score_>>
         implements BiConstraintStub<A, B, Score_> {
 
@@ -22,7 +22,7 @@ public final class BiConstraintStubImpl<A, B, Score_ extends Score<Score_>>
     }
 
     @Override
-    public @NonNull BiConstraintBuilder<A, B, Score_> usingDefaultConstraintWeight(@Nullable Score_ constraintWeight) {
+    public BiConstraintBuilder<A, B, Score_> usingDefaultConstraintWeight(Score_ constraintWeight) {
         return new BiConstraintBuilderImpl<>(constraintConstructor, impactType, constraintWeight);
     }
 

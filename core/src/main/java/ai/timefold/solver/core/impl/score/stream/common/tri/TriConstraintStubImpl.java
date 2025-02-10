@@ -3,13 +3,13 @@ package ai.timefold.solver.core.impl.score.stream.common.tri;
 import java.util.Objects;
 
 import ai.timefold.solver.core.api.score.Score;
-import ai.timefold.solver.core.api.score.stream.tmp.TriConstraintStub;
 import ai.timefold.solver.core.api.score.stream.tri.TriConstraintBuilder;
+import ai.timefold.solver.core.api.score.stream.tri.TriConstraintStub;
 import ai.timefold.solver.core.impl.score.stream.common.ScoreImpactType;
 
-import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
 
+@NullMarked
 public final class TriConstraintStubImpl<A, B, C, Score_ extends Score<Score_>>
         implements TriConstraintStub<A, B, C, Score_> {
 
@@ -22,7 +22,7 @@ public final class TriConstraintStubImpl<A, B, C, Score_ extends Score<Score_>>
     }
 
     @Override
-    public @NonNull TriConstraintBuilder<A, B, C, Score_> usingDefaultConstraintWeight(@Nullable Score_ constraintWeight) {
+    public TriConstraintBuilder<A, B, C, Score_> usingDefaultConstraintWeight(Score_ constraintWeight) {
         return new TriConstraintBuilderImpl<>(constraintConstructor, impactType, constraintWeight);
     }
 

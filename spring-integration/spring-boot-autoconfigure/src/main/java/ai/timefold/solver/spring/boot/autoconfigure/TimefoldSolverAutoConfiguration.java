@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.joining;
 
 import java.io.StringWriter;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -442,14 +443,11 @@ public class TimefoldSolverAutoConfiguration
         assertTargetClasses(entityScanner.findEntityClassList(), PlanningEntity.class.getSimpleName());
     }
 
-    private static void assertSolverConfigConstraintClasses(
-            IncludeAbstractClassesEntityScanner entityScanner, Map<String, SolverConfig> solverConfigMap) {
-        List<Class<? extends EasyScoreCalculator>> simpleScoreClassList =
-                entityScanner.findImplementingClassList(EasyScoreCalculator.class);
-        List<Class<? extends ConstraintProvider>> constraintScoreClassList =
-                entityScanner.findImplementingClassList(ConstraintProvider.class);
-        List<Class<? extends IncrementalScoreCalculator>> incrementalScoreClassList =
-                entityScanner.findImplementingClassList(IncrementalScoreCalculator.class);
+    private static void assertSolverConfigConstraintClasses(IncludeAbstractClassesEntityScanner entityScanner,
+            Map<String, SolverConfig> solverConfigMap) {
+        var simpleScoreClassList = getAllNonAbstractClasses(entityScanner, EasyScoreCalculator.class);
+        var constraintScoreClassList = getAllNonAbstractClasses(entityScanner, ConstraintProvider.class);
+        var incrementalScoreClassList = getAllNonAbstractClasses(entityScanner, IncrementalScoreCalculator.class);
         // No score calculators
         if (simpleScoreClassList.isEmpty() && constraintScoreClassList.isEmpty()
                 && incrementalScoreClassList.isEmpty()) {
@@ -466,6 +464,14 @@ public class TimefoldSolverAutoConfiguration
         assertSolverConfigsSpecifyScoreCalculatorWhenAmbigious(solverConfigMap, simpleScoreClassList, constraintScoreClassList,
                 incrementalScoreClassList);
         assertNoUnusedScoreClasses(solverConfigMap, simpleScoreClassList, constraintScoreClassList, incrementalScoreClassList);
+    }
+
+    private static <Class_> List<Class<? extends Class_>>
+            getAllNonAbstractClasses(IncludeAbstractClassesEntityScanner entityScanner, Class<Class_> clz) {
+        return entityScanner.findImplementingClassList(clz)
+                .stream()
+                .filter(clazz -> !Modifier.isAbstract(clazz.getModifiers()))
+                .toList();
     }
 
     private static void assertSolverConfigsSpecifyScoreCalculatorWhenAmbigious(Map<String, SolverConfig> solverConfigMap,

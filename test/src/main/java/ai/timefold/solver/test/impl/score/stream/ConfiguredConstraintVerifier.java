@@ -8,6 +8,7 @@ import java.util.function.BiFunction;
 import ai.timefold.solver.core.api.score.Score;
 import ai.timefold.solver.core.api.score.constraint.ConstraintRef;
 import ai.timefold.solver.core.api.score.stream.Constraint;
+import ai.timefold.solver.core.api.score.stream.ConstraintDefinition;
 import ai.timefold.solver.core.api.score.stream.ConstraintFactory;
 import ai.timefold.solver.core.api.score.stream.ConstraintProvider;
 import ai.timefold.solver.core.config.solver.EnvironmentMode;
@@ -55,6 +56,15 @@ final class ConfiguredConstraintVerifier<ConstraintProvider_ extends ConstraintP
         requireNonNull(constraintFunction);
         AbstractConstraintStreamScoreDirectorFactory<Solution_, Score_> scoreDirectorFactory =
                 scoreDirectorFactoryContainerThreadLocal.get().getScoreDirectorFactory(constraintFunction, constraintProvider,
+                        EnvironmentMode.FULL_ASSERT);
+        return new DefaultSingleConstraintVerification<>(scoreDirectorFactory);
+    }
+
+    public DefaultSingleConstraintVerification<Solution_, Score_>
+            verifyThat(ConstraintDefinition<Score_> constraintDefinition) {
+        requireNonNull(constraintDefinition);
+        AbstractConstraintStreamScoreDirectorFactory<Solution_, Score_> scoreDirectorFactory =
+                scoreDirectorFactoryContainerThreadLocal.get().getScoreDirectorFactory(constraintDefinition,
                         EnvironmentMode.FULL_ASSERT);
         return new DefaultSingleConstraintVerification<>(scoreDirectorFactory);
     }

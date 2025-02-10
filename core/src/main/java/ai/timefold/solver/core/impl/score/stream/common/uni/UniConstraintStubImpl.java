@@ -3,12 +3,12 @@ package ai.timefold.solver.core.impl.score.stream.common.uni;
 import java.util.Objects;
 
 import ai.timefold.solver.core.api.score.Score;
-import ai.timefold.solver.core.api.score.stream.tmp.UniConstraintStub;
+import ai.timefold.solver.core.api.score.stream.uni.UniConstraintStub;
 import ai.timefold.solver.core.impl.score.stream.common.ScoreImpactType;
 
-import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
 
+@NullMarked
 public final class UniConstraintStubImpl<A, Score_ extends Score<Score_>>
         implements UniConstraintStub<A, Score_> {
 
@@ -21,7 +21,7 @@ public final class UniConstraintStubImpl<A, Score_ extends Score<Score_>>
     }
 
     @Override
-    public @NonNull UniConstraintBuilderImpl<A, Score_> usingDefaultConstraintWeight(@Nullable Score_ constraintWeight) {
+    public UniConstraintBuilderImpl<A, Score_> usingDefaultConstraintWeight(Score_ constraintWeight) {
         return new UniConstraintBuilderImpl<>(constraintConstructor, impactType, constraintWeight);
     }
 

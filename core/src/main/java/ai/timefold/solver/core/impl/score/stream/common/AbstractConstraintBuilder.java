@@ -7,6 +7,7 @@ import ai.timefold.solver.core.api.score.stream.Constraint;
 import ai.timefold.solver.core.api.score.stream.ConstraintBuilder;
 
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 @SuppressWarnings("rawtypes")
 public abstract class AbstractConstraintBuilder<Score_ extends Score<Score_>> implements ConstraintBuilder {
@@ -35,7 +36,7 @@ public abstract class AbstractConstraintBuilder<Score_ extends Score<Score_>> im
 
     @SuppressWarnings("unchecked")
     @Override
-    public final Constraint asConstraint(String constraintPackage, String constraintName) {
+    public final Constraint asConstraint(@Nullable String constraintPackage, @Nullable String constraintName) {
         return constraintConstructor.apply(constraintPackage, constraintName, "", Constraint.DEFAULT_CONSTRAINT_GROUP,
                 constraintWeight, impactType, getJustificationMapping(), getIndictedObjectsMapping());
     }

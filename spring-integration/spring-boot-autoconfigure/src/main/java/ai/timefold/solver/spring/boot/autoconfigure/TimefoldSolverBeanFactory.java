@@ -5,6 +5,7 @@ import java.util.function.BiFunction;
 import ai.timefold.solver.core.api.score.Score;
 import ai.timefold.solver.core.api.score.ScoreManager;
 import ai.timefold.solver.core.api.score.stream.Constraint;
+import ai.timefold.solver.core.api.score.stream.ConstraintDefinition;
 import ai.timefold.solver.core.api.score.stream.ConstraintFactory;
 import ai.timefold.solver.core.api.score.stream.ConstraintMetaModel;
 import ai.timefold.solver.core.api.score.stream.ConstraintProvider;
@@ -168,6 +169,12 @@ public class TimefoldSolverBeanFactory implements ApplicationContextAware, Envir
             public SingleConstraintVerification<SolutionClass_>
                     verifyThat(
                             @NonNull BiFunction<ConstraintProvider_, ConstraintFactory, Constraint> constraintFunction) {
+                throw new UnsupportedOperationException(errorMessage);
+            }
+
+            @Override
+            public @NonNull SingleConstraintVerification<SolutionClass_>
+                    verifyThat(@NonNull ConstraintDefinition<?> constraintDefinition) {
                 throw new UnsupportedOperationException(errorMessage);
             }
 

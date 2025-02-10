@@ -5,11 +5,13 @@ import java.util.function.BiFunction;
 
 import ai.timefold.solver.core.api.score.Score;
 import ai.timefold.solver.core.api.score.stream.Constraint;
+import ai.timefold.solver.core.api.score.stream.ConstraintDefinition;
 import ai.timefold.solver.core.api.score.stream.ConstraintFactory;
 import ai.timefold.solver.core.api.score.stream.ConstraintProvider;
 import ai.timefold.solver.core.api.score.stream.ConstraintStreamImplType;
 import ai.timefold.solver.core.impl.domain.solution.descriptor.SolutionDescriptor;
 import ai.timefold.solver.test.api.score.stream.ConstraintVerifier;
+import ai.timefold.solver.test.api.score.stream.SingleConstraintVerification;
 
 import org.jspecify.annotations.NonNull;
 
@@ -53,6 +55,12 @@ public final class DefaultConstraintVerifier<ConstraintProvider_ extends Constra
             }
             return v;
         });
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public @NonNull SingleConstraintVerification<Solution_> verifyThat(@NonNull ConstraintDefinition<?> constraintDefinition) {
+        return getOrCreateConfiguredConstraintVerifier().verifyThat((ConstraintDefinition<Score_>) constraintDefinition);
     }
 
     @Override

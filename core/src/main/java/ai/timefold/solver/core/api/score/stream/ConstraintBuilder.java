@@ -4,8 +4,9 @@ import ai.timefold.solver.core.api.domain.solution.PlanningSolution;
 import ai.timefold.solver.core.api.score.constraint.ConstraintMatchTotal;
 import ai.timefold.solver.core.api.score.constraint.ConstraintRef;
 
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 
+@NullMarked
 public interface ConstraintBuilder {
 
     /**
@@ -15,7 +16,7 @@ public interface ConstraintBuilder {
      *
      * @param constraintName shows up in {@link ConstraintMatchTotal} during score justification
      */
-    default @NonNull Constraint asConstraint(@NonNull String constraintName) {
+    default Constraint asConstraint(String constraintName) {
         return asConstraintDescribed(constraintName, "");
     }
 
@@ -26,8 +27,7 @@ public interface ConstraintBuilder {
      *
      * @param constraintName shows up in {@link ConstraintMatchTotal} during score justification
      */
-    @NonNull
-    default Constraint asConstraintDescribed(@NonNull String constraintName, @NonNull String constraintDescription) {
+    default Constraint asConstraintDescribed(String constraintName, String constraintDescription) {
         return asConstraintDescribed(constraintName, constraintDescription, Constraint.DEFAULT_CONSTRAINT_GROUP);
     }
 
@@ -38,9 +38,7 @@ public interface ConstraintBuilder {
      * @param constraintName shows up in {@link ConstraintMatchTotal} during score justification
      * @param constraintGroup only allows alphanumeric characters, "-" and "_"
      */
-    @NonNull
-    Constraint asConstraintDescribed(@NonNull String constraintName, @NonNull String constraintDescription,
-            @NonNull String constraintGroup);
+    Constraint asConstraintDescribed(String constraintName, String constraintDescription, String constraintGroup);
 
     /**
      * Builds a {@link Constraint} from the constraint stream.

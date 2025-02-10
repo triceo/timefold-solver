@@ -1,7 +1,6 @@
 package ai.timefold.solver.test.impl.score.stream;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiFunction;
@@ -9,6 +8,7 @@ import java.util.function.BiFunction;
 import ai.timefold.solver.core.api.score.Score;
 import ai.timefold.solver.core.api.score.constraint.ConstraintRef;
 import ai.timefold.solver.core.api.score.stream.Constraint;
+import ai.timefold.solver.core.api.score.stream.ConstraintDefinition;
 import ai.timefold.solver.core.api.score.stream.ConstraintFactory;
 import ai.timefold.solver.core.api.score.stream.ConstraintProvider;
 import ai.timefold.solver.core.config.solver.EnvironmentMode;
@@ -16,7 +16,6 @@ import ai.timefold.solver.core.impl.domain.solution.descriptor.SolutionDescripto
 import ai.timefold.solver.core.impl.score.director.stream.BavetConstraintStreamScoreDirectorFactory;
 import ai.timefold.solver.core.impl.score.stream.bavet.BavetConstraintFactory;
 import ai.timefold.solver.core.impl.score.stream.common.AbstractConstraintStreamScoreDirectorFactory;
-import ai.timefold.solver.core.impl.score.stream.common.InnerConstraintFactory;
 
 /**
  * Designed for access from a single thread.
@@ -47,7 +46,7 @@ final class ScoreDirectorFactoryCache<ConstraintProvider_ extends ConstraintProv
      * Cache key is the ID of the single constraint returned by calling the constraintFunction.
      *
      * @param constraintFunction never null, determines the single constraint to be used from the constraint provider
-     * @param constraintProvider never null, determines the constraint provider to be used
+     * @param environmentMode never null, determines the environment mode to be used
      * @return never null
      */
     public AbstractConstraintStreamScoreDirectorFactory<Solution_, Score_> getScoreDirectorFactory(
@@ -58,9 +57,8 @@ final class ScoreDirectorFactoryCache<ConstraintProvider_ extends ConstraintProv
          * This step is only necessary to perform validation of the constraint provider;
          * if we only wanted the one constraint, we could just call constraintFunction directly.
          */
-        InnerConstraintFactory<Solution_, ?> fullConstraintFactory =
-                new BavetConstraintFactory<>(solutionDescriptor, environmentMode);
-        List<Constraint> constraints = (List<Constraint>) fullConstraintFactory.buildConstraints(constraintProvider);
+        var fullConstraintFactory = new BavetConstraintFactory<>(solutionDescriptor, environmentMode);
+        var constraints = fullConstraintFactory.buildConstraints(constraintProvider);
         Constraint expectedConstraint = constraintFunction.apply(constraintProvider, fullConstraintFactory);
         Constraint result = constraints.stream()
                 .filter(c -> Objects.equals(c.getConstraintRef(), expectedConstraint.getConstraintRef()))
@@ -70,6 +68,28 @@ final class ScoreDirectorFactoryCache<ConstraintProvider_ extends ConstraintProv
         return getScoreDirectorFactory(result.getConstraintRef(),
                 constraintFactory -> new Constraint[] {
                         result
+                }, environmentMode);
+    }
+
+    /**
+     * Retrieve {@link AbstractConstraintStreamScoreDirectorFactory} from the cache,
+     * or create and cache a new instance.
+     * Cache key is the ID of the single constraint returned by calling the constraintFunction.
+     *
+     * @param constraintDefinition never null, determines the single constraint to be used from the constraint provider
+     * @param environmentMode never null, determines the environment mode to be used
+     * @return never null
+     */
+    public AbstractConstraintStreamScoreDirectorFactory<Solution_, Score_>
+            getScoreDirectorFactory(ConstraintDefinition<Score_> constraintDefinition, EnvironmentMode environmentMode) {
+        var fullConstraintFactory = new BavetConstraintFactory<>(solutionDescriptor, environmentMode);
+        var constraint = constraintDefinition.buildConstraint(fullConstraintFactory)
+                .usingDefaultConstraintWeight(constraintDefinition.defaultConstraintWeight())
+                .asConstraintDescribed(constraintDefinition.name(), constraintDefinition.description(),
+                        constraintDefinition.group());
+        return getScoreDirectorFactory(constraint.getConstraintRef(),
+                constraintFactory -> new Constraint[] {
+                        constraint
                 }, environmentMode);
     }
 
