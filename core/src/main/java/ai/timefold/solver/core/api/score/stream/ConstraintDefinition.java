@@ -3,12 +3,32 @@ package ai.timefold.solver.core.api.score.stream;
 import java.util.Objects;
 
 import ai.timefold.solver.core.api.score.Score;
+import ai.timefold.solver.core.api.score.stream.bi.BiConstraintDefinition;
+import ai.timefold.solver.core.api.score.stream.quad.QuadConstraintDefinition;
+import ai.timefold.solver.core.api.score.stream.tri.TriConstraintDefinition;
 import ai.timefold.solver.core.api.score.stream.uni.UniConstraintDefinition;
 
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+/**
+ * Constraint definition for use with {@link ComposableConstraintProvider}.
+ * The user is required to implement two methods: {@link #buildConstraint(ConstraintFactory)} and
+ * {@link #defaultConstraintWeight()}.
+ * Every other method has a reasonable default implementation,
+ * which can be overridden to provide more specific information about the constraint.
+ * <p>
+ * Instead of implementing this interface directly, consider using specialized extensions of this interface,
+ * such as {@link UniConstraintDefinition} for constraints with a single fact output.
+ * These guide you towards the correct generic types of functions such as {@link #justificationFunction()}.
+ * 
+ * @param <Score_>
+ * @see UniConstraintDefinition Specialization for constraints with a single fact output.
+ * @see BiConstraintDefinition Specialization for constraints with two fact outputs.
+ * @see TriConstraintDefinition Specialization for constraints with three fact outputs.
+ * @see QuadConstraintDefinition Specialization for constraints with four fact outputs.
+ */
 @NullMarked
 public interface ConstraintDefinition<Score_ extends Score<@NonNull Score_>> {
 
@@ -30,12 +50,15 @@ public interface ConstraintDefinition<Score_ extends Score<@NonNull Score_>> {
 
     /**
      * Override this method together with {@link #justificationFunction()} to collect constraint justifications.
-     * 
+     *
+     * @param <ConstraintJustification_> the actual type of the {@link ConstraintJustification},
+     *        not known at compile time
      * @return the constraint justification type being collected;
      *         the default return value is {@link DefaultConstraintJustification},
      *         which goes well with {@link #justificationFunction()} returning null.
-     * @param <ConstraintJustification_> the actual type of the {@link ConstraintJustification},
-     *        not known at compile time
+     * @see ConstraintJustification What are constraint justifications and how to use them.
+     * @see UniConstraintDefinition#justificationFunction()
+     *      Example of return value for a constraint stream with a single fact output.
      */
     @SuppressWarnings("unchecked")
     default <ConstraintJustification_ extends ConstraintJustification> Class<ConstraintJustification_>
@@ -47,7 +70,7 @@ public interface ConstraintDefinition<Score_ extends Score<@NonNull Score_>> {
      * @return null if default indictments should be used;
      *         otherwise the expected return value depends on constraint stream cardinality.
      * @see UniConstraintDefinition#indictmentFunction()
-     *      Example of return value for a constraint stream of cardinality 1.
+     *      Example of return value for a constraint stream with a single fact output.
      */
     default @Nullable Object indictmentFunction() {
         return null;

@@ -32,7 +32,7 @@ import ai.timefold.solver.core.api.solver.SolutionManager;
  * instead it uses equality of the implementations (as defined above) to tell them apart from the outside.
  * For this reason, it is recommended that:
  * <ul>
- * <li>The implementations must not use {@link Score} for {@link Object#equals(Object) equal} and hash codes,
+ * <li>The implementations must not use {@link Score} for {@link Object#equals(Object) equality} and hash codes,
  * as that would prevent diffing from working entirely.</li>
  * <li>The implementations should not store any {@link Score} instances,
  * as they would not be diffed, leading to confusion with {@link MatchAnalysis#score()}, which does get diffed.</li>

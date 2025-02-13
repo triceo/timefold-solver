@@ -12,6 +12,10 @@ import ai.timefold.solver.core.api.score.stream.ConstraintJustification;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+/**
+ * As defined by {@link ConstraintDefinition},
+ * specialized for constraints with three fact outputs.
+ */
 @NullMarked
 public interface TriConstraintDefinition<A, B, C, Score_ extends Score<Score_>>
         extends ConstraintDefinition<Score_> {

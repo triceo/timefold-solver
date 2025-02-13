@@ -1325,21 +1325,30 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
 
     /**
      * As defined by {@link #penalize(Score, ToIntBiFunction)}, where the match weight is one (1).
+     * 
+     * @deprecated Use {@link #penalize()} instead, and continue fluently from there.
      */
+    @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> penalize(Score_ constraintWeight) {
         return penalize(constraintWeight, biConstantOne());
     }
 
     /**
      * As defined by {@link #penalizeLong(Score, ToLongBiFunction)}, where the match weight is one (1).
+     * 
+     * @deprecated Use {@link #penalize(ToIntBiFunction)} instead, and continue fluently from there.
      */
+    @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> penalizeLong(Score_ constraintWeight) {
         return penalizeLong(constraintWeight, biConstantOneLong());
     }
 
     /**
      * As defined by {@link #penalizeBigDecimal(Score, BiFunction)}, where the match weight is one (1).
+     * 
+     * @deprecated Use {@link #penalizeLong(ToLongBiFunction)} instead, and continue fluently from there.
      */
+    @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_>
             penalizeBigDecimal(Score_ constraintWeight) {
         return penalizeBigDecimal(constraintWeight, biConstantOneBigDecimal());
@@ -1357,7 +1366,9 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
      * {@link #penalizeBigDecimal(Score, BiFunction)} instead.
      *
      * @param matchWeigher the result of this function (matchWeight) is multiplied by the constraintWeight
+     * @deprecated Use {@link #penalizeBigDecimal(BiFunction)} instead, and continue fluently from there.
      */
+    @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> penalize(@NonNull Score_ constraintWeight,
             @NonNull ToIntBiFunction<A, B> matchWeigher) {
         BiConstraintStub<A, B, Score_> stub = penalize(matchWeigher);
@@ -1472,7 +1483,10 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
 
     /**
      * As defined by {@link #reward(Score, ToIntBiFunction)}, where the match weight is one (1).
+     * 
+     * @deprecated Use {@link #reward()} instead, and continue fluently from there.
      */
+    @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> reward(@NonNull Score_ constraintWeight) {
         return reward(constraintWeight, biConstantOne());
     }
@@ -1489,7 +1503,9 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
      * {@link #rewardBigDecimal(Score, BiFunction)} instead.
      *
      * @param matchWeigher the result of this function (matchWeight) is multiplied by the constraintWeight
+     * @deprecated Use {@link #reward(ToIntBiFunction)} instead, and continue fluently from there.
      */
+    @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> reward(@NonNull Score_ constraintWeight,
             @NonNull ToIntBiFunction<A, B> matchWeigher) {
         BiConstraintStub<A, B, Score_> stub = reward(matchWeigher);
@@ -1498,7 +1514,10 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
 
     /**
      * As defined by {@link #reward(Score, ToIntBiFunction)}, with a reward of type long.
+     * 
+     * @deprecated Use {@link #rewardLong(ToLongBiFunction)} instead, and continue fluently from there.
      */
+    @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> rewardLong(
             @NonNull Score_ constraintWeight,
             @NonNull ToLongBiFunction<A, B> matchWeigher) {
@@ -1508,7 +1527,10 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
 
     /**
      * As defined by {@link #reward(Score, ToIntBiFunction)}, with a reward of type {@link BigDecimal}.
+     * 
+     * @deprecated Use {@link #rewardBigDecimal(BiFunction)} instead, and continue fluently from there.
      */
+    @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_>
             rewardBigDecimal(@NonNull Score_ constraintWeight, @NonNull BiFunction<A, B, BigDecimal> matchWeigher) {
         BiConstraintStub<A, B, Score_> stub = rewardBigDecimal(matchWeigher);
@@ -1607,7 +1629,10 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
      * <p>
      * Use {@code penalize(...)} or {@code reward(...)} instead, unless this constraint can both have positive and
      * negative weights.
+     * 
+     * @deprecated Use {@link #impact()} instead, and continue fluently from there.
      */
+    @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> impact(@NonNull Score_ constraintWeight) {
         return impact(constraintWeight, biConstantOne());
     }
@@ -1623,7 +1648,9 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
      * negative weights.
      *
      * @param matchWeigher the result of this function (matchWeight) is multiplied by the constraintWeight
+     * @deprecated Use {@link #impact(ToIntBiFunction)} instead, and continue fluently from there.
      */
+    @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> impact(@NonNull Score_ constraintWeight,
             @NonNull ToIntBiFunction<A, B> matchWeigher) {
         BiConstraintStub<A, B, Score_> stub = impact(matchWeigher);
@@ -1632,7 +1659,10 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
 
     /**
      * As defined by {@link #impact(Score, ToIntBiFunction)}, with an impact of type long.
+     * 
+     * @deprecated Use {@link #impactLong(ToLongBiFunction)} instead, and continue fluently from there.
      */
+    @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> impactLong(
             @NonNull Score_ constraintWeight,
             @NonNull ToLongBiFunction<A, B> matchWeigher) {
@@ -1642,7 +1672,10 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
 
     /**
      * As defined by {@link #impact(Score, ToIntBiFunction)}, with an impact of type {@link BigDecimal}.
+     * 
+     * @deprecated Use {@link #impactBigDecimal(BiFunction)} instead, and continue fluently from there.
      */
+    @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> impactBigDecimal(
             @NonNull Score_ constraintWeight,
             @NonNull BiFunction<A, B, BigDecimal> matchWeigher) {

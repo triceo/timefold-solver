@@ -1761,7 +1761,6 @@ public interface UniConstraintStream<A> extends ConstraintStream {
 
     /**
      * As defined by {@link #penalize(ToIntFunction)}, with a penalty of type long.
-     *
      */
     @NonNull
     <Score_ extends @NonNull Score<Score_>> UniConstraintStub<A, Score_> penalizeLong(ToLongFunction<A> matchWeigher);
@@ -1777,15 +1776,20 @@ public interface UniConstraintStream<A> extends ConstraintStream {
     /**
      * As defined by {@link #penalize(Score, ToIntFunction)}, where the match weight is one (1).
      *
+     * @deprecated Use {@link #penalize(ToIntFunction)} instead, and continue fluently from there.
      */
+    @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull UniConstraintBuilder<A, Score_> penalize(@NonNull Score_ constraintWeight) {
-        return penalize(constraintWeight, uniConstantOne());
+        UniConstraintStub<A, Score_> stub = penalize();
+        return stub.usingDefaultConstraintWeight(constraintWeight);
     }
 
     /**
      * As defined by {@link #penalizeLong(Score, ToLongFunction)}, where the match weight is one (1).
      *
+     * @deprecated Use {@link #penalize()} instead, and continue fluently from there.
      */
+    @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull UniConstraintBuilder<A, Score_>
             penalizeLong(@NonNull Score_ constraintWeight) {
         return penalizeLong(constraintWeight, uniConstantOneLong());
@@ -1794,7 +1798,9 @@ public interface UniConstraintStream<A> extends ConstraintStream {
     /**
      * As defined by {@link #penalizeBigDecimal(Score, Function)}, where the match weight is one (1).
      *
+     * @deprecated Use {@link #penalize()} instead, and continue fluently from there.
      */
+    @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull UniConstraintBuilder<A, Score_>
             penalizeBigDecimal(@NonNull Score_ constraintWeight) {
         return penalizeBigDecimal(constraintWeight, uniConstantOneBigDecimal());
@@ -1812,21 +1818,40 @@ public interface UniConstraintStream<A> extends ConstraintStream {
      * {@link #penalizeBigDecimal(Score, Function)} instead.
      *
      * @param matchWeigher the result of this function (matchWeight) is multiplied by the constraintWeight
+     * @deprecated Use {@link #penalize(ToIntFunction)} instead, and continue fluently from there.
      */
-    <Score_ extends Score<Score_>> @NonNull UniConstraintBuilder<A, Score_> penalize(@NonNull Score_ constraintWeight,
-            @NonNull ToIntFunction<A> matchWeigher);
+    @Deprecated(forRemoval = true, since = "1.20.0")
+    default <Score_ extends Score<Score_>> @NonNull UniConstraintBuilder<A, Score_> penalize(@NonNull Score_ constraintWeight,
+            @NonNull ToIntFunction<A> matchWeigher) {
+        UniConstraintStub<A, Score_> stub = penalize(matchWeigher);
+        return stub.usingDefaultConstraintWeight(constraintWeight);
+    }
 
     /**
      * As defined by {@link #penalize(Score, ToIntFunction)}, with a penalty of type long.
+     *
+     * @deprecated Use {@link #penalizeLong(ToLongFunction)} instead, and continue fluently from there.
      */
-    <Score_ extends Score<Score_>> @NonNull UniConstraintBuilder<A, Score_> penalizeLong(@NonNull Score_ constraintWeight,
-            @NonNull ToLongFunction<A> matchWeigher);
+    @Deprecated(forRemoval = true, since = "1.20.0")
+    default <Score_ extends Score<Score_>> @NonNull UniConstraintBuilder<A, Score_> penalizeLong(
+            @NonNull Score_ constraintWeight,
+            @NonNull ToLongFunction<A> matchWeigher) {
+        UniConstraintStub<A, Score_> stub = penalizeLong(matchWeigher);
+        return stub.usingDefaultConstraintWeight(constraintWeight);
+    }
 
     /**
      * As defined by {@link #penalize(Score, ToIntFunction)}, with a penalty of type {@link BigDecimal}.
+     *
+     * @deprecated Use {@link #penalizeBigDecimal(Function)} instead, and continue fluently from there.
      */
-    <Score_ extends Score<Score_>> @NonNull UniConstraintBuilder<A, Score_> penalizeBigDecimal(@NonNull Score_ constraintWeight,
-            @NonNull Function<A, BigDecimal> matchWeigher);
+    @Deprecated(forRemoval = true, since = "1.20.0")
+    default <Score_ extends Score<Score_>> @NonNull UniConstraintBuilder<A, Score_> penalizeBigDecimal(
+            @NonNull Score_ constraintWeight,
+            @NonNull Function<A, BigDecimal> matchWeigher) {
+        UniConstraintStub<A, Score_> stub = penalizeBigDecimal(matchWeigher);
+        return stub.usingDefaultConstraintWeight(constraintWeight);
+    }
 
     /**
      * Negatively impacts the {@link Score},
@@ -1918,9 +1943,13 @@ public interface UniConstraintStream<A> extends ConstraintStream {
 
     /**
      * As defined by {@link #reward(Score, ToIntFunction)}, where the match weight is one (1).
+     *
+     * @deprecated Use {@link #reward()} instead, and continue fluently from there.
      */
+    @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull UniConstraintBuilder<A, Score_> reward(@NonNull Score_ constraintWeight) {
-        return reward(constraintWeight, uniConstantOne());
+        UniConstraintStub<A, Score_> stub = reward();
+        return stub.usingDefaultConstraintWeight(constraintWeight);
     }
 
     /**
@@ -1935,23 +1964,40 @@ public interface UniConstraintStream<A> extends ConstraintStream {
      * {@link #rewardBigDecimal(Score, Function)} instead.
      *
      * @param matchWeigher the result of this function (matchWeight) is multiplied by the constraintWeight
+     * @deprecated Use {@link #reward(ToIntFunction)} instead, and continue fluently from there.
      */
-    <Score_ extends Score<Score_>> @NonNull UniConstraintBuilder<A, Score_> reward(@NonNull Score_ constraintWeight,
-            @NonNull ToIntFunction<A> matchWeigher);
+    @Deprecated(forRemoval = true, since = "1.20.0")
+    default <Score_ extends Score<Score_>> @NonNull UniConstraintBuilder<A, Score_> reward(@NonNull Score_ constraintWeight,
+            @NonNull ToIntFunction<A> matchWeigher) {
+        UniConstraintStub<A, Score_> stub = reward(matchWeigher);
+        return stub.usingDefaultConstraintWeight(constraintWeight);
+    }
 
     /**
      * As defined by {@link #reward(Score, ToIntFunction)}, with a reward of type long.
+     * 
+     * @deprecated Use {@link #rewardLong(ToLongFunction)} instead, and continue fluently from there.
      */
+    @Deprecated(forRemoval = true, since = "1.20.0")
     @NonNull
-    <Score_ extends Score<Score_>> UniConstraintBuilder<A, Score_> rewardLong(@NonNull Score_ constraintWeight,
-            @NonNull ToLongFunction<A> matchWeigher);
+    default <Score_ extends Score<Score_>> UniConstraintBuilder<A, Score_> rewardLong(@NonNull Score_ constraintWeight,
+            @NonNull ToLongFunction<A> matchWeigher) {
+        UniConstraintStub<A, Score_> stub = rewardLong(matchWeigher);
+        return stub.usingDefaultConstraintWeight(constraintWeight);
+    }
 
     /**
      * As defined by {@link #reward(Score, ToIntFunction)}, with a reward of type {@link BigDecimal}.
+     * 
+     * @deprecated Use {@link #rewardBigDecimal(Function)} instead, and continue fluently from there.
      */
+    @Deprecated(forRemoval = true, since = "1.20.0")
     @NonNull
-    <Score_ extends Score<Score_>> UniConstraintBuilder<A, Score_> rewardBigDecimal(@NonNull Score_ constraintWeight,
-            @NonNull Function<A, BigDecimal> matchWeigher);
+    default <Score_ extends Score<Score_>> UniConstraintBuilder<A, Score_> rewardBigDecimal(@NonNull Score_ constraintWeight,
+            @NonNull Function<A, BigDecimal> matchWeigher) {
+        UniConstraintStub<A, Score_> stub = rewardBigDecimal(matchWeigher);
+        return stub.usingDefaultConstraintWeight(constraintWeight);
+    }
 
     /**
      * Positively impacts the {@link Score},
@@ -2044,9 +2090,13 @@ public interface UniConstraintStream<A> extends ConstraintStream {
      * <p>
      * Use {@code penalize(...)} or {@code reward(...)} instead, unless this constraint can both have positive and
      * negative weights.
+     * 
+     * @deprecated Use {@link #impact()} instead, and continue fluently from there.
      */
+    @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull UniConstraintBuilder<A, Score_> impact(@NonNull Score_ constraintWeight) {
-        return impact(constraintWeight, uniConstantOne());
+        UniConstraintStub<A, Score_> stub = impact();
+        return stub.usingDefaultConstraintWeight(constraintWeight);
     }
 
     /**
@@ -2060,21 +2110,39 @@ public interface UniConstraintStream<A> extends ConstraintStream {
      * negative weights.
      *
      * @param matchWeigher the result of this function (matchWeight) is multiplied by the constraintWeight
+     * @deprecated Use {@link #impact(ToIntFunction)} instead, and continue fluently from there.
      */
-    <Score_ extends Score<Score_>> @NonNull UniConstraintBuilder<A, Score_> impact(@NonNull Score_ constraintWeight,
-            @NonNull ToIntFunction<A> matchWeigher);
+    @Deprecated(forRemoval = true, since = "1.20.0")
+    default <Score_ extends Score<Score_>> @NonNull UniConstraintBuilder<A, Score_> impact(@NonNull Score_ constraintWeight,
+            @NonNull ToIntFunction<A> matchWeigher) {
+        UniConstraintStub<A, Score_> stub = impact(matchWeigher);
+        return stub.usingDefaultConstraintWeight(constraintWeight);
+    }
 
     /**
      * As defined by {@link #impact(Score, ToIntFunction)}, with an impact of type long.
+     * 
+     * @deprecated Use {@link #impactLong(ToLongFunction)} instead, and continue fluently from there.
      */
-    <Score_ extends Score<Score_>> @NonNull UniConstraintBuilder<A, Score_> impactLong(@NonNull Score_ constraintWeight,
-            @NonNull ToLongFunction<A> matchWeigher);
+    @Deprecated(forRemoval = true, since = "1.20.0")
+    default <Score_ extends Score<Score_>> @NonNull UniConstraintBuilder<A, Score_> impactLong(@NonNull Score_ constraintWeight,
+            @NonNull ToLongFunction<A> matchWeigher) {
+        UniConstraintStub<A, Score_> stub = impactLong(matchWeigher);
+        return stub.usingDefaultConstraintWeight(constraintWeight);
+    }
 
     /**
      * As defined by {@link #impact(Score, ToIntFunction)}, with an impact of type {@link BigDecimal}.
+     * 
+     * @deprecated Use {@link #impactBigDecimal(Function)} instead, and continue fluently from there.
      */
-    <Score_ extends Score<Score_>> @NonNull UniConstraintBuilder<A, Score_> impactBigDecimal(@NonNull Score_ constraintWeight,
-            @NonNull Function<A, BigDecimal> matchWeigher);
+    @Deprecated(forRemoval = true, since = "1.20.0")
+    default <Score_ extends Score<Score_>> @NonNull UniConstraintBuilder<A, Score_> impactBigDecimal(
+            @NonNull Score_ constraintWeight,
+            @NonNull Function<A, BigDecimal> matchWeigher) {
+        UniConstraintStub<A, Score_> stub = impactBigDecimal(matchWeigher);
+        return stub.usingDefaultConstraintWeight(constraintWeight);
+    }
 
     /**
      * Positively impacts the {@link Score} by the {@link ConstraintWeight} for each match,
