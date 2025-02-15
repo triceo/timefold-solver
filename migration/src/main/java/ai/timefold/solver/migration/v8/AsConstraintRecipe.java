@@ -243,22 +243,13 @@ public final class AsConstraintRecipe extends AbstractRecipe {
                             LOGGER.warn("Cannot refactor to asConstraint() method for deprecated method ({}).", method);
                             return method;
                         }
-                        if (!matcherMeta.configurable) {
-                            if (!matcherMeta.matchWeigherIncluded) {
-                                templateCode +=
-                                        "." + matcherMeta.methodName + "(#{any(ai.timefold.solver.core.api.score.Score)})\n";
-                            } else {
-                                templateCode +=
-                                        "." + matcherMeta.methodName + "(#{any(ai.timefold.solver.core.api.score.Score)}," +
-                                                " #{any(" + matcherMeta.functionType + ")})\n";
-                            }
+                        if (!matcherMeta.matchWeigherIncluded) {
+                            templateCode += "." + matcherMeta.methodName + "()\n";
                         } else {
-                            if (!matcherMeta.matchWeigherIncluded) {
-                                templateCode += "." + matcherMeta.methodName + "()\n";
-                            } else {
-                                templateCode += "." + matcherMeta.methodName + "(" +
-                                        "#{any(" + matcherMeta.functionType + ")})\n";
-                            }
+                            templateCode += "." + matcherMeta.methodName + "(#{any(" + matcherMeta.functionType + ")})\n";
+                        }
+                        if (!matcherMeta.configurable) {
+                            templateCode += ".usingDefaultConstraintWeight(#{any(ai.timefold.solver.core.api.score.Score)})\n";
                         }
                         if (!matcherMeta.constraintPackageIncluded) {
                             templateCode += ".asConstraint(#{any(String)})";
@@ -269,48 +260,57 @@ public final class AsConstraintRecipe extends AbstractRecipe {
                                 .javaParser(JAVA_PARSER)
                                 .build();
                         if (!matcherMeta.constraintPackageIncluded) {
+                            var constraintNameArgument = arguments.get(0);
                             if (!matcherMeta.configurable) {
+                                var constraintWeightArgument = arguments.get(1);
                                 if (!matcherMeta.matchWeigherIncluded) {
                                     return template.apply(getCursor(),
                                             method.getCoordinates().replace(), select,
-                                            arguments.get(1), arguments.get(0));
+                                            constraintWeightArgument, constraintNameArgument);
                                 } else {
+                                    var matchWeigherArgument = arguments.get(2);
                                     return template.apply(getCursor(),
                                             method.getCoordinates().replace(), select,
-                                            arguments.get(1), arguments.get(2), arguments.get(0));
+                                            matchWeigherArgument, constraintWeightArgument, constraintNameArgument);
                                 }
                             } else {
                                 if (!matcherMeta.matchWeigherIncluded) {
                                     return template.apply(getCursor(),
                                             method.getCoordinates().replace(), select,
-                                            arguments.get(0));
+                                            constraintNameArgument);
                                 } else {
+                                    var matcherWeightArgument = arguments.get(1);
                                     return template.apply(getCursor(),
                                             method.getCoordinates().replace(), select,
-                                            arguments.get(1), arguments.get(0));
+                                            matcherWeightArgument, constraintNameArgument);
                                 }
                             }
                         } else {
+                            var constraintPackageArgument = arguments.get(0);
+                            var constraintNameArgument = arguments.get(1);
+                            var constraintName = mergeExpressions(constraintPackageArgument, constraintNameArgument);
                             if (!matcherMeta.configurable) {
+                                var constraintWeightArgument = arguments.get(2);
                                 if (!matcherMeta.matchWeigherIncluded) {
                                     return template.apply(getCursor(),
                                             method.getCoordinates().replace(), select,
-                                            arguments.get(2), mergeExpressions(arguments.get(0), arguments.get(1)));
+                                            constraintWeightArgument, constraintName);
                                 } else {
+                                    var matchWeigherArgument = arguments.get(3);
                                     return template.apply(getCursor(),
                                             method.getCoordinates().replace(), select,
-                                            arguments.get(2), arguments.get(3),
-                                            mergeExpressions(arguments.get(0), arguments.get(1)));
+                                            matchWeigherArgument, constraintWeightArgument, constraintName);
                                 }
                             } else {
                                 if (!matcherMeta.matchWeigherIncluded) {
                                     return template.apply(getCursor(),
                                             method.getCoordinates().replace(), select,
-                                            mergeExpressions(arguments.get(0), arguments.get(1)));
+                                            constraintName);
                                 } else {
+                                    var matchWeigherArgument = arguments.get(2);
                                     return template.apply(getCursor(),
                                             method.getCoordinates().replace(), select,
-                                            arguments.get(2), mergeExpressions(arguments.get(0), arguments.get(1)));
+                                            matchWeigherArgument, constraintName);
                                 }
                             }
                         }
@@ -347,18 +347,18 @@ public final class AsConstraintRecipe extends AbstractRecipe {
                 throw new IllegalArgumentException("Invalid select (" + select + ").");
             }
             signature += " " + method.replace(" Score", " ai.timefold.solver.core.api.score.Score")
-                    .replace(" ToIntFunction", " java.util.function.ToIntFunction")
-                    .replace(" ToLongFunction", " java.util.function.ToLongFunction")
-                    .replace(" Function", " java.util.function.Function")
-                    .replace(" ToIntBiFunction", " java.util.function.ToIntBiFunction")
-                    .replace(" ToLongBiFunction", " java.util.function.ToLongBiFunction")
-                    .replace(" BiFunction", " java.util.function.BiFunction")
-                    .replace(" ToIntTriFunction", " ai.timefold.solver.core.api.function.ToIntTriFunction")
-                    .replace(" ToLongTriFunction", " ai.timefold.solver.core.api.function.ToLongTriFunction")
-                    .replace(" TriFunction", " ai.timefold.solver.core.api.function.TriFunction")
-                    .replace(" ToIntQuadFunction", " ai.timefold.solver.core.api.function.ToIntQuadFunction")
+                    .replace("ToIntFunction", " java.util.function.ToIntFunction")
+                    .replace("ToLongFunction", " java.util.function.ToLongFunction")
+                    .replace("ToIntBiFunction", " java.util.function.ToIntBiFunction")
+                    .replace("ToLongBiFunction", " java.util.function.ToLongBiFunction")
+                    .replace("ToIntTriFunction", " ai.timefold.solver.core.api.function.ToIntTriFunction")
+                    .replace("ToLongTriFunction", " ai.timefold.solver.core.api.function.ToLongTriFunction")
+                    .replace("ToIntQuadFunction", " ai.timefold.solver.core.api.function.ToIntQuadFunction")
                     .replace(" ToLongQuadFunction", " ai.timefold.solver.core.api.function.ToLongQuadFunction")
-                    .replace(" QuadFunction", " ai.timefold.solver.core.api.function.QuadFunction");
+                    .replace(" QuadFunction", " ai.timefold.solver.core.api.function.QuadFunction")
+                    .replace(" TriFunction", " ai.timefold.solver.core.api.function.TriFunction")
+                    .replace(" BiFunction", " java.util.function.BiFunction")
+                    .replace(" Function", " java.util.function.Function");
             methodMatcher = new MethodMatcher(signature);
             constraintPackageIncluded = method.contains("String, String");
             configurable = method.contains("Configurable");
