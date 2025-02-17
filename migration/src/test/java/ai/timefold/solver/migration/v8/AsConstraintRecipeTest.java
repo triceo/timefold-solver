@@ -54,34 +54,6 @@ class AsConstraintRecipeTest implements RewriteTest {
     }
 
     @Test
-    void uniPenalizeConfigurableName() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .penalizeConfigurable("My constraint");\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .penalizeConfigurable()
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void uniPenalizeConfigurableId() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .penalizeConfigurable("My package", "My constraint");\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .penalizeConfigurable()
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
     void uniPenalizeNameMatchWeigherInt() {
         rewriteRun(java(
                 wrap("""
@@ -90,7 +62,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .penalize((a) -> 7)
+                                        .penalize()
+                                        .withMatchWeight((a) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -105,36 +78,9 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .penalize((a) -> 7)
+                                        .penalize()
+                                        .withMatchWeight((a) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
-    void uniPenalizeConfigurableNameMatchWeigherInt() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .penalizeConfigurable("My constraint", (a) -> 7);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .penalizeConfigurable((a) -> 7)
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void uniPenalizeConfigurableIdMatchWeigherInt() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .penalizeConfigurable("My package", "My constraint", (a) -> 7);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .penalizeConfigurable((a) -> 7)
                                         .asConstraint("My package.My constraint");\
                         """)));
     }
@@ -148,7 +94,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .penalizeLong((a) -> 7L)
+                                        .penalize()
+                                        .withLongMatchWeight((a) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -163,36 +110,9 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .penalizeLong((a) -> 7L)
+                                        .penalize()
+                                        .withLongMatchWeight((a) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
-    void uniPenalizeConfigurableNameMatchWeigherLong() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .penalizeConfigurableLong("My constraint", (a) -> 7L);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .penalizeConfigurableLong((a) -> 7L)
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void uniPenalizeConfigurableIdMatchWeigherLong() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .penalizeConfigurableLong("My package", "My constraint", (a) -> 7L);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .penalizeConfigurableLong((a) -> 7L)
                                         .asConstraint("My package.My constraint");\
                         """)));
     }
@@ -206,7 +126,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .penalizeBigDecimal((a) -> BigDecimal.TEN)
+                                        .penalize()
+                                        .withBigDecimalMatchWeight((a) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -221,36 +142,9 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .penalizeBigDecimal((a) -> BigDecimal.TEN)
+                                        .penalize()
+                                        .withBigDecimalMatchWeight((a) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
-    void uniPenalizeConfigurableNameMatchWeigherBigDecimal() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .penalizeConfigurableBigDecimal("My constraint", (a) -> BigDecimal.TEN);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .penalizeConfigurableBigDecimal((a) -> BigDecimal.TEN)
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void uniPenalizeConfigurableIdMatchWeigherBigDecimal() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .penalizeConfigurableBigDecimal("My package", "My constraint", (a) -> BigDecimal.TEN);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .penalizeConfigurableBigDecimal((a) -> BigDecimal.TEN)
                                         .asConstraint("My package.My constraint");\
                         """)));
     }
@@ -286,34 +180,6 @@ class AsConstraintRecipeTest implements RewriteTest {
     }
 
     @Test
-    void uniRewardConfigurableName() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .rewardConfigurable("My constraint");\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .rewardConfigurable()
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void uniRewardConfigurableId() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .rewardConfigurable("My package", "My constraint");\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .rewardConfigurable()
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
     void uniRewardNameMatchWeigherInt() {
         rewriteRun(java(
                 wrap("""
@@ -322,7 +188,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .reward((a) -> 7)
+                                        .reward()
+                                        .withMatchWeight((a) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -337,36 +204,9 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .reward((a) -> 7)
+                                        .reward()
+                                        .withMatchWeight((a) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
-    void uniRewardConfigurableNameMatchWeigherInt() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .rewardConfigurable("My constraint", (a) -> 7);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .rewardConfigurable((a) -> 7)
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void uniRewardConfigurableIdMatchWeigherInt() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .rewardConfigurable("My package", "My constraint", (a) -> 7);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .rewardConfigurable((a) -> 7)
                                         .asConstraint("My package.My constraint");\
                         """)));
     }
@@ -380,7 +220,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .rewardLong((a) -> 7L)
+                                        .reward()
+                                        .withLongMatchWeight((a) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -395,36 +236,9 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .rewardLong((a) -> 7L)
+                                        .reward()
+                                        .withLongMatchWeight((a) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
-    void uniRewardConfigurableNameMatchWeigherLong() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .rewardConfigurableLong("My constraint", (a) -> 7L);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .rewardConfigurableLong((a) -> 7L)
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void uniRewardConfigurableIdMatchWeigherLong() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .rewardConfigurableLong("My package", "My constraint", (a) -> 7L);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .rewardConfigurableLong((a) -> 7L)
                                         .asConstraint("My package.My constraint");\
                         """)));
     }
@@ -438,7 +252,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .rewardBigDecimal((a) -> BigDecimal.TEN)
+                                        .reward()
+                                        .withBigDecimalMatchWeight((a) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -453,36 +268,9 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .rewardBigDecimal((a) -> BigDecimal.TEN)
+                                        .reward()
+                                        .withBigDecimalMatchWeight((a) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
-    void uniRewardConfigurableNameMatchWeigherBigDecimal() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .rewardConfigurableBigDecimal("My constraint", (a) -> BigDecimal.TEN);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .rewardConfigurableBigDecimal((a) -> BigDecimal.TEN)
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void uniRewardConfigurableIdMatchWeigherBigDecimal() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .rewardConfigurableBigDecimal("My package", "My constraint", (a) -> BigDecimal.TEN);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .rewardConfigurableBigDecimal((a) -> BigDecimal.TEN)
                                         .asConstraint("My package.My constraint");\
                         """)));
     }
@@ -526,7 +314,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .impact((a) -> 7)
+                                        .impact()
+                                        .withMatchWeight((a) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -541,7 +330,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .impact((a) -> 7)
+                                        .impact()
+                                        .withMatchWeight((a) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -556,7 +346,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .impactLong((a) -> 7L)
+                                        .impact()
+                                        .withLongMatchWeight((a) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -571,7 +362,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .impactLong((a) -> 7L)
+                                        .impact()
+                                        .withLongMatchWeight((a) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -586,7 +378,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .impactBigDecimal((a) -> BigDecimal.TEN)
+                                        .impact()
+                                        .withBigDecimalMatchWeight((a) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -601,7 +394,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .impactBigDecimal((a) -> BigDecimal.TEN)
+                                        .impact()
+                                        .withBigDecimalMatchWeight((a) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -646,38 +440,6 @@ class AsConstraintRecipeTest implements RewriteTest {
     }
 
     @Test
-    void biPenalizeConfigurableName() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurable("My constraint");\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurable()
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void biPenalizeConfigurableId() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurable("My package", "My constraint");\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurable()
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
     void biPenalizeNameMatchWeigherInt() {
         rewriteRun(java(
                 wrap("""
@@ -688,7 +450,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .penalize((a, b) -> 7)
+                                        .penalize()
+                                        .withMatchWeight((a, b) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -705,40 +468,9 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .penalize((a, b) -> 7)
+                                        .penalize()
+                                        .withMatchWeight((a, b) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
-    void biPenalizeConfigurableNameMatchWeigherInt() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurable("My constraint", (a, b) -> 7);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurable((a, b) -> 7)
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void biPenalizeConfigurableIdMatchWeigherInt() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurable("My package", "My constraint", (a, b) -> 7);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurable((a, b) -> 7)
                                         .asConstraint("My package.My constraint");\
                         """)));
     }
@@ -754,7 +486,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .penalizeLong((a, b) -> 7L)
+                                        .penalize()
+                                        .withLongMatchWeight((a, b) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -771,40 +504,9 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .penalizeLong((a, b) -> 7L)
+                                        .penalize()
+                                        .withLongMatchWeight((a, b) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
-    void biPenalizeConfigurableNameMatchWeigherLong() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurableLong("My constraint", (a, b) -> 7L);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurableLong((a, b) -> 7L)
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void biPenalizeConfigurableIdMatchWeigherLong() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurableLong("My package", "My constraint", (a, b) -> 7L);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurableLong((a, b) -> 7L)
                                         .asConstraint("My package.My constraint");\
                         """)));
     }
@@ -820,7 +522,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .penalizeBigDecimal((a, b) -> BigDecimal.TEN)
+                                        .penalize()
+                                        .withBigDecimalMatchWeight((a, b) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -837,40 +540,9 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .penalizeBigDecimal((a, b) -> BigDecimal.TEN)
+                                        .penalize()
+                                        .withBigDecimalMatchWeight((a, b) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
-    void biPenalizeConfigurableNameMatchWeigherBigDecimal() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurableBigDecimal("My constraint", (a, b) -> BigDecimal.TEN);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurableBigDecimal((a, b) -> BigDecimal.TEN)
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void biPenalizeConfigurableIdMatchWeigherBigDecimal() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurableBigDecimal("My package", "My constraint", (a, b) -> BigDecimal.TEN);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurableBigDecimal((a, b) -> BigDecimal.TEN)
                                         .asConstraint("My package.My constraint");\
                         """)));
     }
@@ -910,38 +582,6 @@ class AsConstraintRecipeTest implements RewriteTest {
     }
 
     @Test
-    void biRewardConfigurableName() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurable("My constraint");\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurable()
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void biRewardConfigurableId() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurable("My package", "My constraint");\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurable()
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
     void biRewardNameMatchWeigherInt() {
         rewriteRun(java(
                 wrap("""
@@ -952,7 +592,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .reward((a, b) -> 7)
+                                        .reward()
+                                        .withMatchWeight((a, b) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -969,40 +610,9 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .reward((a, b) -> 7)
+                                        .reward()
+                                        .withMatchWeight((a, b) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
-    void biRewardConfigurableNameMatchWeigherInt() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurable("My constraint", (a, b) -> 7);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurable((a, b) -> 7)
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void biRewardConfigurableIdMatchWeigherInt() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurable("My package", "My constraint", (a, b) -> 7);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurable((a, b) -> 7)
                                         .asConstraint("My package.My constraint");\
                         """)));
     }
@@ -1018,7 +628,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .rewardLong((a, b) -> 7L)
+                                        .reward()
+                                        .withLongMatchWeight((a, b) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -1035,40 +646,9 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .rewardLong((a, b) -> 7L)
+                                        .reward()
+                                        .withLongMatchWeight((a, b) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
-    void biRewardConfigurableNameMatchWeigherLong() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurableLong("My constraint", (a, b) -> 7L);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurableLong((a, b) -> 7L)
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void biRewardConfigurableIdMatchWeigherLong() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurableLong("My package", "My constraint", (a, b) -> 7L);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurableLong((a, b) -> 7L)
                                         .asConstraint("My package.My constraint");\
                         """)));
     }
@@ -1084,7 +664,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .rewardBigDecimal((a, b) -> BigDecimal.TEN)
+                                        .reward()
+                                        .withBigDecimalMatchWeight((a, b) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -1101,40 +682,9 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .rewardBigDecimal((a, b) -> BigDecimal.TEN)
+                                        .reward()
+                                        .withBigDecimalMatchWeight((a, b) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
-    void biRewardConfigurableNameMatchWeigherBigDecimal() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurableBigDecimal("My constraint", (a, b) -> BigDecimal.TEN);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurableBigDecimal((a, b) -> BigDecimal.TEN)
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void biRewardConfigurableIdMatchWeigherBigDecimal() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurableBigDecimal("My package", "My constraint", (a, b) -> BigDecimal.TEN);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurableBigDecimal((a, b) -> BigDecimal.TEN)
                                         .asConstraint("My package.My constraint");\
                         """)));
     }
@@ -1184,7 +734,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .impact((a, b) -> 7)
+                                        .impact()
+                                        .withMatchWeight((a, b) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -1201,7 +752,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .impact((a, b) -> 7)
+                                        .impact()
+                                        .withMatchWeight((a, b) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -1218,7 +770,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .impactLong((a, b) -> 7L)
+                                        .impact()
+                                        .withLongMatchWeight((a, b) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -1235,7 +788,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .impactLong((a, b) -> 7L)
+                                        .impact()
+                                        .withLongMatchWeight((a, b) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -1252,7 +806,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .impactBigDecimal((a, b) -> BigDecimal.TEN)
+                                        .impact()
+                                        .withBigDecimalMatchWeight((a, b) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -1269,7 +824,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .impactBigDecimal((a, b) -> BigDecimal.TEN)
+                                        .impact()
+                                        .withBigDecimalMatchWeight((a, b) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -1318,42 +874,6 @@ class AsConstraintRecipeTest implements RewriteTest {
     }
 
     @Test
-    void triPenalizeConfigurableName() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurable("My constraint");\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurable()
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void triPenalizeConfigurableId() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurable("My package", "My constraint");\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurable()
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
     void triPenalizeNameMatchWeigherInt() {
         rewriteRun(java(
                 wrap("""
@@ -1366,7 +886,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalize((a, b, c) -> 7)
+                                        .penalize()
+                                        .withMatchWeight((a, b, c) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -1385,44 +906,9 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalize((a, b, c) -> 7)
+                                        .penalize()
+                                        .withMatchWeight((a, b, c) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
-    void triPenalizeConfigurableNameMatchWeigherInt() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurable("My constraint", (a, b, c) -> 7);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurable((a, b, c) -> 7)
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void triPenalizeConfigurableIdMatchWeigherInt() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurable("My package", "My constraint", (a, b, c) -> 7);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurable((a, b, c) -> 7)
                                         .asConstraint("My package.My constraint");\
                         """)));
     }
@@ -1440,7 +926,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalizeLong((a, b, c) -> 7L)
+                                        .penalize()
+                                        .withLongMatchWeight((a, b, c) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -1459,44 +946,9 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalizeLong((a, b, c) -> 7L)
+                                        .penalize()
+                                        .withLongMatchWeight((a, b, c) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
-    void triPenalizeConfigurableNameMatchWeigherLong() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurableLong("My constraint", (a, b, c) -> 7L);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurableLong((a, b, c) -> 7L)
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void triPenalizeConfigurableIdMatchWeigherLong() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurableLong("My package", "My constraint", (a, b, c) -> 7L);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurableLong((a, b, c) -> 7L)
                                         .asConstraint("My package.My constraint");\
                         """)));
     }
@@ -1514,7 +966,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalizeBigDecimal((a, b, c) -> BigDecimal.TEN)
+                                        .penalize()
+                                        .withBigDecimalMatchWeight((a, b, c) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -1533,44 +986,9 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalizeBigDecimal((a, b, c) -> BigDecimal.TEN)
+                                        .penalize()
+                                        .withBigDecimalMatchWeight((a, b, c) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
-    void triPenalizeConfigurableNameMatchWeigherBigDecimal() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurableBigDecimal("My constraint", (a, b, c) -> BigDecimal.TEN);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurableBigDecimal((a, b, c) -> BigDecimal.TEN)
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void triPenalizeConfigurableIdMatchWeigherBigDecimal() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurableBigDecimal("My package", "My constraint", (a, b, c) -> BigDecimal.TEN);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurableBigDecimal((a, b, c) -> BigDecimal.TEN)
                                         .asConstraint("My package.My constraint");\
                         """)));
     }
@@ -1614,42 +1032,6 @@ class AsConstraintRecipeTest implements RewriteTest {
     }
 
     @Test
-    void triRewardConfigurableName() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurable("My constraint");\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurable()
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void triRewardConfigurableId() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurable("My package", "My constraint");\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurable()
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
     void triRewardNameMatchWeigherInt() {
         rewriteRun(java(
                 wrap("""
@@ -1662,7 +1044,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .reward((a, b, c) -> 7)
+                                        .reward()
+                                        .withMatchWeight((a, b, c) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -1681,44 +1064,9 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .reward((a, b, c) -> 7)
+                                        .reward()
+                                        .withMatchWeight((a, b, c) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
-    void triRewardConfigurableNameMatchWeigherInt() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurable("My constraint", (a, b, c) -> 7);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurable((a, b, c) -> 7)
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void triRewardConfigurableIdMatchWeigherInt() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurable("My package", "My constraint", (a, b, c) -> 7);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurable((a, b, c) -> 7)
                                         .asConstraint("My package.My constraint");\
                         """)));
     }
@@ -1736,7 +1084,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .rewardLong((a, b, c) -> 7L)
+                                        .reward()
+                                        .withLongMatchWeight((a, b, c) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -1755,44 +1104,9 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .rewardLong((a, b, c) -> 7L)
+                                        .reward()
+                                        .withLongMatchWeight((a, b, c) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
-    void triRewardConfigurableNameMatchWeigherLong() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurableLong("My constraint", (a, b, c) -> 7L);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurableLong((a, b, c) -> 7L)
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void triRewardConfigurableIdMatchWeigherLong() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurableLong("My package", "My constraint", (a, b, c) -> 7L);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurableLong((a, b, c) -> 7L)
                                         .asConstraint("My package.My constraint");\
                         """)));
     }
@@ -1810,7 +1124,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .rewardBigDecimal((a, b, c) -> BigDecimal.TEN)
+                                        .reward()
+                                        .withBigDecimalMatchWeight((a, b, c) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -1829,44 +1144,9 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .rewardBigDecimal((a, b, c) -> BigDecimal.TEN)
+                                        .reward()
+                                        .withBigDecimalMatchWeight((a, b, c) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
-    void triRewardConfigurableNameMatchWeigherBigDecimal() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurableBigDecimal("My constraint", (a, b, c) -> BigDecimal.TEN);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurableBigDecimal((a, b, c) -> BigDecimal.TEN)
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void triRewardConfigurableIdMatchWeigherBigDecimal() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurableBigDecimal("My package", "My constraint", (a, b, c) -> BigDecimal.TEN);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurableBigDecimal((a, b, c) -> BigDecimal.TEN)
                                         .asConstraint("My package.My constraint");\
                         """)));
     }
@@ -1922,7 +1202,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .impact((a, b, c) -> 7)
+                                        .impact()
+                                        .withMatchWeight((a, b, c) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -1941,7 +1222,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .impact((a, b, c) -> 7)
+                                        .impact()
+                                        .withMatchWeight((a, b, c) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -1960,7 +1242,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .impactLong((a, b, c) -> 7L)
+                                        .impact()
+                                        .withLongMatchWeight((a, b, c) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -1979,7 +1262,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .impactLong((a, b, c) -> 7L)
+                                        .impact()
+                                        .withLongMatchWeight((a, b, c) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -1998,7 +1282,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .impactBigDecimal((a, b, c) -> BigDecimal.TEN)
+                                        .impact()
+                                        .withBigDecimalMatchWeight((a, b, c) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -2017,7 +1302,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .impactBigDecimal((a, b, c) -> BigDecimal.TEN)
+                                        .impact()
+                                        .withBigDecimalMatchWeight((a, b, c) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -2070,46 +1356,6 @@ class AsConstraintRecipeTest implements RewriteTest {
     }
 
     @Test
-    void quadPenalizeConfigurableName() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurable("My constraint");\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurable()
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void quadPenalizeConfigurableId() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurable("My package", "My constraint");\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurable()
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
     void quadPenalizeNameMatchWeigherInt() {
         rewriteRun(java(
                 wrap("""
@@ -2124,7 +1370,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalize((a, b, c, d) -> 7)
+                                        .penalize()
+                                        .withMatchWeight((a, b, c, d) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -2145,48 +1392,9 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalize((a, b, c, d) -> 7)
+                                        .penalize()
+                                        .withMatchWeight((a, b, c, d) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
-    void quadPenalizeConfigurableNameMatchWeigherInt() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurable("My constraint", (a, b, c, d) -> 7);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurable((a, b, c, d) -> 7)
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void quadPenalizeConfigurableIdMatchWeigherInt() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurable("My package", "My constraint", (a, b, c, d) -> 7);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurable((a, b, c, d) -> 7)
                                         .asConstraint("My package.My constraint");\
                         """)));
     }
@@ -2206,7 +1414,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalizeLong((a, b, c, d) -> 7L)
+                                        .penalize()
+                                        .withLongMatchWeight((a, b, c, d) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -2227,48 +1436,9 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalizeLong((a, b, c, d) -> 7L)
+                                        .penalize()
+                                        .withLongMatchWeight((a, b, c, d) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
-    void quadPenalizeConfigurableNameMatchWeigherLong() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurableLong("My constraint", (a, b, c, d) -> 7L);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurableLong((a, b, c, d) -> 7L)
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void quadPenalizeConfigurableIdMatchWeigherLong() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurableLong("My package", "My constraint", (a, b, c, d) -> 7L);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurableLong((a, b, c, d) -> 7L)
                                         .asConstraint("My package.My constraint");\
                         """)));
     }
@@ -2288,7 +1458,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalizeBigDecimal((a, b, c, d) -> BigDecimal.TEN)
+                                        .penalize()
+                                        .withBigDecimalMatchWeight((a, b, c, d) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -2309,48 +1480,9 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalizeBigDecimal((a, b, c, d) -> BigDecimal.TEN)
+                                        .penalize()
+                                        .withBigDecimalMatchWeight((a, b, c, d) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
-    void quadPenalizeConfigurableNameMatchWeigherBigDecimal() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurableBigDecimal("My constraint", (a, b, c, d) -> BigDecimal.TEN);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurableBigDecimal((a, b, c, d) -> BigDecimal.TEN)
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void quadPenalizeConfigurableIdMatchWeigherBigDecimal() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurableBigDecimal("My package", "My constraint", (a, b, c, d) -> BigDecimal.TEN);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .penalizeConfigurableBigDecimal((a, b, c, d) -> BigDecimal.TEN)
                                         .asConstraint("My package.My constraint");\
                         """)));
     }
@@ -2398,46 +1530,6 @@ class AsConstraintRecipeTest implements RewriteTest {
     }
 
     @Test
-    void quadRewardConfigurableName() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurable("My constraint");\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurable()
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void quadRewardConfigurableId() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurable("My package", "My constraint");\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurable()
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
     void quadRewardNameMatchWeigherInt() {
         rewriteRun(java(
                 wrap("""
@@ -2452,7 +1544,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .reward((a, b, c, d) -> 7)
+                                        .reward()
+                                        .withMatchWeight((a, b, c, d) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -2473,48 +1566,9 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .reward((a, b, c, d) -> 7)
+                                        .reward()
+                                        .withMatchWeight((a, b, c, d) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
-    void quadRewardConfigurableNameMatchWeigherInt() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurable("My constraint", (a, b, c, d) -> 7);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurable((a, b, c, d) -> 7)
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void quadRewardConfigurableIdMatchWeigherInt() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurable("My package", "My constraint", (a, b, c, d) -> 7);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurable((a, b, c, d) -> 7)
                                         .asConstraint("My package.My constraint");\
                         """)));
     }
@@ -2534,7 +1588,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .rewardLong((a, b, c, d) -> 7L)
+                                        .reward()
+                                        .withLongMatchWeight((a, b, c, d) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -2555,48 +1610,9 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .rewardLong((a, b, c, d) -> 7L)
+                                        .reward()
+                                        .withLongMatchWeight((a, b, c, d) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
-    void quadRewardConfigurableNameMatchWeigherLong() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurableLong("My constraint", (a, b, c, d) -> 7L);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurableLong((a, b, c, d) -> 7L)
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void quadRewardConfigurableIdMatchWeigherLong() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurableLong("My package", "My constraint", (a, b, c, d) -> 7L);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurableLong((a, b, c, d) -> 7L)
                                         .asConstraint("My package.My constraint");\
                         """)));
     }
@@ -2616,7 +1632,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .rewardBigDecimal((a, b, c, d) -> BigDecimal.TEN)
+                                        .reward()
+                                        .withBigDecimalMatchWeight((a, b, c, d) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -2637,48 +1654,9 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .rewardBigDecimal((a, b, c, d) -> BigDecimal.TEN)
+                                        .reward()
+                                        .withBigDecimalMatchWeight((a, b, c, d) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
-                                        .asConstraint("My package.My constraint");\
-                        """)));
-    }
-
-    @Test
-    void quadRewardConfigurableNameMatchWeigherBigDecimal() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurableBigDecimal("My constraint", (a, b, c, d) -> BigDecimal.TEN);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurableBigDecimal((a, b, c, d) -> BigDecimal.TEN)
-                                        .asConstraint("My constraint");\
-                        """)));
-    }
-
-    @Test
-    void quadRewardConfigurableIdMatchWeigherBigDecimal() {
-        rewriteRun(java(
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurableBigDecimal("My package", "My constraint", (a, b, c, d) -> BigDecimal.TEN);\
-                        """),
-                wrap("""
-                                return f.forEach(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .join(String.class)
-                                        .rewardConfigurableBigDecimal((a, b, c, d) -> BigDecimal.TEN)
                                         .asConstraint("My package.My constraint");\
                         """)));
     }
@@ -2740,7 +1718,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .impact((a, b, c, d) -> 7)
+                                        .impact()
+                                        .withMatchWeight((a, b, c, d) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -2761,7 +1740,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .impact((a, b, c, d) -> 7)
+                                        .impact()
+                                        .withMatchWeight((a, b, c, d) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -2782,7 +1762,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .impactLong((a, b, c, d) -> 7L)
+                                        .impact()
+                                        .withLongMatchWeight((a, b, c, d) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -2803,7 +1784,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .impactLong((a, b, c, d) -> 7L)
+                                        .impact()
+                                        .withLongMatchWeight((a, b, c, d) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -2824,7 +1806,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .impactBigDecimal((a, b, c, d) -> BigDecimal.TEN)
+                                        .impact()
+                                        .withBigDecimalMatchWeight((a, b, c, d) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -2845,7 +1828,8 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .impactBigDecimal((a, b, c, d) -> BigDecimal.TEN)
+                                        .impact()
+                                        .withBigDecimalMatchWeight((a, b, c, d) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));

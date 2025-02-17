@@ -3,7 +3,6 @@ package ai.timefold.solver.core.impl.score.stream.bavet.quad;
 import static ai.timefold.solver.core.impl.score.stream.common.quad.InnerQuadConstraintStream.createDefaultIndictedObjectsMapping;
 import static ai.timefold.solver.core.impl.score.stream.common.quad.InnerQuadConstraintStream.createDefaultJustificationMapping;
 
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -11,8 +10,6 @@ import java.util.function.Function;
 import ai.timefold.solver.core.api.function.PentaFunction;
 import ai.timefold.solver.core.api.function.QuadFunction;
 import ai.timefold.solver.core.api.function.QuadPredicate;
-import ai.timefold.solver.core.api.function.ToIntQuadFunction;
-import ai.timefold.solver.core.api.function.ToLongQuadFunction;
 import ai.timefold.solver.core.api.function.TriFunction;
 import ai.timefold.solver.core.api.score.Score;
 import ai.timefold.solver.core.api.score.stream.DefaultConstraintJustification;
@@ -415,33 +412,19 @@ public abstract class BavetAbstractQuadConstraintStream<Solution_, A, B, C, D>
     // ************************************************************************
 
     @Override
-    public QuadConstraintStub<A, B, C, D> innerImpact(ToIntQuadFunction<A, B, C, D> matchWeigher,
-            ScoreImpactType scoreImpactType) {
-        var stream = shareAndAddChild(new BavetScoringQuadConstraintStream<>(constraintFactory, this, matchWeigher));
+    public QuadConstraintStub<A, B, C, D> innerImpact(ScoreImpactType scoreImpactType) {
+        var stream = shareAndAddChild(new BavetScoringQuadConstraintStream<>(constraintFactory, this));
         return newTerminator(stream, scoreImpactType);
     }
 
     private <Score_ extends Score<Score_>> QuadConstraintStubImpl<A, B, C, D>
             newTerminator(BavetScoringConstraintStream<Solution_> stream, ScoreImpactType impactType) {
-        QuadConstraintConstructor<A, B, C, D, Score_> constructor = (constraintPackage, constraintName, constraintDescription,
-                constraintGroup, constraintWeight, impactType_, justificationMapping,
-                indictedObjectsMapping) -> buildConstraint(constraintPackage, constraintName, constraintDescription,
-                        constraintGroup, constraintWeight, impactType_, justificationMapping, indictedObjectsMapping, stream);
+        QuadConstraintConstructor<A, B, C, D, Score_> constructor =
+                (constraintPackage, constraintName, constraintDescription, constraintGroup, constraintWeight, matchWeight,
+                        impactType_, justificationMapping, indictedObjectsMapping) -> buildConstraint(constraintPackage,
+                                constraintName, constraintDescription, constraintGroup, constraintWeight, matchWeight,
+                                impactType_, justificationMapping, indictedObjectsMapping, stream);
         return new QuadConstraintStubImpl<>(constructor, impactType);
-    }
-
-    @Override
-    public QuadConstraintStub<A, B, C, D> innerImpact(ToLongQuadFunction<A, B, C, D> matchWeigher,
-            ScoreImpactType scoreImpactType) {
-        var stream = shareAndAddChild(new BavetScoringQuadConstraintStream<>(constraintFactory, this, matchWeigher));
-        return newTerminator(stream, scoreImpactType);
-    }
-
-    @Override
-    public QuadConstraintStub<A, B, C, D> innerImpact(QuadFunction<A, B, C, D, BigDecimal> matchWeigher,
-            ScoreImpactType scoreImpactType) {
-        var stream = shareAndAddChild(new BavetScoringQuadConstraintStream<>(constraintFactory, this, matchWeigher));
-        return newTerminator(stream, scoreImpactType);
     }
 
     @Override

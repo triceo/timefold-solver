@@ -3,13 +3,10 @@ package ai.timefold.solver.core.impl.score.stream.bavet.bi;
 import static ai.timefold.solver.core.impl.score.stream.common.bi.InnerBiConstraintStream.createDefaultIndictedObjectsMapping;
 import static ai.timefold.solver.core.impl.score.stream.common.bi.InnerBiConstraintStream.createDefaultJustificationMapping;
 
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
-import java.util.function.ToIntBiFunction;
-import java.util.function.ToLongBiFunction;
 
 import ai.timefold.solver.core.api.function.TriFunction;
 import ai.timefold.solver.core.api.score.Score;
@@ -462,30 +459,19 @@ public abstract class BavetAbstractBiConstraintStream<Solution_, A, B> extends B
     // ************************************************************************
 
     @Override
-    public BiConstraintStub<A, B> innerImpact(ToIntBiFunction<A, B> matchWeigher, ScoreImpactType scoreImpactType) {
-        var stream = shareAndAddChild(new BavetScoringBiConstraintStream<>(constraintFactory, this, matchWeigher));
+    public BiConstraintStub<A, B> innerImpact(ScoreImpactType scoreImpactType) {
+        var stream = shareAndAddChild(new BavetScoringBiConstraintStream<>(constraintFactory, this));
         return newTerminator(stream, scoreImpactType);
     }
 
     private <Score_ extends Score<Score_>> BiConstraintStubImpl<A, B>
             newTerminator(BavetScoringConstraintStream<Solution_> stream, ScoreImpactType impactType) {
-        BiConstraintConstructor<A, B, Score_> constructor = (constraintPackage, constraintName, constraintDescription,
-                constraintGroup, constraintWeight, impactType_, justificationMapping,
-                indictedObjectsMapping) -> buildConstraint(constraintPackage, constraintName, constraintDescription,
-                        constraintGroup, constraintWeight, impactType_, justificationMapping, indictedObjectsMapping, stream);
+        BiConstraintConstructor<A, B, Score_> constructor =
+                (constraintPackage, constraintName, constraintDescription, constraintGroup, constraintWeight, matchWeight,
+                        impactType_, justificationMapping, indictedObjectsMapping) -> buildConstraint(constraintPackage,
+                                constraintName, constraintDescription, constraintGroup, constraintWeight, matchWeight,
+                                impactType_, justificationMapping, indictedObjectsMapping, stream);
         return new BiConstraintStubImpl<>(constructor, impactType);
-    }
-
-    @Override
-    public BiConstraintStub<A, B> innerImpact(ToLongBiFunction<A, B> matchWeigher, ScoreImpactType scoreImpactType) {
-        var stream = shareAndAddChild(new BavetScoringBiConstraintStream<>(constraintFactory, this, matchWeigher));
-        return newTerminator(stream, scoreImpactType);
-    }
-
-    @Override
-    public BiConstraintStub<A, B> innerImpact(BiFunction<A, B, BigDecimal> matchWeigher, ScoreImpactType scoreImpactType) {
-        var stream = shareAndAddChild(new BavetScoringBiConstraintStream<>(constraintFactory, this, matchWeigher));
-        return newTerminator(stream, scoreImpactType);
     }
 
     @Override

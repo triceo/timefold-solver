@@ -21,8 +21,8 @@ public final class UniConstraintBuilderImpl<A, Score_ extends Score<Score_>>
     private Function<A, Collection<Object>> indictedObjectsMapping;
 
     public UniConstraintBuilderImpl(UniConstraintConstructor<A, Score_> constraintConstructor, ScoreImpactType impactType,
-            Score_ constraintWeight) {
-        super(constraintConstructor, impactType, constraintWeight);
+            AbstractUniMatchWeight<A> matchWeight, Score_ constraintWeight) {
+        super(constraintConstructor, impactType, matchWeight, constraintWeight);
     }
 
     @Override

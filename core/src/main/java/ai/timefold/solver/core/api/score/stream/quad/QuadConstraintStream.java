@@ -1093,40 +1093,14 @@ public interface QuadConstraintStream<A, B, C, D> extends ConstraintStream {
     // ************************************************************************
 
     /**
-     * As defined by {@link #penalize(ToIntQuadFunction)}, where the match weight is one (1).
-     */
-    @Override
-    default @NonNull QuadConstraintStub<A, B, C, D> penalize() {
-        return penalize(quadConstantOne());
-    }
-
-    /**
      * Applies a negative {@link Score} impact,
-     * subtracting the constraint weight multiplied by the match weight,
      * and returns a builder to apply optional constraint properties.
-     * <p>
-     * For non-int {@link Score} types use {@link #penalizeLong(ToLongQuadFunction)} or
-     * {@link #penalizeBigDecimal(QuadFunction)} instead.
      *
-     * @param matchWeigher the result of this function (matchWeight) is multiplied by the constraintWeight
      * @return fluent builder for the constraint
      */
+    @Override
     @NonNull
-    QuadConstraintStub<A, B, C, D> penalize(ToIntQuadFunction<A, B, C, D> matchWeigher);
-
-    /**
-     * As defined by {@link #penalize(ToIntQuadFunction)}, with a penalty of type long.
-     *
-     */
-    @NonNull
-    QuadConstraintStub<A, B, C, D> penalizeLong(ToLongQuadFunction<A, B, C, D> matchWeigher);
-
-    /**
-     * As defined by {@link #penalize(ToIntQuadFunction)}, with a penalty of type {@link BigDecimal}.
-     *
-     */
-    @NonNull
-    QuadConstraintStub<A, B, C, D> penalizeBigDecimal(QuadFunction<A, B, C, D, BigDecimal> matchWeigher);
+    QuadConstraintStub<A, B, C, D> penalize();
 
     /**
      * As defined by {@link #penalize(Score, ToIntQuadFunction)}, where the match weight is one (1).
@@ -1173,38 +1147,40 @@ public interface QuadConstraintStream<A, B, C, D> extends ConstraintStream {
      * {@link #penalizeBigDecimal(Score, QuadFunction)} instead.
      *
      * @param matchWeigher the result of this function (matchWeight) is multiplied by the constraintWeight
-     * @deprecated Use {@link #penalizeLong(ToLongQuadFunction)} instead, and continue fluently from there.
+     * @deprecated Use {@link #penalize()} instead, and continue fluently from there.
      */
     @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull QuadConstraintBuilder<A, B, C, D, Score_> penalize(
-            @NonNull Score_ constraintWeight,
-            @NonNull ToIntQuadFunction<A, B, C, D> matchWeigher) {
-        QuadConstraintStub<A, B, C, D> stub = penalize(matchWeigher);
-        return stub.usingDefaultConstraintWeight(constraintWeight);
+            @NonNull Score_ constraintWeight, @NonNull ToIntQuadFunction<A, B, C, D> matchWeigher) {
+        return penalize()
+                .withMatchWeight(matchWeigher)
+                .usingDefaultConstraintWeight(constraintWeight);
     }
 
     /**
      * As defined by {@link #penalize(Score, ToIntQuadFunction)}, with a penalty of type long.
      * 
-     * @deprecated Use {@link #penalizeLong(ToLongQuadFunction)} instead, and continue fluently from there.
+     * @deprecated Use {@link #penalize()} instead, and continue fluently from there.
      */
     @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull QuadConstraintBuilder<A, B, C, D, Score_> penalizeLong(
             @NonNull Score_ constraintWeight, @NonNull ToLongQuadFunction<A, B, C, D> matchWeigher) {
-        QuadConstraintStub<A, B, C, D> stub = penalizeLong(matchWeigher);
-        return stub.usingDefaultConstraintWeight(constraintWeight);
+        return penalize()
+                .withLongMatchWeight(matchWeigher)
+                .usingDefaultConstraintWeight(constraintWeight);
     }
 
     /**
      * As defined by {@link #penalize(Score, ToIntQuadFunction)}, with a penalty of type {@link BigDecimal}.
      * 
-     * @deprecated Use {@link #penalizeBigDecimal(QuadFunction)} instead, and continue fluently from there.
+     * @deprecated Use {@link #penalize()} instead, and continue fluently from there.
      */
     @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull QuadConstraintBuilder<A, B, C, D, Score_> penalizeBigDecimal(
             @NonNull Score_ constraintWeight, @NonNull QuadFunction<A, B, C, D, BigDecimal> matchWeigher) {
-        QuadConstraintStub<A, B, C, D> stub = penalizeBigDecimal(matchWeigher);
-        return stub.usingDefaultConstraintWeight(constraintWeight);
+        return penalize()
+                .withBigDecimalMatchWeight(matchWeigher)
+                .usingDefaultConstraintWeight(constraintWeight);
     }
 
     /**
@@ -1257,40 +1233,14 @@ public interface QuadConstraintStream<A, B, C, D> extends ConstraintStream {
     QuadConstraintBuilder<A, B, C, D, ?> penalizeConfigurableBigDecimal(QuadFunction<A, B, C, D, BigDecimal> matchWeigher);
 
     /**
-     * As defined by {@link #reward(ToIntQuadFunction)}, where the match weight is one (1).
-     */
-    @Override
-    default @NonNull QuadConstraintStub<A, B, C, D> reward() {
-        return reward(quadConstantOne());
-    }
-
-    /**
      * Applies a positive {@link Score} impact,
-     * adding the constraint weight multiplied by the match weight,
      * and returns a builder to apply optional constraint properties.
-     * <p>
-     * For non-int {@link Score} types use {@link #rewardLong(ToLongQuadFunction)} or
-     * {@link #rewardBigDecimal(QuadFunction)} instead.
      *
-     * @param matchWeigher the result of this function (matchWeight) is multiplied by the constraintWeight
      * @return fluent builder for the constraint
      */
+    @Override
     @NonNull
-    QuadConstraintStub<A, B, C, D> reward(ToIntQuadFunction<A, B, C, D> matchWeigher);
-
-    /**
-     * As defined by {@link #reward(ToIntQuadFunction)}, with a reward of type long.
-     *
-     */
-    @NonNull
-    QuadConstraintStub<A, B, C, D> rewardLong(ToLongQuadFunction<A, B, C, D> matchWeigher);
-
-    /**
-     * As defined by {@link #reward(ToIntQuadFunction)}, with a reward of type {@link BigDecimal}.
-     *
-     */
-    @NonNull
-    QuadConstraintStub<A, B, C, D> rewardBigDecimal(QuadFunction<A, B, C, D, BigDecimal> matchWeigher);
+    QuadConstraintStub<A, B, C, D> reward();
 
     /**
      * As defined by {@link #reward(Score, ToIntQuadFunction)}, where the match weight is one (1).
@@ -1315,37 +1265,40 @@ public interface QuadConstraintStream<A, B, C, D> extends ConstraintStream {
      * {@link #rewardBigDecimal(Score, QuadFunction)} instead.
      *
      * @param matchWeigher the result of this function (matchWeight) is multiplied by the constraintWeight
-     * @deprecated Use {@link #reward(ToIntQuadFunction)} instead, and continue fluently from there.
+     * @deprecated Use {@link #reward()} instead, and continue fluently from there.
      */
     @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull QuadConstraintBuilder<A, B, C, D, Score_> reward(
             @NonNull Score_ constraintWeight, @NonNull ToIntQuadFunction<A, B, C, D> matchWeigher) {
-        QuadConstraintStub<A, B, C, D> stub = reward(matchWeigher);
-        return stub.usingDefaultConstraintWeight(constraintWeight);
+        return reward()
+                .withMatchWeight(matchWeigher)
+                .usingDefaultConstraintWeight(constraintWeight);
     }
 
     /**
      * As defined by {@link #reward(Score, ToIntQuadFunction)}, with a penalty of type long.
      * 
-     * @deprecated Use {@link #rewardLong(ToLongQuadFunction)} instead, and continue fluently from there.
+     * @deprecated Use {@link #reward()} instead, and continue fluently from there.
      */
     @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull QuadConstraintBuilder<A, B, C, D, Score_> rewardLong(
             @NonNull Score_ constraintWeight, @NonNull ToLongQuadFunction<A, B, C, D> matchWeigher) {
-        QuadConstraintStub<A, B, C, D> stub = rewardLong(matchWeigher);
-        return stub.usingDefaultConstraintWeight(constraintWeight);
+        return reward()
+                .withLongMatchWeight(matchWeigher)
+                .usingDefaultConstraintWeight(constraintWeight);
     }
 
     /**
      * As defined by {@link #reward(Score, ToIntQuadFunction)}, with a penalty of type {@link BigDecimal}.
      * 
-     * @deprecated Use {@link #rewardBigDecimal(QuadFunction)} instead, and continue fluently from there.
+     * @deprecated Use {@link #reward()} instead, and continue fluently from there.
      */
     @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull QuadConstraintBuilder<A, B, C, D, Score_> rewardBigDecimal(
             @NonNull Score_ constraintWeight, @NonNull QuadFunction<A, B, C, D, BigDecimal> matchWeigher) {
-        QuadConstraintStub<A, B, C, D> stub = rewardBigDecimal(matchWeigher);
-        return stub.usingDefaultConstraintWeight(constraintWeight);
+        return reward()
+                .withBigDecimalMatchWeight(matchWeigher)
+                .usingDefaultConstraintWeight(constraintWeight);
     }
 
     /**
@@ -1398,39 +1351,14 @@ public interface QuadConstraintStream<A, B, C, D> extends ConstraintStream {
     QuadConstraintBuilder<A, B, C, D, ?> rewardConfigurableBigDecimal(QuadFunction<A, B, C, D, BigDecimal> matchWeigher);
 
     /**
-     * As defined by {@link #impact(ToIntQuadFunction)}, where the match weight is one (1).
-     */
-    @Override
-    default @NonNull QuadConstraintStub<A, B, C, D> impact() {
-        return reward(quadConstantOne());
-    }
-
-    /**
-     * Positively or negatively impacts the {@link Score} by constraintWeight multiplied by matchWeight for each match
+     * Positively or negatively impacts the {@link Score},
      * and returns a builder to apply optional constraint properties.
-     * <p>
-     * For non-int {@link Score} types use {@link #impactLong(ToLongQuadFunction)} or
-     * {@link #impactBigDecimal(QuadFunction)} instead.
      *
-     * @param matchWeigher the result of this function (matchWeight) is multiplied by the constraintWeight
      * @return fluent builder for the constraint
      */
+    @Override
     @NonNull
-    QuadConstraintStub<A, B, C, D> impact(ToIntQuadFunction<A, B, C, D> matchWeigher);
-
-    /**
-     * As defined by {@link #impact(ToIntQuadFunction)}, with an impact of type long.
-     *
-     */
-    @NonNull
-    QuadConstraintStub<A, B, C, D> impactLong(ToLongQuadFunction<A, B, C, D> matchWeigher);
-
-    /**
-     * As defined by {@link #impact(ToIntQuadFunction)}, with an impact of type {@link BigDecimal}.
-     *
-     */
-    @NonNull
-    QuadConstraintStub<A, B, C, D> impactBigDecimal(QuadFunction<A, B, C, D, BigDecimal> matchWeigher);
+    QuadConstraintStub<A, B, C, D> impact();
 
     /**
      * Positively or negatively impacts the {@link Score} by the constraintWeight for each match
@@ -1458,37 +1386,40 @@ public interface QuadConstraintStream<A, B, C, D> extends ConstraintStream {
      * negative weights.
      *
      * @param matchWeigher the result of this function (matchWeight) is multiplied by the constraintWeight
-     * @deprecated Use {@link #impact(ToIntQuadFunction)} instead, and continue fluently from there.
+     * @deprecated Use {@link #impact()} instead, and continue fluently from there.
      */
     @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull QuadConstraintBuilder<A, B, C, D, Score_> impact(
             @NonNull Score_ constraintWeight, @NonNull ToIntQuadFunction<A, B, C, D> matchWeigher) {
-        QuadConstraintStub<A, B, C, D> stub = impact(matchWeigher);
-        return stub.usingDefaultConstraintWeight(constraintWeight);
+        return impact()
+                .withMatchWeight(matchWeigher)
+                .usingDefaultConstraintWeight(constraintWeight);
     }
 
     /**
      * As defined by {@link #impact(Score, ToIntQuadFunction)}, with an impact of type long.
      * 
-     * @deprecated Use {@link #impactLong(ToLongQuadFunction)} instead, and continue fluently from there.
+     * @deprecated Use {@link #impact()} instead, and continue fluently from there.
      */
     @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull QuadConstraintBuilder<A, B, C, D, Score_> impactLong(
             @NonNull Score_ constraintWeight, @NonNull ToLongQuadFunction<A, B, C, D> matchWeigher) {
-        QuadConstraintStub<A, B, C, D> stub = impactLong(matchWeigher);
-        return stub.usingDefaultConstraintWeight(constraintWeight);
+        return impact()
+                .withLongMatchWeight(matchWeigher)
+                .usingDefaultConstraintWeight(constraintWeight);
     }
 
     /**
      * As defined by {@link #impact(Score, ToIntQuadFunction)}, with an impact of type {@link BigDecimal}.
      * 
-     * @deprecated Use {@link #impactBigDecimal(QuadFunction)} instead, and continue fluently from there.
+     * @deprecated Use {@link #impact()} instead, and continue fluently from there.
      */
     @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull QuadConstraintBuilder<A, B, C, D, Score_> impactBigDecimal(
             @NonNull Score_ constraintWeight, @NonNull QuadFunction<A, B, C, D, BigDecimal> matchWeigher) {
-        QuadConstraintStub<A, B, C, D> stub = impactBigDecimal(matchWeigher);
-        return stub.usingDefaultConstraintWeight(constraintWeight);
+        return impact()
+                .withBigDecimalMatchWeight(matchWeigher)
+                .usingDefaultConstraintWeight(constraintWeight);
     }
 
     /**

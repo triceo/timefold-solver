@@ -25,164 +25,86 @@ public final class AsConstraintRecipe extends AbstractRecipe {
     private static final MatcherMeta[] MATCHER_METAS = {
             new MatcherMeta("ConstraintStream", "penalize(String, Score)"),
             new MatcherMeta("ConstraintStream", "penalize(String, String, Score)"),
-            new MatcherMeta("ConstraintStream", "penalizeConfigurable(String)"),
-            new MatcherMeta("ConstraintStream", "penalizeConfigurable(String, String)"),
             new MatcherMeta("ConstraintStream", "reward(String, Score)"),
             new MatcherMeta("ConstraintStream", "reward(String, String, Score)"),
-            new MatcherMeta("ConstraintStream", "rewardConfigurable(String)"),
-            new MatcherMeta("ConstraintStream", "rewardConfigurable(String, String)"),
             new MatcherMeta("ConstraintStream", "impact(String, Score)"),
             new MatcherMeta("ConstraintStream", "impact(String, String, Score)"),
-            new MatcherMeta("ConstraintStream", "impactConfigurable(String)"),
-            new MatcherMeta("ConstraintStream", "impactConfigurable(String, String)"),
 
             new MatcherMeta("UniConstraintStream", "penalize(String, Score, ToIntFunction)"),
             new MatcherMeta("UniConstraintStream", "penalize(String, String, Score, ToIntFunction)"),
-            new MatcherMeta("UniConstraintStream", "penalizeConfigurable(String, ToIntFunction)"),
-            new MatcherMeta("UniConstraintStream", "penalizeConfigurable(String, String, ToIntFunction)"),
             new MatcherMeta("UniConstraintStream", "penalizeLong(String, Score, ToLongFunction)"),
             new MatcherMeta("UniConstraintStream", "penalizeLong(String, String, Score, ToLongFunction)"),
-            new MatcherMeta("UniConstraintStream", "penalizeConfigurableLong(String, ToLongFunction)"),
-            new MatcherMeta("UniConstraintStream", "penalizeConfigurableLong(String, String, ToLongFunction)"),
             new MatcherMeta("UniConstraintStream", "penalizeBigDecimal(String, Score, Function)"),
             new MatcherMeta("UniConstraintStream", "penalizeBigDecimal(String, String, Score, Function)"),
-            new MatcherMeta("UniConstraintStream", "penalizeConfigurableBigDecimal(String, Function)"),
-            new MatcherMeta("UniConstraintStream", "penalizeConfigurableBigDecimal(String, String, Function)"),
             new MatcherMeta("UniConstraintStream", "reward(String, Score, ToIntFunction)"),
             new MatcherMeta("UniConstraintStream", "reward(String, String, Score, ToIntFunction)"),
-            new MatcherMeta("UniConstraintStream", "rewardConfigurable(String, ToIntFunction)"),
-            new MatcherMeta("UniConstraintStream", "rewardConfigurable(String, String, ToIntFunction)"),
             new MatcherMeta("UniConstraintStream", "rewardLong(String, Score, ToLongFunction)"),
             new MatcherMeta("UniConstraintStream", "rewardLong(String, String, Score, ToLongFunction)"),
-            new MatcherMeta("UniConstraintStream", "rewardConfigurableLong(String, ToLongFunction)"),
-            new MatcherMeta("UniConstraintStream", "rewardConfigurableLong(String, String, ToLongFunction)"),
             new MatcherMeta("UniConstraintStream", "rewardBigDecimal(String, Score, Function)"),
             new MatcherMeta("UniConstraintStream", "rewardBigDecimal(String, String, Score, Function)"),
-            new MatcherMeta("UniConstraintStream", "rewardConfigurableBigDecimal(String, Function)"),
-            new MatcherMeta("UniConstraintStream", "rewardConfigurableBigDecimal(String, String, Function)"),
             new MatcherMeta("UniConstraintStream", "impact(String, Score, ToIntFunction)"),
             new MatcherMeta("UniConstraintStream", "impact(String, String, Score, ToIntFunction)"),
-            new MatcherMeta("UniConstraintStream", "impactConfigurable(String, ToIntFunction)"),
-            new MatcherMeta("UniConstraintStream", "impactConfigurable(String, String, ToIntFunction)"),
             new MatcherMeta("UniConstraintStream", "impactLong(String, Score, ToLongFunction)"),
             new MatcherMeta("UniConstraintStream", "impactLong(String, String, Score, ToLongFunction)"),
-            new MatcherMeta("UniConstraintStream", "impactConfigurableLong(String, ToLongFunction)"),
-            new MatcherMeta("UniConstraintStream", "impactConfigurableLong(String, String, ToLongFunction)"),
             new MatcherMeta("UniConstraintStream", "impactBigDecimal(String, Score, Function)"),
             new MatcherMeta("UniConstraintStream", "impactBigDecimal(String, String, Score, Function)"),
-            new MatcherMeta("UniConstraintStream", "impactConfigurableBigDecimal(String, Function)"),
-            new MatcherMeta("UniConstraintStream", "impactConfigurableBigDecimal(String, String, Function)"),
 
             new MatcherMeta("BiConstraintStream", "penalize(String, Score, ToIntBiFunction)"),
             new MatcherMeta("BiConstraintStream", "penalize(String, String, Score, ToIntBiFunction)"),
-            new MatcherMeta("BiConstraintStream", "penalizeConfigurable(String, ToIntBiFunction)"),
-            new MatcherMeta("BiConstraintStream", "penalizeConfigurable(String, String, ToIntBiFunction)"),
             new MatcherMeta("BiConstraintStream", "penalizeLong(String, Score, ToLongBiFunction)"),
             new MatcherMeta("BiConstraintStream", "penalizeLong(String, String, Score, ToLongBiFunction)"),
-            new MatcherMeta("BiConstraintStream", "penalizeConfigurableLong(String, ToLongBiFunction)"),
-            new MatcherMeta("BiConstraintStream", "penalizeConfigurableLong(String, String, ToLongBiFunction)"),
             new MatcherMeta("BiConstraintStream", "penalizeBigDecimal(String, Score, BiFunction)"),
             new MatcherMeta("BiConstraintStream", "penalizeBigDecimal(String, String, Score, BiFunction)"),
-            new MatcherMeta("BiConstraintStream", "penalizeConfigurableBigDecimal(String, BiFunction)"),
-            new MatcherMeta("BiConstraintStream", "penalizeConfigurableBigDecimal(String, String, BiFunction)"),
             new MatcherMeta("BiConstraintStream", "reward(String, Score, ToIntBiFunction)"),
             new MatcherMeta("BiConstraintStream", "reward(String, String, Score, ToIntBiFunction)"),
-            new MatcherMeta("BiConstraintStream", "rewardConfigurable(String, ToIntBiFunction)"),
-            new MatcherMeta("BiConstraintStream", "rewardConfigurable(String, String, ToIntBiFunction)"),
             new MatcherMeta("BiConstraintStream", "rewardLong(String, Score, ToLongBiFunction)"),
             new MatcherMeta("BiConstraintStream", "rewardLong(String, String, Score, ToLongBiFunction)"),
-            new MatcherMeta("BiConstraintStream", "rewardConfigurableLong(String, ToLongBiFunction)"),
-            new MatcherMeta("BiConstraintStream", "rewardConfigurableLong(String, String, ToLongBiFunction)"),
             new MatcherMeta("BiConstraintStream", "rewardBigDecimal(String, Score, BiFunction)"),
             new MatcherMeta("BiConstraintStream", "rewardBigDecimal(String, String, Score, BiFunction)"),
-            new MatcherMeta("BiConstraintStream", "rewardConfigurableBigDecimal(String, BiFunction)"),
-            new MatcherMeta("BiConstraintStream", "rewardConfigurableBigDecimal(String, String, BiFunction)"),
             new MatcherMeta("BiConstraintStream", "impact(String, Score, ToIntBiFunction)"),
             new MatcherMeta("BiConstraintStream", "impact(String, String, Score, ToIntBiFunction)"),
-            new MatcherMeta("BiConstraintStream", "impactConfigurable(String, ToIntBiFunction)"),
-            new MatcherMeta("BiConstraintStream", "impactConfigurable(String, String, ToIntBiFunction)"),
             new MatcherMeta("BiConstraintStream", "impactLong(String, Score, ToLongBiFunction)"),
             new MatcherMeta("BiConstraintStream", "impactLong(String, String, Score, ToLongBiFunction)"),
-            new MatcherMeta("BiConstraintStream", "impactConfigurableLong(String, ToLongBiFunction)"),
-            new MatcherMeta("BiConstraintStream", "impactConfigurableLong(String, String, ToLongBiFunction)"),
             new MatcherMeta("BiConstraintStream", "impactBigDecimal(String, Score, BiFunction)"),
             new MatcherMeta("BiConstraintStream", "impactBigDecimal(String, String, Score, BiFunction)"),
-            new MatcherMeta("BiConstraintStream", "impactConfigurableBigDecimal(String, BiFunction)"),
-            new MatcherMeta("BiConstraintStream", "impactConfigurableBigDecimal(String, String, BiFunction)"),
 
             new MatcherMeta("TriConstraintStream", "penalize(String, Score, ToIntTriFunction)"),
             new MatcherMeta("TriConstraintStream", "penalize(String, String, Score, ToIntTriFunction)"),
-            new MatcherMeta("TriConstraintStream", "penalizeConfigurable(String, ToIntTriFunction)"),
-            new MatcherMeta("TriConstraintStream", "penalizeConfigurable(String, String, ToIntTriFunction)"),
             new MatcherMeta("TriConstraintStream", "penalizeLong(String, Score, ToLongTriFunction)"),
             new MatcherMeta("TriConstraintStream", "penalizeLong(String, String, Score, ToLongTriFunction)"),
-            new MatcherMeta("TriConstraintStream", "penalizeConfigurableLong(String, ToLongTriFunction)"),
-            new MatcherMeta("TriConstraintStream", "penalizeConfigurableLong(String, String, ToLongTriFunction)"),
             new MatcherMeta("TriConstraintStream", "penalizeBigDecimal(String, Score, TriFunction)"),
             new MatcherMeta("TriConstraintStream", "penalizeBigDecimal(String, String, Score, TriFunction)"),
-            new MatcherMeta("TriConstraintStream", "penalizeConfigurableBigDecimal(String, TriFunction)"),
-            new MatcherMeta("TriConstraintStream", "penalizeConfigurableBigDecimal(String, String, TriFunction)"),
             new MatcherMeta("TriConstraintStream", "reward(String, Score, ToIntTriFunction)"),
             new MatcherMeta("TriConstraintStream", "reward(String, String, Score, ToIntTriFunction)"),
-            new MatcherMeta("TriConstraintStream", "rewardConfigurable(String, ToIntTriFunction)"),
-            new MatcherMeta("TriConstraintStream", "rewardConfigurable(String, String, ToIntTriFunction)"),
             new MatcherMeta("TriConstraintStream", "rewardLong(String, Score, ToLongTriFunction)"),
             new MatcherMeta("TriConstraintStream", "rewardLong(String, String, Score, ToLongTriFunction)"),
-            new MatcherMeta("TriConstraintStream", "rewardConfigurableLong(String, ToLongTriFunction)"),
-            new MatcherMeta("TriConstraintStream", "rewardConfigurableLong(String, String, ToLongTriFunction)"),
             new MatcherMeta("TriConstraintStream", "rewardBigDecimal(String, Score, TriFunction)"),
             new MatcherMeta("TriConstraintStream", "rewardBigDecimal(String, String, Score, TriFunction)"),
-            new MatcherMeta("TriConstraintStream", "rewardConfigurableBigDecimal(String, TriFunction)"),
-            new MatcherMeta("TriConstraintStream", "rewardConfigurableBigDecimal(String, String, TriFunction)"),
             new MatcherMeta("TriConstraintStream", "impact(String, Score, ToIntTriFunction)"),
             new MatcherMeta("TriConstraintStream", "impact(String, String, Score, ToIntTriFunction)"),
-            new MatcherMeta("TriConstraintStream", "impactConfigurable(String, ToIntTriFunction)"),
-            new MatcherMeta("TriConstraintStream", "impactConfigurable(String, String, ToIntTriFunction)"),
             new MatcherMeta("TriConstraintStream", "impactLong(String, Score, ToLongTriFunction)"),
             new MatcherMeta("TriConstraintStream", "impactLong(String, String, Score, ToLongTriFunction)"),
-            new MatcherMeta("TriConstraintStream", "impactConfigurableLong(String, ToLongTriFunction)"),
-            new MatcherMeta("TriConstraintStream", "impactConfigurableLong(String, String, ToLongTriFunction)"),
             new MatcherMeta("TriConstraintStream", "impactBigDecimal(String, Score, TriFunction)"),
             new MatcherMeta("TriConstraintStream", "impactBigDecimal(String, String, Score, TriFunction)"),
-            new MatcherMeta("TriConstraintStream", "impactConfigurableBigDecimal(String, TriFunction)"),
-            new MatcherMeta("TriConstraintStream", "impactConfigurableBigDecimal(String, String, TriFunction)"),
 
             new MatcherMeta("QuadConstraintStream", "penalize(String, Score, ToIntQuadFunction)"),
             new MatcherMeta("QuadConstraintStream", "penalize(String, String, Score, ToIntQuadFunction)"),
-            new MatcherMeta("QuadConstraintStream", "penalizeConfigurable(String, ToIntQuadFunction)"),
-            new MatcherMeta("QuadConstraintStream", "penalizeConfigurable(String, String, ToIntQuadFunction)"),
             new MatcherMeta("QuadConstraintStream", "penalizeLong(String, Score, ToLongQuadFunction)"),
             new MatcherMeta("QuadConstraintStream", "penalizeLong(String, String, Score, ToLongQuadFunction)"),
-            new MatcherMeta("QuadConstraintStream", "penalizeConfigurableLong(String, ToLongQuadFunction)"),
-            new MatcherMeta("QuadConstraintStream", "penalizeConfigurableLong(String, String, ToLongQuadFunction)"),
             new MatcherMeta("QuadConstraintStream", "penalizeBigDecimal(String, Score, QuadFunction)"),
             new MatcherMeta("QuadConstraintStream", "penalizeBigDecimal(String, String, Score, QuadFunction)"),
-            new MatcherMeta("QuadConstraintStream", "penalizeConfigurableBigDecimal(String, QuadFunction)"),
-            new MatcherMeta("QuadConstraintStream", "penalizeConfigurableBigDecimal(String, String, QuadFunction)"),
             new MatcherMeta("QuadConstraintStream", "reward(String, Score, ToIntQuadFunction)"),
             new MatcherMeta("QuadConstraintStream", "reward(String, String, Score, ToIntQuadFunction)"),
-            new MatcherMeta("QuadConstraintStream", "rewardConfigurable(String, ToIntQuadFunction)"),
-            new MatcherMeta("QuadConstraintStream", "rewardConfigurable(String, String, ToIntQuadFunction)"),
             new MatcherMeta("QuadConstraintStream", "rewardLong(String, Score, ToLongQuadFunction)"),
             new MatcherMeta("QuadConstraintStream", "rewardLong(String, String, Score, ToLongQuadFunction)"),
-            new MatcherMeta("QuadConstraintStream", "rewardConfigurableLong(String, ToLongQuadFunction)"),
-            new MatcherMeta("QuadConstraintStream", "rewardConfigurableLong(String, String, ToLongQuadFunction)"),
             new MatcherMeta("QuadConstraintStream", "rewardBigDecimal(String, Score, QuadFunction)"),
             new MatcherMeta("QuadConstraintStream", "rewardBigDecimal(String, String, Score, QuadFunction)"),
-            new MatcherMeta("QuadConstraintStream", "rewardConfigurableBigDecimal(String, QuadFunction)"),
-            new MatcherMeta("QuadConstraintStream", "rewardConfigurableBigDecimal(String, String, QuadFunction)"),
             new MatcherMeta("QuadConstraintStream", "impact(String, Score, ToIntQuadFunction)"),
             new MatcherMeta("QuadConstraintStream", "impact(String, String, Score, ToIntQuadFunction)"),
-            new MatcherMeta("QuadConstraintStream", "impactConfigurable(String, ToIntQuadFunction)"),
-            new MatcherMeta("QuadConstraintStream", "impactConfigurable(String, String, ToIntQuadFunction)"),
             new MatcherMeta("QuadConstraintStream", "impactLong(String, Score, ToLongQuadFunction)"),
             new MatcherMeta("QuadConstraintStream", "impactLong(String, String, Score, ToLongQuadFunction)"),
-            new MatcherMeta("QuadConstraintStream", "impactConfigurableLong(String, ToLongQuadFunction)"),
-            new MatcherMeta("QuadConstraintStream", "impactConfigurableLong(String, String, ToLongQuadFunction)"),
             new MatcherMeta("QuadConstraintStream", "impactBigDecimal(String, Score, QuadFunction)"),
             new MatcherMeta("QuadConstraintStream", "impactBigDecimal(String, String, Score, QuadFunction)"),
-            new MatcherMeta("QuadConstraintStream", "impactConfigurableBigDecimal(String, QuadFunction)"),
-            new MatcherMeta("QuadConstraintStream", "impactConfigurableBigDecimal(String, String, QuadFunction)"),
     };
 
     @Override
@@ -243,14 +165,27 @@ public final class AsConstraintRecipe extends AbstractRecipe {
                             LOGGER.warn("Cannot refactor to asConstraint() method for deprecated method ({}).", method);
                             return method;
                         }
+
+                        var sanitizedImpactType = switch (matcherMeta.methodName) {
+                            case "penalizeLong", "penalizeBigDecimal" -> "penalize";
+                            case "rewardLong", "rewardBigDecimal" -> "reward";
+                            case "impactLong", "impactBigDecimal" -> "impact";
+                            default -> matcherMeta.methodName;
+                        };
                         if (!matcherMeta.matchWeigherIncluded) {
-                            templateCode += "." + matcherMeta.methodName + "()\n";
+                            templateCode += "." + sanitizedImpactType + "()\n";
                         } else {
-                            templateCode += "." + matcherMeta.methodName + "(#{any(" + matcherMeta.functionType + ")})\n";
+                            var sanitizedMatchWeight = switch (matcherMeta.methodName) {
+                                case "penalize", "reward", "impact" -> "withMatchWeight";
+                                case "penalizeLong", "rewardLong", "impactLong" -> "withLongMatchWeight";
+                                case "penalizeBigDecimal", "rewardBigDecimal", "impactBigDecimal" ->
+                                    "withBigDecimalMatchWeight";
+                                default -> matcherMeta.methodName;
+                            };
+                            templateCode += "." + sanitizedImpactType + "()\n";
+                            templateCode += "." + sanitizedMatchWeight + "(#{any(" + matcherMeta.functionType + ")})\n";
                         }
-                        if (!matcherMeta.configurable) {
-                            templateCode += ".usingDefaultConstraintWeight(#{any(ai.timefold.solver.core.api.score.Score)})\n";
-                        }
+                        templateCode += ".usingDefaultConstraintWeight(#{any(ai.timefold.solver.core.api.score.Score)})\n";
                         if (!matcherMeta.constraintPackageIncluded) {
                             templateCode += ".asConstraint(#{any(String)})";
                         } else {
@@ -261,57 +196,31 @@ public final class AsConstraintRecipe extends AbstractRecipe {
                                 .build();
                         if (!matcherMeta.constraintPackageIncluded) {
                             var constraintNameArgument = arguments.get(0);
-                            if (!matcherMeta.configurable) {
-                                var constraintWeightArgument = arguments.get(1);
-                                if (!matcherMeta.matchWeigherIncluded) {
-                                    return template.apply(getCursor(),
-                                            method.getCoordinates().replace(), select,
-                                            constraintWeightArgument, constraintNameArgument);
-                                } else {
-                                    var matchWeigherArgument = arguments.get(2);
-                                    return template.apply(getCursor(),
-                                            method.getCoordinates().replace(), select,
-                                            matchWeigherArgument, constraintWeightArgument, constraintNameArgument);
-                                }
+                            var constraintWeightArgument = arguments.get(1);
+                            if (!matcherMeta.matchWeigherIncluded) {
+                                return template.apply(getCursor(),
+                                        method.getCoordinates().replace(), select,
+                                        constraintWeightArgument, constraintNameArgument);
                             } else {
-                                if (!matcherMeta.matchWeigherIncluded) {
-                                    return template.apply(getCursor(),
-                                            method.getCoordinates().replace(), select,
-                                            constraintNameArgument);
-                                } else {
-                                    var matcherWeightArgument = arguments.get(1);
-                                    return template.apply(getCursor(),
-                                            method.getCoordinates().replace(), select,
-                                            matcherWeightArgument, constraintNameArgument);
-                                }
+                                var matchWeigherArgument = arguments.get(2);
+                                return template.apply(getCursor(),
+                                        method.getCoordinates().replace(), select,
+                                        matchWeigherArgument, constraintWeightArgument, constraintNameArgument);
                             }
                         } else {
                             var constraintPackageArgument = arguments.get(0);
                             var constraintNameArgument = arguments.get(1);
                             var constraintName = mergeExpressions(constraintPackageArgument, constraintNameArgument);
-                            if (!matcherMeta.configurable) {
-                                var constraintWeightArgument = arguments.get(2);
-                                if (!matcherMeta.matchWeigherIncluded) {
-                                    return template.apply(getCursor(),
-                                            method.getCoordinates().replace(), select,
-                                            constraintWeightArgument, constraintName);
-                                } else {
-                                    var matchWeigherArgument = arguments.get(3);
-                                    return template.apply(getCursor(),
-                                            method.getCoordinates().replace(), select,
-                                            matchWeigherArgument, constraintWeightArgument, constraintName);
-                                }
+                            var constraintWeightArgument = arguments.get(2);
+                            if (!matcherMeta.matchWeigherIncluded) {
+                                return template.apply(getCursor(),
+                                        method.getCoordinates().replace(), select,
+                                        constraintWeightArgument, constraintName);
                             } else {
-                                if (!matcherMeta.matchWeigherIncluded) {
-                                    return template.apply(getCursor(),
-                                            method.getCoordinates().replace(), select,
-                                            constraintName);
-                                } else {
-                                    var matchWeigherArgument = arguments.get(2);
-                                    return template.apply(getCursor(),
-                                            method.getCoordinates().replace(), select,
-                                            matchWeigherArgument, constraintName);
-                                }
+                                var matchWeigherArgument = arguments.get(3);
+                                return template.apply(getCursor(),
+                                        method.getCoordinates().replace(), select,
+                                        matchWeigherArgument, constraintWeightArgument, constraintName);
                             }
                         }
                     }
@@ -326,7 +235,6 @@ public final class AsConstraintRecipe extends AbstractRecipe {
 
         public final MethodMatcher methodMatcher;
         public final boolean constraintPackageIncluded;
-        public final boolean configurable;
         public final boolean matchWeigherIncluded;
         public final String methodName; // penalize, reward or impact
         public final String functionType;
@@ -361,7 +269,6 @@ public final class AsConstraintRecipe extends AbstractRecipe {
                     .replace(" Function", " java.util.function.Function");
             methodMatcher = new MethodMatcher(signature);
             constraintPackageIncluded = method.contains("String, String");
-            configurable = method.contains("Configurable");
             matchWeigherIncluded = method.contains("Function");
             if (matchWeigherIncluded) {
                 this.functionType = signature.replaceFirst("^.* ([\\w\\.]+Function)\\)$", "$1");

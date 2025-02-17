@@ -11,11 +11,11 @@ import org.openrewrite.test.RecipeSpec;
 import org.openrewrite.test.RewriteTest;
 
 @Execution(ExecutionMode.CONCURRENT)
-class DefaultConstraintWeightRecipeTest implements RewriteTest {
+class PenalizeRewardFluentBuilderRecipeTest implements RewriteTest {
 
     @Override
     public void defaults(RecipeSpec spec) {
-        spec.recipe(new DefaultConstraintWeightRecipe())
+        spec.recipe(new PenalizeRewardFluentBuilderRecipe())
                 .parser(AbstractRecipe.JAVA_PARSER);
     }
 
@@ -45,7 +45,8 @@ class DefaultConstraintWeightRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .penalize(a -> 7)
+                                        .penalize()
+                                        .withMatchWeight(a -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");
                         """)));
@@ -61,7 +62,8 @@ class DefaultConstraintWeightRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .penalizeLong(a -> 7L)
+                                        .penalize()
+                                        .withLongMatchWeight(a -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");
                         """)));
@@ -77,7 +79,8 @@ class DefaultConstraintWeightRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .penalizeBigDecimal(a -> BigDecimal.ONE)
+                                        .penalize()
+                                        .withBigDecimalMatchWeight(a -> BigDecimal.ONE)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");
                         """)));
@@ -113,7 +116,8 @@ class DefaultConstraintWeightRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .penalize((a, b) -> 7)
+                                        .penalize()
+                                        .withMatchWeight((a, b) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");
                         """)));
@@ -131,7 +135,8 @@ class DefaultConstraintWeightRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .penalizeLong((a, b) -> 7L)
+                                        .penalize()
+                                        .withLongMatchWeight((a, b) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");
                         """)));
@@ -149,7 +154,8 @@ class DefaultConstraintWeightRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .penalizeBigDecimal((a, b) -> BigDecimal.ONE)
+                                        .penalize()
+                                        .withBigDecimalMatchWeight((a, b) -> BigDecimal.ONE)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");
                         """)));
@@ -189,7 +195,8 @@ class DefaultConstraintWeightRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalize((a, b, c) -> 7)
+                                        .penalize()
+                                        .withMatchWeight((a, b, c) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");
                         """)));
@@ -209,7 +216,8 @@ class DefaultConstraintWeightRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalizeLong((a, b, c) -> 7L)
+                                        .penalize()
+                                        .withLongMatchWeight((a, b, c) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");
                         """)));
@@ -230,7 +238,8 @@ class DefaultConstraintWeightRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalizeBigDecimal((a, b, c) -> BigDecimal.ONE)
+                                        .penalize()
+                                        .withBigDecimalMatchWeight((a, b, c) -> BigDecimal.ONE)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");
                         """)));
@@ -274,7 +283,8 @@ class DefaultConstraintWeightRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalize((a, b, c, d) -> 7)
+                                        .penalize()
+                                        .withMatchWeight((a, b, c, d) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");
                         """)));
@@ -296,7 +306,8 @@ class DefaultConstraintWeightRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalizeLong((a, b, c, d) -> 7L)
+                                        .penalize()
+                                        .withLongMatchWeight((a, b, c, d) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");
                         """)));
@@ -319,7 +330,8 @@ class DefaultConstraintWeightRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalizeBigDecimal((a, b, c, d) -> BigDecimal.ONE)
+                                        .penalize()
+                                        .withBigDecimalMatchWeight((a, b, c, d) -> BigDecimal.ONE)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");
                         """)));

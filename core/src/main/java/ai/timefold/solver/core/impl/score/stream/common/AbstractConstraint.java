@@ -25,6 +25,7 @@ public abstract class AbstractConstraint<Solution_, Constraint_ extends Abstract
     private final String description;
     private final String constraintGroup;
     private final Score<?> defaultConstraintWeight;
+    private final MatchWeight matchWeight;
     private final ScoreImpactType scoreImpactType;
     // Constraint is not generic in uni/bi/..., therefore these can not be typed.
     private final Object justificationMapping;
@@ -43,7 +44,7 @@ public abstract class AbstractConstraint<Solution_, Constraint_ extends Abstract
      * @param indictedObjectsMapping never null
      */
     protected AbstractConstraint(ConstraintFactory_ constraintFactory, ConstraintRef constraintRef, String description,
-            String constraintGroup, Score<?> defaultConstraintWeight, ScoreImpactType scoreImpactType,
+            String constraintGroup, Score<?> defaultConstraintWeight, MatchWeight matchWeight, ScoreImpactType scoreImpactType,
             Object justificationMapping, Object indictedObjectsMapping) {
         this.constraintFactory = Objects.requireNonNull(constraintFactory);
         this.constraintRef = Objects.requireNonNull(constraintRef);
@@ -58,6 +59,7 @@ public abstract class AbstractConstraint<Solution_, Constraint_ extends Abstract
                     """.formatted(constraintGroup));
         }
         this.defaultConstraintWeight = defaultConstraintWeight;
+        this.matchWeight = Objects.requireNonNull(matchWeight);
         this.scoreImpactType = Objects.requireNonNull(scoreImpactType);
         this.justificationMapping = justificationMapping; // May be omitted in test code.
         this.indictedObjectsMapping = indictedObjectsMapping; // May be omitted in test code.
@@ -171,6 +173,11 @@ public abstract class AbstractConstraint<Solution_, Constraint_ extends Abstract
             return null;
         }
         return adjustConstraintWeight((Score_) defaultConstraintWeight);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <MatchWeight_ extends MatchWeight> MatchWeight_ getMatchWeight() {
+        return (MatchWeight_) matchWeight; // If this cast fails, there is a bug in the API.
     }
 
     public final ScoreImpactType getScoreImpactType() {

@@ -8,13 +8,10 @@ import static ai.timefold.solver.core.impl.bavet.common.GroupNodeConstructor.zer
 import static ai.timefold.solver.core.impl.score.stream.common.uni.InnerUniConstraintStream.createDefaultIndictedObjectsMapping;
 import static ai.timefold.solver.core.impl.score.stream.common.uni.InnerUniConstraintStream.createDefaultJustificationMapping;
 
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.ToIntFunction;
-import java.util.function.ToLongFunction;
 
 import ai.timefold.solver.core.api.score.Score;
 import ai.timefold.solver.core.api.score.stream.DefaultConstraintJustification;
@@ -476,30 +473,19 @@ public abstract class BavetAbstractUniConstraintStream<Solution_, A> extends Bav
     // ************************************************************************
 
     @Override
-    public final UniConstraintStub<A> innerImpact(ToIntFunction<A> matchWeigher, ScoreImpactType scoreImpactType) {
-        var stream = shareAndAddChild(new BavetScoringUniConstraintStream<>(constraintFactory, this, matchWeigher));
+    public final UniConstraintStub<A> innerImpact(ScoreImpactType scoreImpactType) {
+        var stream = shareAndAddChild(new BavetScoringUniConstraintStream<>(constraintFactory, this));
         return newTerminator(stream, scoreImpactType);
     }
 
     private <Score_ extends Score<Score_>> UniConstraintStubImpl<A>
             newTerminator(BavetScoringConstraintStream<Solution_> stream, ScoreImpactType impactType) {
-        UniConstraintConstructor<A, Score_> constructor = (constraintPackage, constraintName, constraintDescription,
-                constraintGroup, constraintWeight, impactType_, justificationMapping,
-                indictedObjectsMapping) -> buildConstraint(constraintPackage, constraintName, constraintDescription,
-                        constraintGroup, constraintWeight, impactType_, justificationMapping, indictedObjectsMapping, stream);
+        UniConstraintConstructor<A, Score_> constructor =
+                (constraintPackage, constraintName, constraintDescription, constraintGroup, constraintWeight, matchWeight,
+                        impactType_, justificationMapping, indictedObjectsMapping) -> buildConstraint(constraintPackage,
+                                constraintName, constraintDescription, constraintGroup, constraintWeight, matchWeight,
+                                impactType_, justificationMapping, indictedObjectsMapping, stream);
         return new UniConstraintStubImpl<>(constructor, impactType);
-    }
-
-    @Override
-    public final UniConstraintStub<A> innerImpact(ToLongFunction<A> matchWeigher, ScoreImpactType scoreImpactType) {
-        var stream = shareAndAddChild(new BavetScoringUniConstraintStream<>(constraintFactory, this, matchWeigher));
-        return newTerminator(stream, scoreImpactType);
-    }
-
-    @Override
-    public final UniConstraintStub<A> innerImpact(Function<A, BigDecimal> matchWeigher, ScoreImpactType scoreImpactType) {
-        var stream = shareAndAddChild(new BavetScoringUniConstraintStream<>(constraintFactory, this, matchWeigher));
-        return newTerminator(stream, scoreImpactType);
     }
 
     @Override

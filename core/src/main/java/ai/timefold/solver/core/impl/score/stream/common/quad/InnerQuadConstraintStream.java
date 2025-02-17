@@ -1,5 +1,10 @@
 package ai.timefold.solver.core.impl.score.stream.common.quad;
 
+import static ai.timefold.solver.core.impl.util.ConstantLambdaUtils.quadPickFirst;
+import static ai.timefold.solver.core.impl.util.ConstantLambdaUtils.quadPickFourth;
+import static ai.timefold.solver.core.impl.util.ConstantLambdaUtils.quadPickSecond;
+import static ai.timefold.solver.core.impl.util.ConstantLambdaUtils.quadPickThird;
+
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,7 +21,6 @@ import ai.timefold.solver.core.api.score.stream.quad.QuadConstraintStream;
 import ai.timefold.solver.core.api.score.stream.quad.QuadConstraintStub;
 import ai.timefold.solver.core.impl.score.stream.common.RetrievalSemantics;
 import ai.timefold.solver.core.impl.score.stream.common.ScoreImpactType;
-import ai.timefold.solver.core.impl.util.ConstantLambdaUtils;
 
 import org.jspecify.annotations.NonNull;
 
@@ -88,120 +92,88 @@ public interface InnerQuadConstraintStream<A, B, C, D> extends QuadConstraintStr
         if (guaranteesDistinct()) {
             return this;
         } else {
-            return groupBy(ConstantLambdaUtils.quadPickFirst(),
-                    ConstantLambdaUtils.quadPickSecond(),
-                    ConstantLambdaUtils.quadPickThird(),
-                    ConstantLambdaUtils.quadPickFourth());
+            return groupBy(quadPickFirst(),
+                    quadPickSecond(),
+                    quadPickThird(),
+                    quadPickFourth());
         }
     }
 
     @Override
     @NonNull
-    default QuadConstraintStub<A, B, C, D> penalize(ToIntQuadFunction<A, B, C, D> matchWeigher) {
-        return innerImpact(matchWeigher, ScoreImpactType.PENALTY);
+    default QuadConstraintStub<A, B, C, D> penalize() {
+        return innerImpact(ScoreImpactType.PENALTY);
     }
 
-    QuadConstraintStub<A, B, C, D> innerImpact(ToIntQuadFunction<A, B, C, D> matchWeigher, ScoreImpactType scoreImpactType);
+    QuadConstraintStub<A, B, C, D> innerImpact(ScoreImpactType scoreImpactType);
 
     @Override
     @NonNull
-    default QuadConstraintStub<A, B, C, D> penalizeLong(ToLongQuadFunction<A, B, C, D> matchWeigher) {
-        return innerImpact(matchWeigher, ScoreImpactType.PENALTY);
-    }
-
-    QuadConstraintStub<A, B, C, D> innerImpact(ToLongQuadFunction<A, B, C, D> matchWeigher, ScoreImpactType scoreImpactType);
-
-    @Override
-    @NonNull
-    default QuadConstraintStub<A, B, C, D> penalizeBigDecimal(QuadFunction<A, B, C, D, BigDecimal> matchWeigher) {
-        return innerImpact(matchWeigher, ScoreImpactType.PENALTY);
-    }
-
-    QuadConstraintStub<A, B, C, D> innerImpact(QuadFunction<A, B, C, D, BigDecimal> matchWeigher,
-            ScoreImpactType scoreImpactType);
-
-    @Override
-    @NonNull
-    default QuadConstraintStub<A, B, C, D> rewardLong(ToLongQuadFunction<A, B, C, D> matchWeigher) {
-        return innerImpact(matchWeigher, ScoreImpactType.REWARD);
+    default QuadConstraintStub<A, B, C, D> reward() {
+        return innerImpact(ScoreImpactType.REWARD);
     }
 
     @Override
     @NonNull
-    default QuadConstraintStub<A, B, C, D> rewardBigDecimal(QuadFunction<A, B, C, D, BigDecimal> matchWeigher) {
-        return innerImpact(matchWeigher, ScoreImpactType.REWARD);
-    }
-
-    @Override
-    @NonNull
-    default QuadConstraintStub<A, B, C, D> reward(ToIntQuadFunction<A, B, C, D> matchWeigher) {
-        return innerImpact(matchWeigher, ScoreImpactType.REWARD);
-    }
-
-    @Override
-    @NonNull
-    default QuadConstraintStub<A, B, C, D> impact(ToIntQuadFunction<A, B, C, D> matchWeigher) {
-        return innerImpact(matchWeigher, ScoreImpactType.MIXED);
-    }
-
-    @Override
-    @NonNull
-    default QuadConstraintStub<A, B, C, D> impactLong(ToLongQuadFunction<A, B, C, D> matchWeigher) {
-        return innerImpact(matchWeigher, ScoreImpactType.MIXED);
-    }
-
-    @Override
-    @NonNull
-    default QuadConstraintStub<A, B, C, D> impactBigDecimal(QuadFunction<A, B, C, D, BigDecimal> matchWeigher) {
-        return innerImpact(matchWeigher, ScoreImpactType.MIXED);
+    default QuadConstraintStub<A, B, C, D> impact() {
+        return innerImpact(ScoreImpactType.MIXED);
     }
 
     @Override
     default QuadConstraintBuilder<A, B, C, D, ?> penalizeConfigurable(ToIntQuadFunction<A, B, C, D> matchWeigher) {
-        return innerImpact(matchWeigher, ScoreImpactType.PENALTY).usingDefaultConstraintWeight(null);
+        return penalize()
+                .usingDefaultConstraintWeight(null);
     }
 
     @Override
     default QuadConstraintBuilder<A, B, C, D, ?> penalizeConfigurableLong(ToLongQuadFunction<A, B, C, D> matchWeigher) {
-        return innerImpact(matchWeigher, ScoreImpactType.PENALTY).usingDefaultConstraintWeight(null);
+        return penalize()
+                .usingDefaultConstraintWeight(null);
     }
 
     @Override
     default QuadConstraintBuilder<A, B, C, D, ?>
             penalizeConfigurableBigDecimal(QuadFunction<A, B, C, D, BigDecimal> matchWeigher) {
-        return innerImpact(matchWeigher, ScoreImpactType.PENALTY).usingDefaultConstraintWeight(null);
+        return penalize()
+                .usingDefaultConstraintWeight(null);
     }
 
     @Override
     default QuadConstraintBuilder<A, B, C, D, ?> rewardConfigurable(ToIntQuadFunction<A, B, C, D> matchWeigher) {
-        return innerImpact(matchWeigher, ScoreImpactType.REWARD).usingDefaultConstraintWeight(null);
+        return reward()
+                .usingDefaultConstraintWeight(null);
     }
 
     @Override
     default QuadConstraintBuilder<A, B, C, D, ?> rewardConfigurableLong(ToLongQuadFunction<A, B, C, D> matchWeigher) {
-        return innerImpact(matchWeigher, ScoreImpactType.REWARD).usingDefaultConstraintWeight(null);
+        return reward()
+                .usingDefaultConstraintWeight(null);
     }
 
     @Override
     default QuadConstraintBuilder<A, B, C, D, ?>
             rewardConfigurableBigDecimal(QuadFunction<A, B, C, D, BigDecimal> matchWeigher) {
-        return innerImpact(matchWeigher, ScoreImpactType.REWARD).usingDefaultConstraintWeight(null);
+        return reward()
+                .usingDefaultConstraintWeight(null);
     }
 
     @Override
     default QuadConstraintBuilder<A, B, C, D, ?> impactConfigurable(ToIntQuadFunction<A, B, C, D> matchWeigher) {
-        return innerImpact(matchWeigher, ScoreImpactType.MIXED).usingDefaultConstraintWeight(null);
+        return impact()
+                .usingDefaultConstraintWeight(null);
     }
 
     @Override
     default QuadConstraintBuilder<A, B, C, D, ?> impactConfigurableLong(ToLongQuadFunction<A, B, C, D> matchWeigher) {
-        return innerImpact(matchWeigher, ScoreImpactType.MIXED).usingDefaultConstraintWeight(null);
+        return impact()
+                .usingDefaultConstraintWeight(null);
     }
 
     @Override
     default QuadConstraintBuilder<A, B, C, D, ?>
             impactConfigurableBigDecimal(QuadFunction<A, B, C, D, BigDecimal> matchWeigher) {
-        return innerImpact(matchWeigher, ScoreImpactType.MIXED).usingDefaultConstraintWeight(null);
+        return impact()
+                .usingDefaultConstraintWeight(null);
     }
 
 }

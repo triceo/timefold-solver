@@ -21,8 +21,8 @@ public final class BiConstraintBuilderImpl<A, B, Score_ extends Score<Score_>>
     private BiFunction<A, B, Collection<Object>> indictedObjectsMapping;
 
     public BiConstraintBuilderImpl(BiConstraintConstructor<A, B, Score_> constraintConstructor, ScoreImpactType impactType,
-            Score_ constraintWeight) {
-        super(constraintConstructor, impactType, constraintWeight);
+            AbstractBiMatchWeight<A, B> matchWeight, Score_ constraintWeight) {
+        super(constraintConstructor, impactType, matchWeight, constraintWeight);
     }
 
     @Override

@@ -12,17 +12,17 @@ import org.openrewrite.java.JavaTemplate;
 import org.openrewrite.java.tree.J;
 import org.openrewrite.java.tree.JavaType;
 
-public final class DefaultConstraintWeightRecipe extends AbstractRecipe {
+public final class PenalizeRewardFluentBuilderRecipe extends AbstractRecipe {
 
     @Override
     public String getDisplayName() {
-        return "ConstraintStreams: use usingDefaultConstraintWeight() method to set constraint weight";
+        return "ConstraintStreams: penalize/reward no-arg overloads";
     }
 
     @Override
     public String getDescription() {
         return """
-                Use `penalize().usingDefaultConstraintWeight()` and `reward().usingDefaultConstraintWeight()()`\
+                Use `penalize()` and `reward()` fluent builders \
                 instead of the deprecated `penalize(Score)` and `reward(Score)` methods.""";
     }
 
@@ -78,13 +78,24 @@ public final class DefaultConstraintWeightRecipe extends AbstractRecipe {
                     }
                 }
 
-                String templateCode = "#{any(" + selectType + ")}\n";
-                if (functionType == null) {
-                    templateCode += "." + methodName + "()\n";
-                } else {
+                var sanitizedImpactType = switch (methodName) {
+                    case "penalizeLong", "penalizeBigDecimal" -> "penalize";
+                    case "rewardLong", "rewardBigDecimal" -> "reward";
+                    case "impactLong", "impactBigDecimal" -> "impact";
+                    default -> methodName;
+                };
+                var sanitizedMatchWeight = switch (methodName) {
+                    case "penalize", "reward", "impact" -> "withMatchWeight";
+                    case "penalizeLong", "rewardLong", "impactLong" -> "withLongMatchWeight";
+                    case "penalizeBigDecimal", "rewardBigDecimal", "impactBigDecimal" -> "withBigDecimalMatchWeight";
+                    default -> throw new UnsupportedOperationException();
+                };
+                var templateCode = "#{any(" + selectType + ")}\n";
+                templateCode += "." + sanitizedImpactType + "()\n";
+                if (functionType != null) {
                     var secondArgument = methodArguments.get(1);
                     var secondArgumentType = extractFunctionFqn(secondArgument.getType());
-                    templateCode += "." + methodName + "(#{any(" + secondArgumentType + ")})\n";
+                    templateCode += "." + sanitizedMatchWeight + "(#{any(" + secondArgumentType + ")})\n";
                 }
                 templateCode += ".usingDefaultConstraintWeight(#{any(ai.timefold.solver.core.api.score.Score)})\n";
                 var template = JavaTemplate.builder(templateCode)

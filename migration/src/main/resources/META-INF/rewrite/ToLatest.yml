@@ -32,8 +32,9 @@ recipeList:
   - ai.timefold.solver.migration.v8.NullableRecipe
   - ai.timefold.solver.migration.v8.SingleConstraintAssertionMethodsRecipe
   - ai.timefold.solver.migration.v8.AsConstraintRecipe
+  - ai.timefold.solver.migration.v8.AsConstraintConfigurableRecipe
   - ai.timefold.solver.migration.v8.RemoveConstraintPackageRecipe
-  - ai.timefold.solver.migration.v8.DefaultConstraintWeightRecipe
+  - ai.timefold.solver.migration.v8.PenalizeRewardFluentBuilderRecipe
   - ai.timefold.solver.migration.v8.SolutionManagerRecommendAssignmentRecipe
   - org.openrewrite.java.RemoveUnusedImports
   - ai.timefold.solver.migration.ChangeVersion

@@ -8,14 +8,11 @@ import static ai.timefold.solver.core.impl.bavet.common.GroupNodeConstructor.zer
 import static ai.timefold.solver.core.impl.score.stream.common.tri.InnerTriConstraintStream.createDefaultIndictedObjectsMapping;
 import static ai.timefold.solver.core.impl.score.stream.common.tri.InnerTriConstraintStream.createDefaultJustificationMapping;
 
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import ai.timefold.solver.core.api.function.QuadFunction;
-import ai.timefold.solver.core.api.function.ToIntTriFunction;
-import ai.timefold.solver.core.api.function.ToLongTriFunction;
 import ai.timefold.solver.core.api.function.TriFunction;
 import ai.timefold.solver.core.api.function.TriPredicate;
 import ai.timefold.solver.core.api.score.Score;
@@ -458,31 +455,19 @@ public abstract class BavetAbstractTriConstraintStream<Solution_, A, B, C> exten
     // ************************************************************************
 
     @Override
-    public TriConstraintStub<A, B, C> innerImpact(ToIntTriFunction<A, B, C> matchWeigher, ScoreImpactType scoreImpactType) {
-        var stream = shareAndAddChild(new BavetScoringTriConstraintStream<>(constraintFactory, this, matchWeigher));
+    public TriConstraintStub<A, B, C> innerImpact(ScoreImpactType scoreImpactType) {
+        var stream = shareAndAddChild(new BavetScoringTriConstraintStream<>(constraintFactory, this));
         return newTerminator(stream, scoreImpactType);
     }
 
     private <Score_ extends Score<Score_>> TriConstraintStubImpl<A, B, C>
             newTerminator(BavetScoringConstraintStream<Solution_> stream, ScoreImpactType impactType) {
-        TriConstraintConstructor<A, B, C, Score_> constructor = (constraintPackage, constraintName, constraintDescription,
-                constraintGroup, constraintWeight, impactType_, justificationMapping,
-                indictedObjectsMapping) -> buildConstraint(constraintPackage, constraintName, constraintDescription,
-                        constraintGroup, constraintWeight, impactType_, justificationMapping, indictedObjectsMapping, stream);
+        TriConstraintConstructor<A, B, C, Score_> constructor =
+                (constraintPackage, constraintName, constraintDescription, constraintGroup, constraintWeight, matchWeight,
+                        impactType_, justificationMapping, indictedObjectsMapping) -> buildConstraint(constraintPackage,
+                                constraintName, constraintDescription, constraintGroup, constraintWeight, matchWeight,
+                                impactType_, justificationMapping, indictedObjectsMapping, stream);
         return new TriConstraintStubImpl<>(constructor, impactType);
-    }
-
-    @Override
-    public TriConstraintStub<A, B, C> innerImpact(ToLongTriFunction<A, B, C> matchWeigher, ScoreImpactType scoreImpactType) {
-        var stream = shareAndAddChild(new BavetScoringTriConstraintStream<>(constraintFactory, this, matchWeigher));
-        return newTerminator(stream, scoreImpactType);
-    }
-
-    @Override
-    public TriConstraintStub<A, B, C> innerImpact(TriFunction<A, B, C, BigDecimal> matchWeigher,
-            ScoreImpactType scoreImpactType) {
-        var stream = shareAndAddChild(new BavetScoringTriConstraintStream<>(constraintFactory, this, matchWeigher));
-        return newTerminator(stream, scoreImpactType);
     }
 
     @Override

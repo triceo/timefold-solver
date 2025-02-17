@@ -5,6 +5,8 @@ import ai.timefold.solver.core.api.score.constraint.ConstraintRef;
 import ai.timefold.solver.core.api.score.stream.Constraint;
 import ai.timefold.solver.core.impl.score.stream.common.AbstractConstraint;
 import ai.timefold.solver.core.impl.score.stream.common.ScoreImpactType;
+import ai.timefold.solver.core.impl.score.stream.common.uni.AbstractUniMatchWeight;
+import ai.timefold.solver.core.impl.util.ConstantLambdaUtils;
 
 public final class TestConstraint<Solution_, Score_ extends Score<Score_>>
         extends AbstractConstraint<Solution_, TestConstraint<Solution_, Score_>, TestConstraintFactory<Solution_, Score_>> {
@@ -17,7 +19,8 @@ public final class TestConstraint<Solution_, Score_ extends Score<Score_>>
     public TestConstraint(TestConstraintFactory<Solution_, Score_> constraintFactory, String constraintName,
             String constraintGroup, Score_ constraintWeight) {
         super(constraintFactory, ConstraintRef.of(constraintFactory.getDefaultConstraintPackage(), constraintName), "",
-                constraintGroup, constraintWeight, ScoreImpactType.REWARD, null, null);
+                constraintGroup, constraintWeight, AbstractUniMatchWeight.of(ConstantLambdaUtils.uniConstantOne()),
+                ScoreImpactType.REWARD, null, null);
     }
 
 }
