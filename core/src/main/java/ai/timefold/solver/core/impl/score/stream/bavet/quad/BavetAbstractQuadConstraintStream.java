@@ -60,6 +60,7 @@ import ai.timefold.solver.core.impl.score.stream.bavet.uni.BavetAbstractUniConst
 import ai.timefold.solver.core.impl.score.stream.common.RetrievalSemantics;
 import ai.timefold.solver.core.impl.score.stream.common.ScoreImpactType;
 import ai.timefold.solver.core.impl.score.stream.common.quad.InnerQuadConstraintStream;
+import ai.timefold.solver.core.impl.score.stream.common.quad.QuadConstraintConstructor;
 import ai.timefold.solver.core.impl.score.stream.common.quad.QuadConstraintStubImpl;
 
 import org.jspecify.annotations.NonNull;
@@ -414,31 +415,31 @@ public abstract class BavetAbstractQuadConstraintStream<Solution_, A, B, C, D>
     // ************************************************************************
 
     @Override
-    public <Score_ extends Score<Score_>> QuadConstraintStub<A, B, C, D, Score_>
-            innerImpact(ToIntQuadFunction<A, B, C, D> matchWeigher, ScoreImpactType scoreImpactType) {
+    public QuadConstraintStub<A, B, C, D> innerImpact(ToIntQuadFunction<A, B, C, D> matchWeigher,
+            ScoreImpactType scoreImpactType) {
         var stream = shareAndAddChild(new BavetScoringQuadConstraintStream<>(constraintFactory, this, matchWeigher));
         return newTerminator(stream, scoreImpactType);
     }
 
-    private <Score_ extends Score<Score_>> QuadConstraintStubImpl<A, B, C, D, Score_>
+    private <Score_ extends Score<Score_>> QuadConstraintStubImpl<A, B, C, D>
             newTerminator(BavetScoringConstraintStream<Solution_> stream, ScoreImpactType impactType) {
-        return new QuadConstraintStubImpl<>((constraintPackage, constraintName, constraintDescription, constraintGroup,
-                constraintWeight_, impactType_, justificationMapping,
+        QuadConstraintConstructor<A, B, C, D, Score_> constructor = (constraintPackage, constraintName, constraintDescription,
+                constraintGroup, constraintWeight, impactType_, justificationMapping,
                 indictedObjectsMapping) -> buildConstraint(constraintPackage, constraintName, constraintDescription,
-                        constraintGroup, constraintWeight_, impactType_, justificationMapping, indictedObjectsMapping, stream),
-                impactType);
+                        constraintGroup, constraintWeight, impactType_, justificationMapping, indictedObjectsMapping, stream);
+        return new QuadConstraintStubImpl<>(constructor, impactType);
     }
 
     @Override
-    public <Score_ extends Score<Score_>> QuadConstraintStub<A, B, C, D, Score_>
-            innerImpact(ToLongQuadFunction<A, B, C, D> matchWeigher, ScoreImpactType scoreImpactType) {
+    public QuadConstraintStub<A, B, C, D> innerImpact(ToLongQuadFunction<A, B, C, D> matchWeigher,
+            ScoreImpactType scoreImpactType) {
         var stream = shareAndAddChild(new BavetScoringQuadConstraintStream<>(constraintFactory, this, matchWeigher));
         return newTerminator(stream, scoreImpactType);
     }
 
     @Override
-    public <Score_ extends Score<Score_>> QuadConstraintStub<A, B, C, D, Score_>
-            innerImpact(QuadFunction<A, B, C, D, BigDecimal> matchWeigher, ScoreImpactType scoreImpactType) {
+    public QuadConstraintStub<A, B, C, D> innerImpact(QuadFunction<A, B, C, D, BigDecimal> matchWeigher,
+            ScoreImpactType scoreImpactType) {
         var stream = shareAndAddChild(new BavetScoringQuadConstraintStream<>(constraintFactory, this, matchWeigher));
         return newTerminator(stream, scoreImpactType);
     }

@@ -10,20 +10,22 @@ import ai.timefold.solver.core.impl.score.stream.common.ScoreImpactType;
 import org.jspecify.annotations.NullMarked;
 
 @NullMarked
-public final class BiConstraintStubImpl<A, B, Score_ extends Score<Score_>>
-        implements BiConstraintStub<A, B, Score_> {
+public final class BiConstraintStubImpl<A, B> implements BiConstraintStub<A, B> {
 
-    private final BiConstraintConstructor<A, B, Score_> constraintConstructor;
+    private final BiConstraintConstructor<A, B, ?> constraintConstructor;
     private final ScoreImpactType impactType;
 
-    public BiConstraintStubImpl(BiConstraintConstructor<A, B, Score_> constraintConstructor, ScoreImpactType impactType) {
+    public BiConstraintStubImpl(BiConstraintConstructor<A, B, ?> constraintConstructor, ScoreImpactType impactType) {
         this.constraintConstructor = Objects.requireNonNull(constraintConstructor);
         this.impactType = Objects.requireNonNull(impactType);
     }
 
+    @SuppressWarnings({ "unchecked" })
     @Override
-    public BiConstraintBuilder<A, B, Score_> usingDefaultConstraintWeight(Score_ constraintWeight) {
-        return new BiConstraintBuilderImpl<>(constraintConstructor, impactType, constraintWeight);
+    public <Score_ extends Score<Score_>> BiConstraintBuilder<A, B, Score_>
+            usingDefaultConstraintWeight(Score_ constraintWeight) {
+        return new BiConstraintBuilderImpl<>((BiConstraintConstructor<A, B, Score_>) constraintConstructor, impactType,
+                constraintWeight);
     }
 
 }

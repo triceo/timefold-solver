@@ -3,7 +3,6 @@ package ai.timefold.solver.core.api.score.stream;
 import ai.timefold.solver.core.api.domain.solution.ConstraintWeightOverrides;
 import ai.timefold.solver.core.api.score.Score;
 
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.NullMarked;
 
 /**
@@ -19,11 +18,9 @@ import org.jspecify.annotations.NullMarked;
  * Other constraint properties such as name etc. can be specified by overriding other methods on
  * {@link ConstraintDefinition}.</li>
  * </ul>
- * 
- * @param <Score_> the type of the score
  */
 @NullMarked
-public interface ConstraintStub<Score_ extends Score<@NonNull Score_>> {
+public interface ConstraintStub {
 
     /**
      * The constraint will use this weight,
@@ -35,6 +32,6 @@ public interface ConstraintStub<Score_ extends Score<@NonNull Score_>> {
      *         continue fluently if using {@link ConstraintProvider},
      *         otherwise return this if using {@link ConstraintDefinition}.
      */
-    ConstraintBuilder usingDefaultConstraintWeight(Score_ constraintWeight);
+    <Score_ extends Score<Score_>> ConstraintBuilder usingDefaultConstraintWeight(Score_ constraintWeight);
 
 }

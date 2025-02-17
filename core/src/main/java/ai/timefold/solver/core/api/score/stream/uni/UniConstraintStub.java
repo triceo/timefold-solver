@@ -10,10 +10,9 @@ import org.jspecify.annotations.NullMarked;
  * but specialized for constraint streams of cardinality 1 (uni-streams).
  */
 @NullMarked
-public interface UniConstraintStub<A, Score_ extends Score<Score_>>
-        extends ConstraintStub<Score_> {
+public interface UniConstraintStub<A> extends ConstraintStub {
 
     @Override
-    UniConstraintBuilder<A, Score_> usingDefaultConstraintWeight(Score_ constraintWeight);
+    <Score_ extends Score<Score_>> UniConstraintBuilder<A, Score_> usingDefaultConstraintWeight(Score_ constraintWeight);
 
 }

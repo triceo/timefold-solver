@@ -11,12 +11,11 @@ import org.jspecify.annotations.NullMarked;
  * 
  * @param <A>
  * @param <B>
- * @param <Score_>
  */
 @NullMarked
-public interface BiConstraintStub<A, B, Score_ extends Score<Score_>> extends ConstraintStub<Score_> {
+public interface BiConstraintStub<A, B> extends ConstraintStub {
 
     @Override
-    BiConstraintBuilder<A, B, Score_> usingDefaultConstraintWeight(Score_ constraintWeight);
+    <Score_ extends Score<Score_>> BiConstraintBuilder<A, B, Score_> usingDefaultConstraintWeight(Score_ constraintWeight);
 
 }

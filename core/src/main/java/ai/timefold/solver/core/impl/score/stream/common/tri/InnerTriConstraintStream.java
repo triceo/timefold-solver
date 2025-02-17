@@ -108,73 +108,61 @@ public interface InnerTriConstraintStream<A, B, C> extends TriConstraintStream<A
 
     @Override
     @NonNull
-    default <Score_ extends @NonNull Score<Score_>> TriConstraintStub<A, B, C, Score_>
-            penalize(ToIntTriFunction<A, B, C> matchWeigher) {
+    default TriConstraintStub<A, B, C> penalize(ToIntTriFunction<A, B, C> matchWeigher) {
         return innerImpact(matchWeigher, ScoreImpactType.PENALTY);
     }
 
-    <Score_ extends Score<Score_>> TriConstraintStub<A, B, C, Score_> innerImpact(ToIntTriFunction<A, B, C> matchWeigher,
-            ScoreImpactType scoreImpactType);
+    TriConstraintStub<A, B, C> innerImpact(ToIntTriFunction<A, B, C> matchWeigher, ScoreImpactType scoreImpactType);
 
     @Override
     @NonNull
-    default <Score_ extends @NonNull Score<Score_>> TriConstraintStub<A, B, C, Score_>
-            penalizeLong(ToLongTriFunction<A, B, C> matchWeigher) {
+    default TriConstraintStub<A, B, C> penalizeLong(ToLongTriFunction<A, B, C> matchWeigher) {
         return innerImpact(matchWeigher, ScoreImpactType.PENALTY);
     }
 
-    <Score_ extends Score<Score_>> TriConstraintStub<A, B, C, Score_> innerImpact(ToLongTriFunction<A, B, C> matchWeigher,
-            ScoreImpactType scoreImpactType);
+    TriConstraintStub<A, B, C> innerImpact(ToLongTriFunction<A, B, C> matchWeigher, ScoreImpactType scoreImpactType);
 
     @Override
     @NonNull
-    default <Score_ extends @NonNull Score<Score_>> TriConstraintStub<A, B, C, Score_>
-            penalizeBigDecimal(TriFunction<A, B, C, BigDecimal> matchWeigher) {
+    default TriConstraintStub<A, B, C> penalizeBigDecimal(TriFunction<A, B, C, BigDecimal> matchWeigher) {
         return innerImpact(matchWeigher, ScoreImpactType.PENALTY);
     }
 
-    <Score_ extends Score<Score_>> TriConstraintStub<A, B, C, Score_> innerImpact(TriFunction<A, B, C, BigDecimal> matchWeigher,
-            ScoreImpactType scoreImpactType);
+    TriConstraintStub<A, B, C> innerImpact(TriFunction<A, B, C, BigDecimal> matchWeigher, ScoreImpactType scoreImpactType);
 
     @Override
     @NonNull
-    default <Score_ extends @NonNull Score<Score_>> TriConstraintStub<A, B, C, Score_>
-            reward(ToIntTriFunction<A, B, C> matchWeigher) {
+    default TriConstraintStub<A, B, C> reward(ToIntTriFunction<A, B, C> matchWeigher) {
         return innerImpact(matchWeigher, ScoreImpactType.REWARD);
     }
 
     @Override
     @NonNull
-    default <Score_ extends @NonNull Score<Score_>> TriConstraintStub<A, B, C, Score_>
-            rewardLong(ToLongTriFunction<A, B, C> matchWeigher) {
+    default TriConstraintStub<A, B, C> rewardLong(ToLongTriFunction<A, B, C> matchWeigher) {
         return innerImpact(matchWeigher, ScoreImpactType.REWARD);
     }
 
     @Override
     @NonNull
-    default <Score_ extends @NonNull Score<Score_>> TriConstraintStub<A, B, C, Score_>
-            rewardBigDecimal(TriFunction<A, B, C, BigDecimal> matchWeigher) {
+    default TriConstraintStub<A, B, C> rewardBigDecimal(TriFunction<A, B, C, BigDecimal> matchWeigher) {
         return innerImpact(matchWeigher, ScoreImpactType.REWARD);
     }
 
     @Override
     @NonNull
-    default <Score_ extends @NonNull Score<Score_>> TriConstraintStub<A, B, C, Score_>
-            impactLong(ToLongTriFunction<A, B, C> matchWeigher) {
+    default TriConstraintStub<A, B, C> impactLong(ToLongTriFunction<A, B, C> matchWeigher) {
         return innerImpact(matchWeigher, ScoreImpactType.MIXED);
     }
 
     @Override
     @NonNull
-    default <Score_ extends @NonNull Score<Score_>> TriConstraintStub<A, B, C, Score_>
-            impactBigDecimal(TriFunction<A, B, C, BigDecimal> matchWeigher) {
+    default TriConstraintStub<A, B, C> impactBigDecimal(TriFunction<A, B, C, BigDecimal> matchWeigher) {
         return innerImpact(matchWeigher, ScoreImpactType.MIXED);
     }
 
     @Override
     @NonNull
-    default <Score_ extends @NonNull Score<Score_>> TriConstraintStub<A, B, C, Score_>
-            impact(ToIntTriFunction<A, B, C> matchWeigher) {
+    default TriConstraintStub<A, B, C> impact(ToIntTriFunction<A, B, C> matchWeigher) {
         return innerImpact(matchWeigher, ScoreImpactType.MIXED);
     }
 

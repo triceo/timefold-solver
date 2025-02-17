@@ -9,20 +9,22 @@ import ai.timefold.solver.core.impl.score.stream.common.ScoreImpactType;
 import org.jspecify.annotations.NullMarked;
 
 @NullMarked
-public final class UniConstraintStubImpl<A, Score_ extends Score<Score_>>
-        implements UniConstraintStub<A, Score_> {
+public final class UniConstraintStubImpl<A> implements UniConstraintStub<A> {
 
-    private final UniConstraintConstructor<A, Score_> constraintConstructor;
+    private final UniConstraintConstructor<A, ?> constraintConstructor;
     private final ScoreImpactType impactType;
 
-    public UniConstraintStubImpl(UniConstraintConstructor<A, Score_> constraintConstructor, ScoreImpactType impactType) {
+    public UniConstraintStubImpl(UniConstraintConstructor<A, ?> constraintConstructor, ScoreImpactType impactType) {
         this.constraintConstructor = Objects.requireNonNull(constraintConstructor);
         this.impactType = Objects.requireNonNull(impactType);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public UniConstraintBuilderImpl<A, Score_> usingDefaultConstraintWeight(Score_ constraintWeight) {
-        return new UniConstraintBuilderImpl<>(constraintConstructor, impactType, constraintWeight);
+    public <Score_ extends Score<Score_>> UniConstraintBuilderImpl<A, Score_>
+            usingDefaultConstraintWeight(Score_ constraintWeight) {
+        return new UniConstraintBuilderImpl<>((UniConstraintConstructor<A, Score_>) constraintConstructor, impactType,
+                constraintWeight);
     }
 
 }

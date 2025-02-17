@@ -32,7 +32,7 @@ import org.jspecify.annotations.Nullable;
 @NullMarked
 public interface ConstraintDefinition<Score_ extends Score<@NonNull Score_>> {
 
-    ConstraintStub<Score_> buildConstraint(ConstraintFactory constraintFactory);
+    ConstraintStub buildConstraint(ConstraintFactory constraintFactory);
 
     Score_ defaultConstraintWeight();
 
@@ -51,8 +51,6 @@ public interface ConstraintDefinition<Score_ extends Score<@NonNull Score_>> {
     /**
      * Override this method together with {@link #justificationFunction()} to collect constraint justifications.
      *
-     * @param <ConstraintJustification_> the actual type of the {@link ConstraintJustification},
-     *        not known at compile time
      * @return the constraint justification type being collected;
      *         the default return value is {@link DefaultConstraintJustification},
      *         which goes well with {@link #justificationFunction()} returning null.
@@ -60,10 +58,8 @@ public interface ConstraintDefinition<Score_ extends Score<@NonNull Score_>> {
      * @see UniConstraintDefinition#justificationFunction()
      *      Example of return value for a constraint stream with a single fact output.
      */
-    @SuppressWarnings("unchecked")
-    default <ConstraintJustification_ extends ConstraintJustification> Class<ConstraintJustification_>
-            justificationClass() {
-        return (Class<ConstraintJustification_>) DefaultConstraintJustification.class;
+    default Class<? extends ConstraintJustification> justificationClass() {
+        return DefaultConstraintJustification.class;
     }
 
     /**

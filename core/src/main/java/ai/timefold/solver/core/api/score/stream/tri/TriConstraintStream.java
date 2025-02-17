@@ -1307,7 +1307,7 @@ public interface TriConstraintStream<A, B, C> extends ConstraintStream {
      * As defined by {@link #penalize(ToIntTriFunction)}, where the match weight is one (1).
      */
     @Override
-    default @NonNull <Score_ extends @NonNull Score<Score_>> TriConstraintStub<A, B, C, Score_> penalize() {
+    default @NonNull TriConstraintStub<A, B, C> penalize() {
         return penalize(triConstantOne());
     }
 
@@ -1321,25 +1321,22 @@ public interface TriConstraintStream<A, B, C> extends ConstraintStream {
      *
      * @param matchWeigher the result of this function (matchWeight) is multiplied by the constraintWeight
      * @return fluent builder for the constraint
-     * @param <Score_> expected type of the {@link Score}
      */
     @NonNull
-    <Score_ extends @NonNull Score<Score_>> TriConstraintStub<A, B, C, Score_> penalize(ToIntTriFunction<A, B, C> matchWeigher);
+    TriConstraintStub<A, B, C> penalize(ToIntTriFunction<A, B, C> matchWeigher);
 
     /**
      * As defined by {@link #penalize(ToIntTriFunction)}, with a penalty of type long.
      *
      */
     @NonNull
-    <Score_ extends @NonNull Score<Score_>> TriConstraintStub<A, B, C, Score_>
-            penalizeLong(ToLongTriFunction<A, B, C> matchWeigher);
+    TriConstraintStub<A, B, C> penalizeLong(ToLongTriFunction<A, B, C> matchWeigher);
 
     /**
      * As defined by {@link #penalize(ToIntTriFunction)}, with a penalty of type {@link BigDecimal}.
      */
     @NonNull
-    <Score_ extends @NonNull Score<Score_>> TriConstraintStub<A, B, C, Score_>
-            penalizeBigDecimal(TriFunction<A, B, C, BigDecimal> matchWeigher);
+    TriConstraintStub<A, B, C> penalizeBigDecimal(TriFunction<A, B, C, BigDecimal> matchWeigher);
 
     /**
      * As defined by {@link #penalize(Score, ToIntTriFunction)}, where the match weight is one (1).
@@ -1366,7 +1363,7 @@ public interface TriConstraintStream<A, B, C> extends ConstraintStream {
     /**
      * As defined by {@link #penalizeBigDecimal(Score, TriFunction)}, where the match weight is one (1).
      * 
-     * @deprecated Use {@link #penalize())} instead, and continue fluently from there.
+     * @deprecated Use {@link #penalize()} instead, and continue fluently from there.
      */
     @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull TriConstraintBuilder<A, B, C, Score_>
@@ -1392,7 +1389,7 @@ public interface TriConstraintStream<A, B, C> extends ConstraintStream {
     default <Score_ extends Score<Score_>> @NonNull TriConstraintBuilder<A, B, C, Score_> penalize(
             @NonNull Score_ constraintWeight,
             @NonNull ToIntTriFunction<A, B, C> matchWeigher) {
-        TriConstraintStub<A, B, C, Score_> stub = penalize(matchWeigher);
+        TriConstraintStub<A, B, C> stub = penalize(matchWeigher);
         return stub.usingDefaultConstraintWeight(constraintWeight);
     }
 
@@ -1405,7 +1402,7 @@ public interface TriConstraintStream<A, B, C> extends ConstraintStream {
     default <Score_ extends Score<Score_>> @NonNull TriConstraintBuilder<A, B, C, Score_> penalizeLong(
             @NonNull Score_ constraintWeight,
             @NonNull ToLongTriFunction<A, B, C> matchWeigher) {
-        TriConstraintStub<A, B, C, Score_> stub = penalizeLong(matchWeigher);
+        TriConstraintStub<A, B, C> stub = penalizeLong(matchWeigher);
         return stub.usingDefaultConstraintWeight(constraintWeight);
     }
 
@@ -1417,7 +1414,7 @@ public interface TriConstraintStream<A, B, C> extends ConstraintStream {
     @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull TriConstraintBuilder<A, B, C, Score_> penalizeBigDecimal(
             @NonNull Score_ constraintWeight, @NonNull TriFunction<A, B, C, BigDecimal> matchWeigher) {
-        TriConstraintStub<A, B, C, Score_> stub = penalizeBigDecimal(matchWeigher);
+        TriConstraintStub<A, B, C> stub = penalizeBigDecimal(matchWeigher);
         return stub.usingDefaultConstraintWeight(constraintWeight);
     }
 
@@ -1474,7 +1471,7 @@ public interface TriConstraintStream<A, B, C> extends ConstraintStream {
      * As defined by {@link #reward(ToIntTriFunction)}, where the match weight is one (1).
      */
     @Override
-    default @NonNull <Score_ extends @NonNull Score<Score_>> TriConstraintStub<A, B, C, Score_> reward() {
+    default @NonNull TriConstraintStub<A, B, C> reward() {
         return reward(triConstantOne());
     }
 
@@ -1488,26 +1485,23 @@ public interface TriConstraintStream<A, B, C> extends ConstraintStream {
      *
      * @param matchWeigher the result of this function (matchWeight) is multiplied by the constraintWeight
      * @return fluent builder for the constraint
-     * @param <Score_> expected type of the {@link Score}
      */
     @NonNull
-    <Score_ extends @NonNull Score<Score_>> TriConstraintStub<A, B, C, Score_> reward(ToIntTriFunction<A, B, C> matchWeigher);
+    TriConstraintStub<A, B, C> reward(ToIntTriFunction<A, B, C> matchWeigher);
 
     /**
      * As defined by {@link #reward(ToIntTriFunction)}, with a reward of type long.
      *
      */
     @NonNull
-    <Score_ extends @NonNull Score<Score_>> TriConstraintStub<A, B, C, Score_>
-            rewardLong(ToLongTriFunction<A, B, C> matchWeigher);
+    TriConstraintStub<A, B, C> rewardLong(ToLongTriFunction<A, B, C> matchWeigher);
 
     /**
      * As defined by {@link #reward(ToIntTriFunction)}, with a reward of type {@link BigDecimal}.
      *
      */
     @NonNull
-    <Score_ extends @NonNull Score<Score_>> TriConstraintStub<A, B, C, Score_>
-            rewardBigDecimal(TriFunction<A, B, C, BigDecimal> matchWeigher);
+    TriConstraintStub<A, B, C> rewardBigDecimal(TriFunction<A, B, C, BigDecimal> matchWeigher);
 
     /**
      * As defined by {@link #reward(Score, ToIntTriFunction)}, where the match weight is one (1).
@@ -1538,7 +1532,7 @@ public interface TriConstraintStream<A, B, C> extends ConstraintStream {
     default <Score_ extends Score<Score_>> @NonNull TriConstraintBuilder<A, B, C, Score_> reward(
             @NonNull Score_ constraintWeight,
             @NonNull ToIntTriFunction<A, B, C> matchWeigher) {
-        TriConstraintStub<A, B, C, Score_> stub = reward(matchWeigher);
+        TriConstraintStub<A, B, C> stub = reward(matchWeigher);
         return stub.usingDefaultConstraintWeight(constraintWeight);
     }
 
@@ -1550,7 +1544,7 @@ public interface TriConstraintStream<A, B, C> extends ConstraintStream {
     @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull TriConstraintBuilder<A, B, C, Score_> rewardLong(
             @NonNull Score_ constraintWeight, @NonNull ToLongTriFunction<A, B, C> matchWeigher) {
-        TriConstraintStub<A, B, C, Score_> stub = rewardLong(matchWeigher);
+        TriConstraintStub<A, B, C> stub = rewardLong(matchWeigher);
         return stub.usingDefaultConstraintWeight(constraintWeight);
     }
 
@@ -1562,7 +1556,7 @@ public interface TriConstraintStream<A, B, C> extends ConstraintStream {
     @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull TriConstraintBuilder<A, B, C, Score_> rewardBigDecimal(
             @NonNull Score_ constraintWeight, @NonNull TriFunction<A, B, C, BigDecimal> matchWeigher) {
-        TriConstraintStub<A, B, C, Score_> stub = rewardBigDecimal(matchWeigher);
+        TriConstraintStub<A, B, C> stub = rewardBigDecimal(matchWeigher);
         return stub.usingDefaultConstraintWeight(constraintWeight);
     }
 
@@ -1619,7 +1613,7 @@ public interface TriConstraintStream<A, B, C> extends ConstraintStream {
      * As defined by {@link #impact(ToIntTriFunction)}, where the match weight is one (1).
      */
     @Override
-    default @NonNull <Score_ extends @NonNull Score<Score_>> TriConstraintStub<A, B, C, Score_> impact() {
+    default @NonNull TriConstraintStub<A, B, C> impact() {
         return penalize(triConstantOne());
     }
 
@@ -1632,26 +1626,23 @@ public interface TriConstraintStream<A, B, C> extends ConstraintStream {
      *
      * @param matchWeigher the result of this function (matchWeight) is multiplied by the constraintWeight
      * @return fluent builder for the constraint
-     * @param <Score_> expected type of the {@link Score}
      */
     @NonNull
-    <Score_ extends @NonNull Score<Score_>> TriConstraintStub<A, B, C, Score_> impact(ToIntTriFunction<A, B, C> matchWeigher);
+    TriConstraintStub<A, B, C> impact(ToIntTriFunction<A, B, C> matchWeigher);
 
     /**
      * As defined by {@link #impact(ToIntTriFunction)}, with an impact of type long.
      *
      */
     @NonNull
-    <Score_ extends @NonNull Score<Score_>> TriConstraintStub<A, B, C, Score_>
-            impactLong(ToLongTriFunction<A, B, C> matchWeigher);
+    TriConstraintStub<A, B, C> impactLong(ToLongTriFunction<A, B, C> matchWeigher);
 
     /**
      * As defined by {@link #impact(ToIntTriFunction)}, with an impact of type {@link BigDecimal}.
      *
      */
     @NonNull
-    <Score_ extends @NonNull Score<Score_>> TriConstraintStub<A, B, C, Score_>
-            impactBigDecimal(TriFunction<A, B, C, BigDecimal> matchWeigher);
+    TriConstraintStub<A, B, C> impactBigDecimal(TriFunction<A, B, C, BigDecimal> matchWeigher);
 
     /**
      * Positively or negatively impacts the {@link Score} by the constraintWeight for each match
@@ -1685,7 +1676,7 @@ public interface TriConstraintStream<A, B, C> extends ConstraintStream {
     default <Score_ extends Score<Score_>> @NonNull TriConstraintBuilder<A, B, C, Score_> impact(
             @NonNull Score_ constraintWeight,
             @NonNull ToIntTriFunction<A, B, C> matchWeigher) {
-        TriConstraintStub<A, B, C, Score_> stub = impact(matchWeigher);
+        TriConstraintStub<A, B, C> stub = impact(matchWeigher);
         return stub.usingDefaultConstraintWeight(constraintWeight);
     }
 
@@ -1697,7 +1688,7 @@ public interface TriConstraintStream<A, B, C> extends ConstraintStream {
     @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull TriConstraintBuilder<A, B, C, Score_> impactLong(
             @NonNull Score_ constraintWeight, @NonNull ToLongTriFunction<A, B, C> matchWeigher) {
-        TriConstraintStub<A, B, C, Score_> stub = impactLong(matchWeigher);
+        TriConstraintStub<A, B, C> stub = impactLong(matchWeigher);
         return stub.usingDefaultConstraintWeight(constraintWeight);
     }
 
@@ -1709,7 +1700,7 @@ public interface TriConstraintStream<A, B, C> extends ConstraintStream {
     @Deprecated(forRemoval = true, since = "1.20.0")
     default <Score_ extends Score<Score_>> @NonNull TriConstraintBuilder<A, B, C, Score_> impactBigDecimal(
             @NonNull Score_ constraintWeight, @NonNull TriFunction<A, B, C, BigDecimal> matchWeigher) {
-        TriConstraintStub<A, B, C, Score_> stub = impactBigDecimal(matchWeigher);
+        TriConstraintStub<A, B, C> stub = impactBigDecimal(matchWeigher);
         return stub.usingDefaultConstraintWeight(constraintWeight);
     }
 

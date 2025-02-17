@@ -91,7 +91,7 @@ public interface ConstraintStream {
      * @return fluent builder for the constraint
      */
     @NonNull
-    <Score_ extends @NonNull Score<Score_>> ConstraintStub<Score_> penalize();
+    ConstraintStub penalize();
 
     /**
      * Positively impact the {@link Score}, with a match weight of 1.
@@ -102,7 +102,7 @@ public interface ConstraintStream {
      * @return fluent builder for the constraint
      */
     @NonNull
-    <Score_ extends @NonNull Score<Score_>> ConstraintStub<Score_> reward();
+    ConstraintStub reward();
 
     /**
      * Positively or negatively impact the {@link Score}, with a match weight of 1.
@@ -113,7 +113,7 @@ public interface ConstraintStream {
      * @return fluent builder for the constraint
      */
     @NonNull
-    <Score_ extends @NonNull Score<Score_>> ConstraintStub<Score_> impact();
+    ConstraintStub impact();
 
     /**
      * Negatively impact the {@link Score}: subtract the constraintWeight for each match.
@@ -131,7 +131,7 @@ public interface ConstraintStream {
     @NonNull
     default Constraint penalize(@NonNull String constraintName, @NonNull Score<?> constraintWeight) {
         ConstraintStub stub = penalize();
-        return stub.usingDefaultConstraintWeight(constraintWeight)
+        return stub.usingDefaultConstraintWeight((Score) constraintWeight)
                 .asConstraint(constraintName);
     }
 
@@ -146,7 +146,7 @@ public interface ConstraintStream {
     default Constraint penalize(@NonNull String constraintPackage, @NonNull String constraintName,
             @NonNull Score<?> constraintWeight) {
         ConstraintStub stub = penalize();
-        return stub.usingDefaultConstraintWeight(constraintWeight)
+        return stub.usingDefaultConstraintWeight((Score) constraintWeight)
                 .asConstraint(constraintPackage, constraintName);
     }
 
@@ -166,7 +166,7 @@ public interface ConstraintStream {
     @Deprecated(forRemoval = true)
     @NonNull
     default Constraint penalizeConfigurable(@NonNull String constraintName) {
-        ConstraintStub<?> stub = penalize();
+        ConstraintStub stub = penalize();
         return stub.usingDefaultConstraintWeight(null)
                 .asConstraint(constraintName);
     }
@@ -179,7 +179,7 @@ public interface ConstraintStream {
     @Deprecated(forRemoval = true)
     @NonNull
     default Constraint penalizeConfigurable(@NonNull String constraintPackage, @NonNull String constraintName) {
-        ConstraintStub<?> stub = penalize();
+        ConstraintStub stub = penalize();
         return stub.usingDefaultConstraintWeight(null)
                 .asConstraint(constraintPackage, constraintName);
     }
@@ -200,7 +200,7 @@ public interface ConstraintStream {
     @NonNull
     default Constraint reward(@NonNull String constraintName, @NonNull Score<?> constraintWeight) {
         ConstraintStub stub = reward();
-        return stub.usingDefaultConstraintWeight(constraintWeight)
+        return stub.usingDefaultConstraintWeight((Score) constraintWeight)
                 .asConstraint(constraintName);
     }
 
@@ -215,7 +215,7 @@ public interface ConstraintStream {
     default Constraint reward(@NonNull String constraintPackage, @NonNull String constraintName,
             @NonNull Score<?> constraintWeight) {
         ConstraintStub stub = reward();
-        return stub.usingDefaultConstraintWeight(constraintWeight)
+        return stub.usingDefaultConstraintWeight((Score) constraintWeight)
                 .asConstraint(constraintPackage, constraintName);
     }
 
@@ -235,7 +235,7 @@ public interface ConstraintStream {
     @Deprecated(forRemoval = true)
     @NonNull
     default Constraint rewardConfigurable(@NonNull String constraintName) {
-        ConstraintStub<?> stub = reward();
+        ConstraintStub stub = reward();
         return stub.usingDefaultConstraintWeight(null)
                 .asConstraint(constraintName);
     }
@@ -248,7 +248,7 @@ public interface ConstraintStream {
     @Deprecated(forRemoval = true)
     @NonNull
     default Constraint rewardConfigurable(@NonNull String constraintPackage, @NonNull String constraintName) {
-        ConstraintStub<?> stub = reward();
+        ConstraintStub stub = reward();
         return stub.usingDefaultConstraintWeight(null)
                 .asConstraint(constraintPackage, constraintName);
     }
@@ -269,7 +269,7 @@ public interface ConstraintStream {
     @NonNull
     default Constraint impact(@NonNull String constraintName, @NonNull Score<?> constraintWeight) {
         ConstraintStub stub = impact();
-        return stub.usingDefaultConstraintWeight(constraintWeight)
+        return stub.usingDefaultConstraintWeight((Score) constraintWeight)
                 .asConstraint(constraintName);
     }
 
@@ -284,7 +284,7 @@ public interface ConstraintStream {
     default Constraint impact(@NonNull String constraintPackage, @NonNull String constraintName,
             @NonNull Score<?> constraintWeight) {
         ConstraintStub stub = impact();
-        return stub.usingDefaultConstraintWeight(constraintWeight)
+        return stub.usingDefaultConstraintWeight((Score) constraintWeight)
                 .asConstraint(constraintPackage, constraintName);
     }
 

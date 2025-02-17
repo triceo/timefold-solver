@@ -21,7 +21,7 @@ public interface QuadConstraintDefinition<A, B, C, D, Score_ extends Score<Score
         extends ConstraintDefinition<Score_> {
 
     @Override
-    QuadConstraintStub<A, B, C, D, Score_> buildConstraint(ConstraintFactory constraintFactory);
+    QuadConstraintStub<A, B, C, D> buildConstraint(ConstraintFactory constraintFactory);
 
     @Override
     default @Nullable PentaFunction<A, B, C, D, Score_, ConstraintJustification> justificationFunction() {

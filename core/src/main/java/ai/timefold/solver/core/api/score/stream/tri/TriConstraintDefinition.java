@@ -21,7 +21,7 @@ public interface TriConstraintDefinition<A, B, C, Score_ extends Score<Score_>>
         extends ConstraintDefinition<Score_> {
 
     @Override
-    TriConstraintStub<A, B, C, Score_> buildConstraint(ConstraintFactory constraintFactory);
+    TriConstraintStub<A, B, C> buildConstraint(ConstraintFactory constraintFactory);
 
     @Override
     default @Nullable QuadFunction<A, B, C, Score_, ConstraintJustification> justificationFunction() {

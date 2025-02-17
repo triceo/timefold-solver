@@ -21,7 +21,7 @@ public interface UniConstraintDefinition<A, Score_ extends Score<Score_>>
         extends ConstraintDefinition<Score_> {
 
     @Override
-    UniConstraintStub<A, Score_> buildConstraint(ConstraintFactory constraintFactory);
+    UniConstraintStub<A> buildConstraint(ConstraintFactory constraintFactory);
 
     @Override
     default @Nullable BiFunction<A, Score_, ConstraintJustification> justificationFunction() {

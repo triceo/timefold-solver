@@ -10,9 +10,9 @@ import org.jspecify.annotations.NullMarked;
  * but specialized for constraint streams of cardinality 3 (tri-streams).
  */
 @NullMarked
-public interface TriConstraintStub<A, B, C, Score_ extends Score<Score_>> extends ConstraintStub<Score_> {
+public interface TriConstraintStub<A, B, C> extends ConstraintStub {
 
     @Override
-    TriConstraintBuilder<A, B, C, Score_> usingDefaultConstraintWeight(Score_ constraintWeight);
+    <Score_ extends Score<Score_>> TriConstraintBuilder<A, B, C, Score_> usingDefaultConstraintWeight(Score_ constraintWeight);
 
 }

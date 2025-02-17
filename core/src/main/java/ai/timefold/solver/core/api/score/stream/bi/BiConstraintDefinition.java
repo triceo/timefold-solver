@@ -21,7 +21,7 @@ public interface BiConstraintDefinition<A, B, Score_ extends Score<Score_>>
         extends ConstraintDefinition<Score_> {
 
     @Override
-    BiConstraintStub<A, B, Score_> buildConstraint(ConstraintFactory constraintFactory);
+    BiConstraintStub<A, B> buildConstraint(ConstraintFactory constraintFactory);
 
     @Override
     default @Nullable TriFunction<A, B, Score_, ConstraintJustification> justificationFunction() {
