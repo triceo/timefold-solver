@@ -69,17 +69,7 @@ public abstract class AbstractConstraintStreamTest {
                 .sum();
         if (implSupport.constraintMatchPolicy().isJustificationEnabled()) {
             for (var assertableMatch : assertableMatches) {
-                var constraintPackage = assertableMatch.constraintPackage == null
-                        ? scoreDirector.getSolutionDescriptor().getSolutionClass().getPackage().getName()
-                        : assertableMatch.constraintPackage;
-                var constraintMatchTotals =
-                        scoreDirector.getConstraintMatchTotalMap();
-                var constraintId = ConstraintRef.composeConstraintId(constraintPackage, assertableMatch.constraintName);
-                var constraintMatchTotal = constraintMatchTotals.get(constraintId);
-                if (constraintMatchTotal == null) {
-                    throw new IllegalStateException("Requested constraint matches for unknown constraint (" +
-                            constraintId + ").");
-                }
+                var constraintMatchTotal = getConstraintMatchTotal(scoreDirector, assertableMatch);
                 if (constraintMatchTotal.getConstraintMatchSet().stream().noneMatch(assertableMatch::isEqualTo)) {
                     fail("The assertableMatch (" + assertableMatch + ") is lacking,"
                             + " it's not in the constraintMatchSet ("
@@ -107,6 +97,22 @@ public abstract class AbstractConstraintStreamTest {
                     .hasSize(matchCount);
         }
         assertThat(score.score()).isEqualTo(scoreTotal);
+    }
+
+    private static <Solution_> ConstraintMatchTotal<SimpleScore>
+            getConstraintMatchTotal(InnerScoreDirector<Solution_, SimpleScore> scoreDirector, AssertableMatch assertableMatch) {
+        var constraintPackage = assertableMatch.constraintPackage == null
+                ? scoreDirector.getSolutionDescriptor().getSolutionClass().getPackage().getName()
+                : assertableMatch.constraintPackage;
+        var constraintMatchTotals =
+                scoreDirector.getConstraintMatchTotalMap();
+        var constraintId = ConstraintRef.composeConstraintId(constraintPackage, assertableMatch.constraintName);
+        var constraintMatchTotal = constraintMatchTotals.get(constraintId);
+        if (constraintMatchTotal == null) {
+            throw new IllegalStateException("Requested constraint matches for unknown constraint (" +
+                    constraintId + ").");
+        }
+        return constraintMatchTotal;
     }
 
     protected static AssertableMatch assertMatch(Object... justifications) {
@@ -194,23 +200,13 @@ public abstract class AbstractConstraintStreamTest {
         return Arrays.stream(facts).collect(Collectors.toSet());
     }
 
-    protected static final class TestConstraintJustification<Score_ extends Score<Score_>>
-            implements ConstraintJustification {
-
-        private final Score_ score;
-        private final Object[] facts;
+    protected record TestConstraintJustification<Score_ extends Score<Score_>>(Score_ score, Object... facts)
+            implements
+                ConstraintJustification {
 
         public TestConstraintJustification(Score_ score, Object... facts) {
             this.score = Objects.requireNonNull(score);
             this.facts = Objects.requireNonNull(facts);
-        }
-
-        public Score_ getScore() {
-            return score;
-        }
-
-        public Object[] getFacts() {
-            return facts;
         }
 
     }

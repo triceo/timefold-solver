@@ -14,7 +14,8 @@ public class IntegrationTestConstraintProvider implements ConstraintProvider {
         return new Constraint[] {
                 constraintFactory.forEach(IntegrationTestEntity.class)
                         .filter(entity -> !entity.getId().equals(entity.getValue().id()))
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint("Entity id do not match value id")
         };
     }

@@ -16,7 +16,8 @@ public class TestdataInterfaceConstraintProvider implements ConstraintProvider {
 
     private Constraint alwaysPenalizingConstraint(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(TestdataInterfaceEntity.class)
-                .penalize(SimpleScore.ONE)
+                .penalize()
+                .usingDefaultConstraintWeight(SimpleScore.ONE)
                 .asConstraint("Always penalize");
     }
 }

@@ -17,7 +17,8 @@ public final class TestdataPinnedWithIndexListConstraintProvider implements Cons
 
     private Constraint onlyConstraint(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(TestdataPinnedWithIndexListEntity.class)
-                .penalize(SimpleScore.ONE)
+                .penalize()
+                .usingDefaultConstraintWeight(SimpleScore.ONE)
                 .asConstraint("First weight");
     }
 

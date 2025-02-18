@@ -18,7 +18,8 @@ public final class TestdataAllowsUnassignedValuesListConstraintProvider implemen
 
     private Constraint entityConstraint(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(TestdataAllowsUnassignedValuesListEntity.class)
-                .penalize(SimpleScore.ONE, e -> e.getValueList().size())
+                .penalizeWeighted(e -> e.getValueList().size())
+                .usingDefaultConstraintWeight(SimpleScore.ONE)
                 .asConstraint("Entity list size");
     }
 

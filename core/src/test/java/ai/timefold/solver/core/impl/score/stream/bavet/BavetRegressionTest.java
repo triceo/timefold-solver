@@ -30,7 +30,8 @@ final class BavetRegressionTest extends AbstractConstraintStreamTest {
                                 factory.forEachIncludingUnassigned(TestdataEntity.class)
                                         .join(factory.forEachIncludingUnassigned(TestdataEntity.class),
                                                 Joiners.equal(TestdataEntity::getValue))
-                                        .penalize(SimpleScore.ONE)
+                                        .penalize()
+                                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                                         .asConstraint(TEST_CONSTRAINT_NAME)
                         });
 
@@ -91,7 +92,8 @@ final class BavetRegressionTest extends AbstractConstraintStreamTest {
                                                     }
                                                     return true;
                                                 }))
-                                        .penalize(SimpleScore.ONE)
+                                        .penalize()
+                                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                                         .asConstraint(TEST_CONSTRAINT_NAME)
                         });
 
@@ -144,7 +146,8 @@ final class BavetRegressionTest extends AbstractConstraintStreamTest {
                                                     }
                                                     return true;
                                                 }))
-                                        .penalize(SimpleScore.ONE)
+                                        .penalize()
+                                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                                         .asConstraint(TEST_CONSTRAINT_NAME)
                         });
 
@@ -191,7 +194,8 @@ final class BavetRegressionTest extends AbstractConstraintStreamTest {
                                 factory.forEach(TestdataEntity.class)
                                         .ifNotExists(TestdataEntity.class,
                                                 filtering((a, b) -> (a.getValue() != b.getValue())))
-                                        .penalize(SimpleScore.ONE)
+                                        .penalize()
+                                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                                         .asConstraint(TEST_CONSTRAINT_NAME)
                         });
 
@@ -253,7 +257,8 @@ final class BavetRegressionTest extends AbstractConstraintStreamTest {
                                                     }
                                                     return true;
                                                 }))
-                                        .penalize(SimpleScore.ONE)
+                                        .penalize()
+                                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                                         .asConstraint(TEST_CONSTRAINT_NAME)
                         });
 
@@ -310,7 +315,8 @@ final class BavetRegressionTest extends AbstractConstraintStreamTest {
                                                     }
                                                     return a.getValue() != b.getValue();
                                                 }))
-                                        .penalize(SimpleScore.ONE)
+                                        .penalize()
+                                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                                         .asConstraint(TEST_CONSTRAINT_NAME)
                         });
 
@@ -364,7 +370,8 @@ final class BavetRegressionTest extends AbstractConstraintStreamTest {
                                                     }
                                                     return a.getValue() != b.getValue();
                                                 }))
-                                        .penalize(SimpleScore.ONE)
+                                        .penalize()
+                                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                                         .asConstraint(TEST_CONSTRAINT_NAME)
                         });
 
@@ -413,7 +420,8 @@ final class BavetRegressionTest extends AbstractConstraintStreamTest {
                                 factory.forEachIncludingUnassigned(TestdataEntity.class)
                                         .map(Function.identity())
                                         .filter(e -> e.getValue() != null)
-                                        .penalize(SimpleScore.ONE)
+                                        .penalize()
+                                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                                         .asConstraint(TEST_CONSTRAINT_NAME)
                         });
 
@@ -458,7 +466,8 @@ final class BavetRegressionTest extends AbstractConstraintStreamTest {
                                 factory.forEach(TestdataEntity.class)
                                         .filter(e -> e.getValue().getCode().equals("A"))
                                         .concat(factory.forEach(TestdataEntity.class))
-                                        .penalize(SimpleScore.ONE)
+                                        .penalize()
+                                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                                         .asConstraint(TEST_CONSTRAINT_NAME)
                         });
 

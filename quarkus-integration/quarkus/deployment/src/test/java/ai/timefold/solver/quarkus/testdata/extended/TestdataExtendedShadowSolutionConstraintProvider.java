@@ -14,7 +14,8 @@ public class TestdataExtendedShadowSolutionConstraintProvider implements Constra
         return new Constraint[] {
                 constraintFactory.forEach(TestdataExtendedShadowEntity.class)
                         .filter(e -> e.myPlanningVariable.id != e.desiredId)
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint("Variable does not match desired id")
         };
     }

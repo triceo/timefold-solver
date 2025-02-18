@@ -47,7 +47,8 @@ public abstract class AbstractAdvancedGroupByConstraintStreamTest extends Abstra
                         .groupBy(e -> e.getCode().substring(0, 1), count())
                         .groupBy(Pair::new)
                         .filter(pair -> !pair.key().equals("G"))
-                        .penalize(SimpleScore.ONE, Pair::value)
+                        .penalizeWeighted(Pair::value)
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -78,7 +79,8 @@ public abstract class AbstractAdvancedGroupByConstraintStreamTest extends Abstra
                 buildScoreDirector(factory -> factory.forEach(TestdataLavishEntity.class)
                         .groupBy(count())
                         .filter(count -> count == 10)
-                        .penalize(SimpleScore.ONE, i -> i)
+                        .penalizeWeighted(count -> count)
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -102,7 +104,8 @@ public abstract class AbstractAdvancedGroupByConstraintStreamTest extends Abstra
                 buildScoreDirector(factory -> factory.forEach(TestdataLavishEntity.class)
                         .groupBy(toSet())
                         .groupBy(sum(Set::size))
-                        .penalize(SimpleScore.ONE, count -> count)
+                        .penalizeWeighted(count -> count)
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -125,7 +128,8 @@ public abstract class AbstractAdvancedGroupByConstraintStreamTest extends Abstra
                 buildScoreDirector(factory -> factory.forEach(TestdataLavishEntity.class)
                         .groupBy(TestdataLavishEntity::getEntityGroup)
                         .groupBy(toSet())
-                        .penalize(SimpleScore.ONE, Set::size)
+                        .penalizeWeighted(Set::size)
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         TestdataLavishEntity entity1 = solution.getFirstEntity();
@@ -154,7 +158,8 @@ public abstract class AbstractAdvancedGroupByConstraintStreamTest extends Abstra
                         // Stream of all unique entity bi tuples that share a group
                         .groupBy((a, b) -> a.getEntityGroup(), countBi())
                         .groupBy(toMap((g, c) -> g, (g, c) -> c, Integer::sum))
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -186,7 +191,8 @@ public abstract class AbstractAdvancedGroupByConstraintStreamTest extends Abstra
                         // Stream of all unique entity tri tuples that share a group
                         .groupBy((a, b, c) -> a.getEntityGroup(), countTri())
                         .groupBy(toMap((g, c) -> g, (g, c) -> c, Integer::sum))
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -222,7 +228,8 @@ public abstract class AbstractAdvancedGroupByConstraintStreamTest extends Abstra
                         // Stream of all unique entity quad tuples that share a group
                         .groupBy((a, b, c, d) -> a.getEntityGroup(), countQuad())
                         .groupBy(toMap((g, c) -> g, (g, c) -> c, Integer::sum))
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -250,7 +257,8 @@ public abstract class AbstractAdvancedGroupByConstraintStreamTest extends Abstra
                         .forEachUniquePair(TestdataLavishEntity.class, equal(TestdataLavishEntity::getEntityGroup))
                         .groupBy((a, b) -> a.getEntityGroup())
                         .groupBy(Function.identity(), count())
-                        .penalize(SimpleScore.ONE, (group, count) -> count)
+                        .penalizeWeighted((group, count) -> count)
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         TestdataLavishEntity entity = solution.getFirstEntity();
@@ -282,7 +290,8 @@ public abstract class AbstractAdvancedGroupByConstraintStreamTest extends Abstra
                         // Stream of all unique entity tri tuples that share a group
                         .groupBy((a, b, c) -> a.getEntityGroup())
                         .groupBy(Function.identity(), count())
-                        .penalize(SimpleScore.ONE, (group, count) -> count)
+                        .penalizeWeighted((group, count) -> count)
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         TestdataLavishEntity entity = solution.getFirstEntity();
@@ -318,7 +327,8 @@ public abstract class AbstractAdvancedGroupByConstraintStreamTest extends Abstra
                         // Stream of all unique entity quad tuples that share a group
                         .groupBy((a, b, c, d) -> a.getEntityGroup())
                         .groupBy(Function.identity(), count())
-                        .penalize(SimpleScore.ONE, (group, count) -> count)
+                        .penalizeWeighted((group, count) -> count)
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         TestdataLavishEntity entity = solution.getFirstEntity();
@@ -347,7 +357,8 @@ public abstract class AbstractAdvancedGroupByConstraintStreamTest extends Abstra
                         .groupBy((a, b) -> a.getEntityGroup())
                         .groupBy(Function.identity(), count())
                         .groupBy((group, count) -> group.toString(), countBi())
-                        .penalize(SimpleScore.ONE, (groupName, count) -> count)
+                        .penalizeWeighted((group, count) -> count)
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         TestdataLavishEntity entity = solution.getFirstEntity();
@@ -381,7 +392,8 @@ public abstract class AbstractAdvancedGroupByConstraintStreamTest extends Abstra
                         .groupBy((a, b, c) -> a.getEntityGroup())
                         .groupBy(Function.identity(), count())
                         .groupBy((group, count) -> group.toString(), countBi())
-                        .penalize(SimpleScore.ONE, (groupName, count) -> count)
+                        .penalizeWeighted((group, count) -> count)
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         TestdataLavishEntity entity = solution.getFirstEntity();
@@ -418,7 +430,8 @@ public abstract class AbstractAdvancedGroupByConstraintStreamTest extends Abstra
                         .groupBy((a, b, c, d) -> a.getEntityGroup())
                         .groupBy(Function.identity(), count())
                         .groupBy((group, count) -> group.toString(), countBi())
-                        .penalize(SimpleScore.ONE, (groupName, count) -> count)
+                        .penalizeWeighted((group, count) -> count)
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         TestdataLavishEntity entity = solution.getFirstEntity();
@@ -454,7 +467,8 @@ public abstract class AbstractAdvancedGroupByConstraintStreamTest extends Abstra
                 buildScoreDirector(factory -> factory.forEach(TestdataLavishEntity.class)
                         .groupBy(TestdataLavishEntity::getEntityGroup, count())
                         .ifExists(TestdataLavishEntityGroup.class, equal((groupA, count) -> groupA, Function.identity()))
-                        .penalize(SimpleScore.ONE, (groupA, count) -> count)
+                        .penalizeWeighted((group, count) -> count)
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -489,7 +503,8 @@ public abstract class AbstractAdvancedGroupByConstraintStreamTest extends Abstra
                         .ifExists(TestdataLavishEntityGroup.class,
                                 equal(TestdataLavishEntity::getEntityGroup, Function.identity()))
                         .groupBy(TestdataLavishEntity::getEntityGroup, count())
-                        .penalize(SimpleScore.ONE, (groupA, count) -> count)
+                        .penalizeWeighted((group, count) -> count)
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -524,7 +539,8 @@ public abstract class AbstractAdvancedGroupByConstraintStreamTest extends Abstra
                         .ifExists(TestdataLavishEntityGroup.class,
                                 equal((e1, e2) -> e1.getEntityGroup(), Function.identity()))
                         .groupBy((e1, e2) -> e1.getEntityGroup(), countBi())
-                        .penalize(SimpleScore.ONE, (groupA, count) -> count)
+                        .penalizeWeighted((group, count) -> count)
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -558,7 +574,8 @@ public abstract class AbstractAdvancedGroupByConstraintStreamTest extends Abstra
                 buildScoreDirector(factory -> factory.forEachUniquePair(TestdataLavishEntity.class,
                         equal(TestdataLavishEntity::getEntityGroup),
                         filtering((e1, e2) -> !e1.getCode().contains("My"))) // Filtering() caused PLANNER-2139.
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -581,7 +598,8 @@ public abstract class AbstractAdvancedGroupByConstraintStreamTest extends Abstra
                 .groupBy((group, value, entity) -> group,
                         (group, value, entity) -> entity,
                         sum((group, count, entity) -> 1))
-                .penalize(SimpleScore.ONE)
+                .penalize()
+                .usingDefaultConstraintWeight(SimpleScore.ONE)
                 .asConstraint(TEST_CONSTRAINT_NAME))).doesNotThrowAnyException();
     }
 
@@ -594,7 +612,8 @@ public abstract class AbstractAdvancedGroupByConstraintStreamTest extends Abstra
                     .filter(e -> e.getEntityGroup() != solution.getFirstEntityGroup());
             return new Constraint[] {
                     reusedStream.join(reusedStream, equal(TestdataLavishEntity::getEntityGroup))
-                            .penalize(SimpleScore.ONE)
+                            .penalize()
+                            .usingDefaultConstraintWeight(SimpleScore.ONE)
                             .asConstraint(TEST_CONSTRAINT_NAME)
 
             };

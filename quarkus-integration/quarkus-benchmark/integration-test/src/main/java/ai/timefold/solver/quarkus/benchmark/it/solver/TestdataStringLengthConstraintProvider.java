@@ -16,10 +16,12 @@ public class TestdataStringLengthConstraintProvider implements ConstraintProvide
         return new Constraint[] {
                 factory.forEachUniquePair(TestdataStringLengthShadowEntity.class)
                         .filter((a, b) -> a.getValues().stream().anyMatch(v -> b.getValues().contains(v)))
-                        .penalize(HardSoftScore.ONE_HARD)
+                        .penalize()
+                        .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                         .asConstraint("Don't assign 2 entities the same value."),
                 factory.forEach(TestdataListValueShadowEntity.class)
-                        .reward(HardSoftScore.ONE_SOFT, a -> a.getLength())
+                        .rewardWeighted(TestdataListValueShadowEntity::getLength)
+                        .usingDefaultConstraintWeight(HardSoftScore.ONE_SOFT)
                         .asConstraint("Maximize value length")
         };
     }

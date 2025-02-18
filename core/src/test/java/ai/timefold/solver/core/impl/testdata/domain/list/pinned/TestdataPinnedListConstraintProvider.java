@@ -17,7 +17,8 @@ public final class TestdataPinnedListConstraintProvider implements ConstraintPro
 
     private Constraint onlyConstraint(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(TestdataPinnedListEntity.class)
-                .penalize(SimpleScore.ONE)
+                .penalize()
+                .usingDefaultConstraintWeight(SimpleScore.ONE)
                 .asConstraint("First weight");
     }
 

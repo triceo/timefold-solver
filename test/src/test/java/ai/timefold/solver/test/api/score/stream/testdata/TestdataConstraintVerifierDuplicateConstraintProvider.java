@@ -18,7 +18,8 @@ public final class TestdataConstraintVerifierDuplicateConstraintProvider impleme
 
     public Constraint penalizeEveryEntity(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(TestdataConstraintVerifierFirstEntity.class)
-                .penalize(HardSoftScore.ONE_HARD)
+                .penalize()
+                .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                 .asConstraint("Penalize every standard entity");
     }
 

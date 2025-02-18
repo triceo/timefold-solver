@@ -17,7 +17,8 @@ public class TestdataGizmoConstraintProvider implements ConstraintProvider {
                 factory.forEach(TestdataGizmoSpringEntity.class)
                         .join(TestdataGizmoSpringEntity.class, Joiners.equal(TestdataGizmoSpringEntity::getValue))
                         .filter((a, b) -> a != b)
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint("Don't assign 2 entities the same value.")
         };
     }

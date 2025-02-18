@@ -19,13 +19,15 @@ public final class TestdataConstraintWeightOverridesConstraintProvider implement
 
     public Constraint firstConstraint(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(TestdataEntity.class)
-                .penalize(SimpleScore.ONE)
+                .penalize()
+                .usingDefaultConstraintWeight(SimpleScore.ONE)
                 .asConstraint("First weight");
     }
 
     public Constraint secondConstraint(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(TestdataEntity.class)
-                .reward(SimpleScore.of(2))
+                .reward()
+                .usingDefaultConstraintWeight(SimpleScore.of(2))
                 .asConstraint("Second weight");
     }
 

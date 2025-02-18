@@ -85,7 +85,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         .join(TestdataLavishExtra.class)
                         .filter((e1, e2, value, extra) -> value.getCode().equals("MyValue 1")
                                 && extra.getCode().equals("MyExtra 1"))
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -130,7 +131,8 @@ public abstract class AbstractQuadConstraintStreamTest
                                 filtering((entityA, entityB, entityC, entityD) -> !Objects.equals(entityA, entity1)))
                         .filter((entityA, entityB, entityC, entityD) -> !Objects.equals(entityA, entity2))
                         .filter((entityA, entityB, entityC, entityD) -> !Objects.equals(entityA, entity3))
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -153,7 +155,8 @@ public abstract class AbstractQuadConstraintStreamTest
                 .join(TestdataLavishEntity.class, equal((entity, group, value) -> group,
                         TestdataLavishEntity::getEntityGroup))
                 .ifExists(Integer.class)
-                .penalize(SimpleScore.ONE)
+                .penalize()
+                .usingDefaultConstraintWeight(SimpleScore.ONE)
                 .asConstraint(TEST_CONSTRAINT_NAME)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining(Integer.class.getCanonicalName())
@@ -173,7 +176,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         .join(TestdataLavishEntity.class, equal((entity, group, value) -> group,
                                 TestdataLavishEntity::getEntityGroup))
                         .ifExists(TestdataLavishValueGroup.class)
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -209,7 +213,8 @@ public abstract class AbstractQuadConstraintStreamTest
                 .ifExists(TestdataLavishValueGroup.class,
                         filtering((entityA, entityB, entityAGroup, value, valueGroup) -> Objects
                                 .equals(value.getValueGroup(), valueGroup)))
-                .penalize(SimpleScore.ONE)
+                .penalize()
+                .usingDefaultConstraintWeight(SimpleScore.ONE)
                 .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -245,7 +250,8 @@ public abstract class AbstractQuadConstraintStreamTest
                 .join(TestdataLavishValue.class, equal((entityA, entityB, group) -> entityA.getValue(), identity()))
                 .ifExists(TestdataLavishEntityGroup.class,
                         equal((entityA, entityB, groupA, valueA) -> entityA.getEntityGroup(), identity()))
-                .penalize(SimpleScore.ONE)
+                .penalize()
+                .usingDefaultConstraintWeight(SimpleScore.ONE)
                 .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -284,7 +290,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         equal((entityA, entityB, groupA, valueA) -> entityA.getEntityGroup(), identity()),
                         filtering((entityA, entityB, groupA, valueA, groupB) -> entityA.getCode().contains("MyEntity")
                                 || groupA.getCode().contains("MyEntity")))
-                .penalize(SimpleScore.ONE)
+                .penalize()
+                .usingDefaultConstraintWeight(SimpleScore.ONE)
                 .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -322,7 +329,8 @@ public abstract class AbstractQuadConstraintStreamTest
                 .join(TestdataLavishEntity.class, equal((entity, group, value) -> group,
                         TestdataLavishEntity::getEntityGroup))
                 .ifNotExists(Integer.class)
-                .penalize(SimpleScore.ONE)
+                .penalize()
+                .usingDefaultConstraintWeight(SimpleScore.ONE)
                 .asConstraint(TEST_CONSTRAINT_NAME)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining(Integer.class.getCanonicalName())
@@ -342,7 +350,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         .join(TestdataLavishEntity.class, equal((entity, group, value) -> group,
                                 TestdataLavishEntity::getEntityGroup))
                         .ifNotExists(TestdataLavishValueGroup.class)
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -378,7 +387,8 @@ public abstract class AbstractQuadConstraintStreamTest
                 .ifNotExists(TestdataLavishValueGroup.class,
                         filtering((entityA, entityB, entityAGroup, value, valueGroup) -> Objects
                                 .equals(value.getValueGroup(), valueGroup)))
-                .penalize(SimpleScore.ONE)
+                .penalize()
+                .usingDefaultConstraintWeight(SimpleScore.ONE)
                 .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -414,7 +424,8 @@ public abstract class AbstractQuadConstraintStreamTest
                 .join(TestdataLavishValue.class, equal((entityA, entityB, group) -> entityA.getValue(), identity()))
                 .ifNotExists(TestdataLavishEntityGroup.class,
                         equal((entityA, entityB, groupA, valueA) -> entityB.getEntityGroup(), identity()))
-                .penalize(SimpleScore.ONE)
+                .penalize()
+                .usingDefaultConstraintWeight(SimpleScore.ONE)
                 .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -450,7 +461,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         filtering((entityA, entityB, groupA, valueA,
                                 groupB) -> !(entityA.getCode().contains("MyEntity")
                                         && groupB.getCode().contains("MyEntity"))))
-                .penalize(SimpleScore.ONE)
+                .penalize()
+                .usingDefaultConstraintWeight(SimpleScore.ONE)
                 .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -504,7 +516,8 @@ public abstract class AbstractQuadConstraintStreamTest
                                 countDistinct(TestdataLavishEntity::getValue),
                                 countDistinct(TestdataLavishEntity::getValue))
                         .ifExists(TestdataLavishExtra.class)
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -544,7 +557,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         .join(TestdataLavishEntity.class, equal((entity, group, value) -> group,
                                 TestdataLavishEntity::getEntityGroup))
                         .groupBy(countQuad())
-                        .penalize(SimpleScore.ONE, count -> count)
+                        .penalizeWeighted(count -> count)
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -571,7 +585,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         .join(TestdataLavishEntity.class, equal((e1, e2, e3) -> e2, Function.identity()))
                         .groupBy(countQuad(),
                                 countDistinct((e, e2, e3, e4) -> e))
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         TestdataLavishEntity entity1 = solution.getFirstEntity();
@@ -600,7 +615,8 @@ public abstract class AbstractQuadConstraintStreamTest
                                         TestdataLavishEntity e4) -> e.getLongProperty()),
                                 max((TestdataLavishEntity e, TestdataLavishEntity e2, TestdataLavishEntity e3,
                                         TestdataLavishEntity e4) -> e.getLongProperty()))
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         TestdataLavishEntity entity1 = solution.getFirstEntity();
@@ -637,7 +653,8 @@ public abstract class AbstractQuadConstraintStreamTest
                                 max((TestdataLavishEntity e, TestdataLavishEntity e2, TestdataLavishEntity e3,
                                         TestdataLavishEntity e4) -> e.getLongProperty()),
                                 toSet((e, e2, e3, e4) -> e))
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         TestdataLavishEntity entity1 = solution.getFirstEntity();
@@ -672,7 +689,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         .join(TestdataLavishEntity.class, equal((entity, group, value) -> group,
                                 TestdataLavishEntity::getEntityGroup))
                         .groupBy((entity1, group, value, entity2) -> value)
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         TestdataLavishValue value1 = solution.getFirstValue();
@@ -696,7 +714,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         .join(TestdataLavishEntity.class, equal((entity, group, value) -> group,
                                 TestdataLavishEntity::getEntityGroup))
                         .groupBy((entity1, group, value, entity2) -> value, countQuad())
-                        .penalize(SimpleScore.ONE, (group, count) -> count)
+                        .penalizeWeighted((group, count) -> count)
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         TestdataLavishValue value1 = solution.getFirstValue();
@@ -730,7 +749,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         .groupBy((entityA, entityB, entityC, entityD) -> entityA.toString(),
                                 countQuad(),
                                 toSet((entityA, entityB, entityC, entityD) -> entityA))
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         TestdataLavishEntity entity1 = solution.getFirstEntity();
@@ -766,7 +786,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         max((TestdataLavishEntity entityA, TestdataLavishEntity entityB,
                                 TestdataLavishEntity entityC, TestdataLavishEntity entityD) -> entityA.getLongProperty()),
                         toSet((entityA, entityB, entityC, entityD) -> entityA))
-                .penalize(SimpleScore.ONE)
+                .penalize()
+                .usingDefaultConstraintWeight(SimpleScore.ONE)
                 .asConstraint(TEST_CONSTRAINT_NAME));
 
         TestdataLavishEntity entity1 = solution.getFirstEntity();
@@ -803,7 +824,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         .join(TestdataLavishEntity.class, equal((entity, group, value) -> group,
                                 TestdataLavishEntity::getEntityGroup))
                         .groupBy((entity1, group, value, entity2) -> group, (entity1, group, value, entity2) -> value)
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         TestdataLavishEntityGroup group1 = solution.getFirstEntityGroup();
@@ -840,7 +862,8 @@ public abstract class AbstractQuadConstraintStreamTest
                                 TestdataLavishEntity::getEntityGroup))
                         .groupBy((entity1, group, value, entity2) -> group, (entity1, group, value, entity2) -> value,
                                 countQuad())
-                        .penalize(SimpleScore.ONE, (group, value, count) -> count)
+                        .penalizeWeighted((group, value, count) -> count)
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         TestdataLavishEntityGroup group1 = solution.getFirstEntityGroup();
@@ -877,7 +900,8 @@ public abstract class AbstractQuadConstraintStreamTest
                                 TestdataLavishEntity::getEntityGroup))
                         .groupBy((entity1, group, value, entity2) -> group, (entity1, group, value, entity2) -> value,
                                 countQuad(), countQuad())
-                        .penalize(SimpleScore.ONE, (group, value, count, sameCount) -> count + sameCount)
+                        .penalizeWeighted((group, value, count, sameCount) -> count + sameCount)
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         TestdataLavishEntityGroup group1 = solution.getFirstEntityGroup();
@@ -915,7 +939,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         .groupBy((entity1, group, value, entity2) -> entity1.getEntityGroup(),
                                 (entity1, group, value, entity2) -> entity2.getEntityGroup(),
                                 (entity1, group, value, entity2) -> value)
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         TestdataLavishEntityGroup group1 = solution.getFirstEntityGroup();
@@ -953,7 +978,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         .groupBy((entity1, group, value, entity2) -> entity1.getEntityGroup(),
                                 (entity1, group, value, entity2) -> entity2.getEntityGroup(),
                                 (entity1, group, value, entity2) -> group, ConstraintCollectors.countQuad())
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         TestdataLavishEntityGroup group1 = solution.getFirstEntityGroup();
@@ -990,7 +1016,8 @@ public abstract class AbstractQuadConstraintStreamTest
                                 (entity1, group, value, entity2) -> entity2.getEntityGroup(),
                                 (entity1, group, value, entity2) -> group,
                                 (entity1, group, value, entity2) -> value)
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         TestdataLavishEntityGroup group1 = solution.getFirstEntityGroup();
@@ -1025,7 +1052,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         .join(TestdataLavishEntityGroup.class,
                                 Joiners.equal((entity1, entity2, group) -> entity2.getEntityGroup(), Function.identity()))
                         .distinct()
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         TestdataLavishEntity entity1 = solution.getFirstEntity();
@@ -1053,7 +1081,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         .join(TestdataLavishEntityGroup.class,
                                 Joiners.equal((entity1, entity2, group) -> entity2.getEntityGroup(), Function.identity()))
                         .map((entity1, entity2, group1, group2) -> asSet(group1, group2))
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         TestdataLavishEntity entity = solution.getFirstEntity();
@@ -1086,7 +1115,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         .join(TestdataLavishEntityGroup.class,
                                 Joiners.equal((entity1, entity2, group) -> entity2.getEntityGroup(), Function.identity()))
                         .map((entity1, entity2, group1, group2) -> asSet(group1, group2))
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         TestdataLavishEntityGroup group1 = solution.getFirstEntityGroup();
@@ -1118,7 +1148,8 @@ public abstract class AbstractQuadConstraintStreamTest
                                 Joiners.equal((entity1, entity2, group) -> entity2.getEntityGroup(), Function.identity()))
                         .map((entity1, entity2, group1, group2) -> asSet(group1, group2))
                         .distinct()
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         TestdataLavishEntity entity = solution.getFirstEntity();
@@ -1151,7 +1182,8 @@ public abstract class AbstractQuadConstraintStreamTest
                                 Joiners.equal((entity1, entity2, group) -> entity2.getEntityGroup(), Function.identity()))
                         .map((entity1, entity2, group1, group2) -> asSet(group1, group2))
                         .distinct()
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         TestdataLavishEntityGroup group1 = solution.getFirstEntityGroup();
@@ -1183,7 +1215,8 @@ public abstract class AbstractQuadConstraintStreamTest
                                 Joiners.equal((entity1, entity2, group) -> entity2.getEntityGroup(), Function.identity()))
                         .map((entity1, entity2, group1, group2) -> entity1,
                                 (entity1, entity2, group1, group2) -> entity2)
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -1213,7 +1246,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         .map((entity1, entity2, group1, group2) -> entity1,
                                 (entity1, entity2, group1, group2) -> entity2,
                                 (entity1, entity2, group1, group2) -> entity1.getLongProperty() + entity2.getLongProperty())
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -1245,7 +1279,8 @@ public abstract class AbstractQuadConstraintStreamTest
                                 (entity1, entity2, group1, group2) -> entity2.getCode(),
                                 (entity1, entity2, group1, group2) -> group1.getCode(),
                                 (entity1, entity2, group1, group2) -> group2.getCode())
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -1279,7 +1314,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         .join(TestdataLavishEntity.class, filtering((a, b, c) -> a != c && b != c))
                         .join(TestdataLavishEntity.class, filtering((a, b, c, d) -> a != d && b != d))
                         .flattenLast((d) -> asList(group1, group1, group2))
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -1317,7 +1353,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         .join(TestdataLavishEntity.class, filtering((a, b, c) -> a != c && b != c))
                         .join(TestdataLavishEntity.class, filtering((a, b, c, d) -> a != d && b != d))
                         .flattenLast((d) -> asList(group1, group2))
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -1353,7 +1390,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         .join(TestdataLavishEntity.class, filtering((a, b, c, d) -> a != d && b != d))
                         .flattenLast((d) -> asList(group1, group1, group2))
                         .distinct()
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -1389,7 +1427,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         .join(TestdataLavishEntity.class, filtering((a, b, c, d) -> a != d && b != d))
                         .flattenLast((d) -> asList(group1, group2))
                         .distinct()
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -1435,7 +1474,8 @@ public abstract class AbstractQuadConstraintStreamTest
                                 .filter(entity -> entity.getValue() == value1))
                         .concat(factory.forEach(TestdataLavishEntity.class)
                                 .filter(entity -> entity.getValue() == value2))
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -1484,7 +1524,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         .concat(factory.forEach(TestdataLavishEntity.class)
                                 .filter(entity -> entity.getValue() == value2))
                         .distinct()
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -1534,7 +1575,8 @@ public abstract class AbstractQuadConstraintStreamTest
                                 .filter(entity -> entity.getValue() == value2)
                                 .join(factory.forEach(TestdataLavishEntity.class)
                                         .filter(entity -> entity.getValue() == value3)))
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -1585,7 +1627,8 @@ public abstract class AbstractQuadConstraintStreamTest
                                 .join(factory.forEach(TestdataLavishEntity.class)
                                         .filter(entity -> entity.getValue() == value3)))
                         .distinct()
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -1637,7 +1680,8 @@ public abstract class AbstractQuadConstraintStreamTest
                                         .filter(entity -> entity.getValue() == value3))
                                 .join(factory.forEach(TestdataLavishEntity.class)
                                         .filter(entity -> entity.getValue() == value1)))
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -1690,7 +1734,8 @@ public abstract class AbstractQuadConstraintStreamTest
                                 .join(factory.forEach(TestdataLavishEntity.class)
                                         .filter(entity -> entity.getValue() == value1)))
                         .distinct()
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -1744,7 +1789,8 @@ public abstract class AbstractQuadConstraintStreamTest
                                         .filter(entity -> entity.getValue() == value1))
                                 .join(factory.forEach(TestdataLavishEntity.class)
                                         .filter(entity -> entity.getValue() == value2)))
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -1798,7 +1844,8 @@ public abstract class AbstractQuadConstraintStreamTest
                                         .filter(entity -> entity.getValue() == value3))
                                 .join(factory.forEach(TestdataLavishEntity.class)
                                         .filter(entity -> entity.getValue() == value1)))
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -1853,7 +1900,8 @@ public abstract class AbstractQuadConstraintStreamTest
                                 .join(factory.forEach(TestdataLavishEntity.class)
                                         .filter(entity -> entity.getValue() == value2)))
                         .distinct()
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -1908,7 +1956,8 @@ public abstract class AbstractQuadConstraintStreamTest
                                 .join(factory.forEach(TestdataLavishEntity.class)
                                         .filter(entity -> entity.getValue() == value1)))
                         .distinct()
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -1964,7 +2013,8 @@ public abstract class AbstractQuadConstraintStreamTest
                                         (e1, e2, e3, e4) -> e2.getValue(),
                                         (e1, e2, e3, e4) -> e3.getValue().getCode() + e4.getValue().getCode(),
                                         ConstraintCollectors.countQuad()))
-                        .penalize(SimpleScore.ONE, (v1, v2, v3, count) -> count)
+                        .penalizeWeighted((v1, v2, v3, count) -> count)
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -2016,7 +2066,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         .expand((a, b, c) -> c + 1)
                         .filter((entity, index, index2, index3) -> index == 0)
                         .complement(TestdataLavishEntity.class, e -> Integer.MAX_VALUE, e -> -1, e -> 0)
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         // From scratch
@@ -2045,7 +2096,8 @@ public abstract class AbstractQuadConstraintStreamTest
                 factory -> factory.forEachUniquePair(TestdataLavishEntity.class, equal(TestdataLavishEntity::getValue))
                         .join(TestdataLavishValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                         .join(TestdataLavishValue.class, equal((entity, entity2, value) -> value, identity()))
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         scoreDirector.setWorkingSolution(solution);
@@ -2065,7 +2117,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         factory.forEachUniquePair(TestdataEntity.class, equal(TestdataEntity::getValue))
                                 .join(TestdataValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                                 .join(TestdataValue.class, equal((entity, entity2, value) -> value, identity()))
-                                .penalizeLong(SimpleLongScore.ONE)
+                                .penalize()
+                                .usingDefaultConstraintWeight(SimpleLongScore.ONE)
                                 .asConstraint(TEST_CONSTRAINT_NAME)
                 });
 
@@ -2086,7 +2139,8 @@ public abstract class AbstractQuadConstraintStreamTest
                                 factory.forEachUniquePair(TestdataEntity.class, equal(TestdataEntity::getValue))
                                         .join(TestdataValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                                         .join(TestdataValue.class, equal((entity, entity2, value) -> value, identity()))
-                                        .penalizeBigDecimal(SimpleBigDecimalScore.ONE)
+                                        .penalize()
+                                        .usingDefaultConstraintWeight(SimpleBigDecimalScore.ONE)
                                         .asConstraint(TEST_CONSTRAINT_NAME)
                         });
 
@@ -2144,7 +2198,8 @@ public abstract class AbstractQuadConstraintStreamTest
                 factory -> factory.forEachUniquePair(TestdataLavishEntity.class, equal(TestdataLavishEntity::getValue))
                         .join(TestdataLavishValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                         .join(TestdataLavishValue.class, equal((entity, entity2, value) -> value, identity()))
-                        .penalize(SimpleScore.ONE, (entity, entity2, value, value2) -> 2)
+                        .penalizeWeighted((entity, entity2, value, value2) -> 2)
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         scoreDirector.setWorkingSolution(solution);
@@ -2164,7 +2219,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         factory.forEachUniquePair(TestdataEntity.class, equal(TestdataEntity::getValue))
                                 .join(TestdataValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                                 .join(TestdataValue.class, equal((entity, entity2, value) -> value, identity()))
-                                .penalizeLong(SimpleLongScore.ONE, (entity, entity2, value, value2) -> 2L)
+                                .penalizeWeightedLong((entity, entity2, value, value2) -> 2L)
+                                .usingDefaultConstraintWeight(SimpleLongScore.ONE)
                                 .asConstraint(TEST_CONSTRAINT_NAME)
                 });
 
@@ -2185,8 +2241,8 @@ public abstract class AbstractQuadConstraintStreamTest
                                 factory.forEachUniquePair(TestdataEntity.class, equal(TestdataEntity::getValue))
                                         .join(TestdataValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                                         .join(TestdataValue.class, equal((entity, entity2, value) -> value, identity()))
-                                        .penalizeBigDecimal(SimpleBigDecimalScore.ONE,
-                                                (entity, entity2, value, value2) -> BigDecimal.valueOf(2))
+                                        .penalizeWeightedBigDecimal((entity, entity2, value, value2) -> BigDecimal.valueOf(2))
+                                        .usingDefaultConstraintWeight(SimpleBigDecimalScore.ONE)
                                         .asConstraint(TEST_CONSTRAINT_NAME)
                         });
 
@@ -2205,7 +2261,8 @@ public abstract class AbstractQuadConstraintStreamTest
                 factory -> factory.forEachUniquePair(TestdataLavishEntity.class, equal(TestdataLavishEntity::getValue))
                         .join(TestdataLavishValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                         .join(TestdataLavishValue.class, equal((entity, entity2, value) -> value, identity()))
-                        .reward(SimpleScore.ONE)
+                        .reward()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         scoreDirector.setWorkingSolution(solution);
@@ -2223,7 +2280,8 @@ public abstract class AbstractQuadConstraintStreamTest
                 factory -> factory.forEachUniquePair(TestdataLavishEntity.class, equal(TestdataLavishEntity::getValue))
                         .join(TestdataLavishValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                         .join(TestdataLavishValue.class, equal((entity, entity2, value) -> value, identity()))
-                        .reward(SimpleScore.ONE, (entity, entity2, value, value2) -> 2)
+                        .rewardWeighted((entity, entity2, value, value2) -> 2)
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         scoreDirector.setWorkingSolution(solution);
@@ -2243,7 +2301,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         factory.forEachUniquePair(TestdataEntity.class, equal(TestdataEntity::getValue))
                                 .join(TestdataValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                                 .join(TestdataValue.class, equal((entity, entity2, value) -> value, identity()))
-                                .rewardLong(SimpleLongScore.ONE, (entity, entity2, value, value2) -> 2L)
+                                .rewardWeightedLong((entity, entity2, value, value2) -> 2L)
+                                .usingDefaultConstraintWeight(SimpleLongScore.ONE)
                                 .asConstraint(TEST_CONSTRAINT_NAME)
                 });
 
@@ -2264,8 +2323,8 @@ public abstract class AbstractQuadConstraintStreamTest
                                 factory.forEachUniquePair(TestdataEntity.class, equal(TestdataEntity::getValue))
                                         .join(TestdataValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                                         .join(TestdataValue.class, equal((entity, entity2, value) -> value, identity()))
-                                        .rewardBigDecimal(SimpleBigDecimalScore.ONE,
-                                                (entity, entity2, value, value2) -> BigDecimal.valueOf(2))
+                                        .rewardWeightedBigDecimal((entity, entity2, value, value2) -> BigDecimal.valueOf(2))
+                                        .usingDefaultConstraintWeight(SimpleBigDecimalScore.ONE)
                                         .asConstraint(TEST_CONSTRAINT_NAME)
                         });
 
@@ -2284,7 +2343,8 @@ public abstract class AbstractQuadConstraintStreamTest
                 factory -> factory.forEachUniquePair(TestdataLavishEntity.class, equal(TestdataLavishEntity::getValue))
                         .join(TestdataLavishValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                         .join(TestdataLavishValue.class, equal((entity, entity2, value) -> value, identity()))
-                        .impact(SimpleScore.ONE)
+                        .impact()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         scoreDirector.setWorkingSolution(solution);
@@ -2302,7 +2362,8 @@ public abstract class AbstractQuadConstraintStreamTest
                 factory -> factory.forEachUniquePair(TestdataLavishEntity.class, equal(TestdataLavishEntity::getValue))
                         .join(TestdataLavishValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                         .join(TestdataLavishValue.class, equal((entity, entity2, value) -> value, identity()))
-                        .impact(SimpleScore.ONE, (entity, entity2, value, value2) -> 2)
+                        .impactWeighted((entity, entity2, value, value2) -> 2)
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         scoreDirector.setWorkingSolution(solution);
@@ -2322,7 +2383,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         factory.forEachUniquePair(TestdataEntity.class, equal(TestdataEntity::getValue))
                                 .join(TestdataValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                                 .join(TestdataValue.class, equal((entity, entity2, value) -> value, identity()))
-                                .impactLong(SimpleLongScore.ONE, (entity, entity2, value, value2) -> 2L)
+                                .impactWeightedLong((entity, entity2, value, value2) -> 2L)
+                                .usingDefaultConstraintWeight(SimpleLongScore.ONE)
                                 .asConstraint(TEST_CONSTRAINT_NAME)
                 });
 
@@ -2343,8 +2405,8 @@ public abstract class AbstractQuadConstraintStreamTest
                                 factory.forEachUniquePair(TestdataEntity.class, equal(TestdataEntity::getValue))
                                         .join(TestdataValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                                         .join(TestdataValue.class, equal((entity, entity2, value) -> value, identity()))
-                                        .impactBigDecimal(SimpleBigDecimalScore.ONE,
-                                                (entity, entity2, value, value2) -> BigDecimal.valueOf(2))
+                                        .impactWeightedBigDecimal((entity, entity2, value, value2) -> BigDecimal.valueOf(2))
+                                        .usingDefaultConstraintWeight(SimpleBigDecimalScore.ONE)
                                         .asConstraint(TEST_CONSTRAINT_NAME)
                         });
 
@@ -2363,7 +2425,8 @@ public abstract class AbstractQuadConstraintStreamTest
                 factory -> factory.forEachUniquePair(TestdataLavishEntity.class, equal(TestdataLavishEntity::getValue))
                         .join(TestdataLavishValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                         .join(TestdataLavishValue.class, equal((entity, entity2, value) -> value, identity()))
-                        .impact(SimpleScore.ONE, (entity, entity2, value, value2) -> -2)
+                        .impactWeighted((entity, entity2, value, value2) -> -2)
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint(TEST_CONSTRAINT_NAME));
 
         scoreDirector.setWorkingSolution(solution);
@@ -2383,7 +2446,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         factory.forEachUniquePair(TestdataEntity.class, equal(TestdataEntity::getValue))
                                 .join(TestdataValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                                 .join(TestdataValue.class, equal((entity, entity2, value) -> value, identity()))
-                                .impactLong(SimpleLongScore.ONE, (entity, entity2, value, value2) -> -2L)
+                                .impactWeightedLong((entity, entity2, value, value2) -> -2L)
+                                .usingDefaultConstraintWeight(SimpleLongScore.ONE)
                                 .asConstraint(TEST_CONSTRAINT_NAME)
                 });
 
@@ -2404,8 +2468,8 @@ public abstract class AbstractQuadConstraintStreamTest
                                 factory.forEachUniquePair(TestdataEntity.class, equal(TestdataEntity::getValue))
                                         .join(TestdataValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                                         .join(TestdataValue.class, equal((entity, entity2, value) -> value, identity()))
-                                        .impactBigDecimal(SimpleBigDecimalScore.ONE,
-                                                (entity, entity2, value, value2) -> BigDecimal.valueOf(-2))
+                                        .impactWeightedBigDecimal((entity, entity2, value, value2) -> BigDecimal.valueOf(-2))
+                                        .usingDefaultConstraintWeight(SimpleBigDecimalScore.ONE)
                                         .asConstraint(TEST_CONSTRAINT_NAME)
                         });
 
@@ -2424,7 +2488,8 @@ public abstract class AbstractQuadConstraintStreamTest
                 factory -> factory.forEachUniquePair(TestdataLavishEntity.class, equal(TestdataLavishEntity::getValue))
                         .join(TestdataLavishValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                         .join(TestdataLavishValue.class, equal((entity, entity2, value) -> value, identity()))
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .justifyWith((a, b, c, d, score) -> new TestConstraintJustification<>(score, a, b, c, d))
                         .indictWith(List::of)
                         .asConstraint(TEST_CONSTRAINT_NAME));
@@ -2466,7 +2531,7 @@ public abstract class AbstractQuadConstraintStreamTest
                         .isInstanceOf(TestConstraintJustification.class);
                 TestConstraintJustification<Score_> castJustification =
                         (TestConstraintJustification<Score_>) justification;
-                softly.assertThat(castJustification.getFacts())
+                softly.assertThat(castJustification.facts())
                         .hasSize(4);
                 softly.assertThat(constraintMatch.getIndictedObjectList())
                         .hasSize(4);
@@ -2483,7 +2548,8 @@ public abstract class AbstractQuadConstraintStreamTest
                 factory -> factory.forEachUniquePair(TestdataLavishEntity.class, equal(TestdataLavishEntity::getValue))
                         .join(TestdataLavishValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                         .join(TestdataLavishValue.class, equal((entity, entity2, value) -> value, identity()))
-                        .penalize(SimpleScore.ONE, (entity, entity2, value, value2) -> 2)
+                        .penalizeWeighted((entity, entity2, value, value2) -> 2)
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .justifyWith((a, b, c, d, score) -> new TestConstraintJustification<>(score, a, b, c, d))
                         .indictWith(List::of)
                         .asConstraint(TEST_CONSTRAINT_NAME));
@@ -2505,7 +2571,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         factory.forEachUniquePair(TestdataEntity.class, equal(TestdataEntity::getValue))
                                 .join(TestdataValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                                 .join(TestdataValue.class, equal((entity, entity2, value) -> value, identity()))
-                                .penalizeLong(SimpleLongScore.ONE, (entity, entity2, value, value2) -> 2L)
+                                .penalizeWeightedLong((entity, entity2, value, value2) -> 2L)
+                                .usingDefaultConstraintWeight(SimpleLongScore.ONE)
                                 .justifyWith((a, b, c, d, score) -> new TestConstraintJustification<>(score, a, b, c, d))
                                 .indictWith(List::of)
                                 .asConstraint(TEST_CONSTRAINT_NAME)
@@ -2528,8 +2595,8 @@ public abstract class AbstractQuadConstraintStreamTest
                                 factory.forEachUniquePair(TestdataEntity.class, equal(TestdataEntity::getValue))
                                         .join(TestdataValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                                         .join(TestdataValue.class, equal((entity, entity2, value) -> value, identity()))
-                                        .penalizeBigDecimal(SimpleBigDecimalScore.ONE,
-                                                (entity, entity2, value, value2) -> BigDecimal.valueOf(2))
+                                        .penalizeWeightedBigDecimal((entity, entity2, value, value2) -> BigDecimal.valueOf(2))
+                                        .usingDefaultConstraintWeight(SimpleBigDecimalScore.ONE)
                                         .justifyWith(
                                                 (a, b, c, d, score) -> new TestConstraintJustification<>(score, a, b, c, d))
                                         .indictWith(List::of)
@@ -2551,7 +2618,8 @@ public abstract class AbstractQuadConstraintStreamTest
                 factory -> factory.forEachUniquePair(TestdataLavishEntity.class, equal(TestdataLavishEntity::getValue))
                         .join(TestdataLavishValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                         .join(TestdataLavishValue.class, equal((entity, entity2, value) -> value, identity()))
-                        .reward(SimpleScore.ONE)
+                        .reward()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .justifyWith((a, b, c, d, score) -> new TestConstraintJustification<>(score, a, b, c, d))
                         .indictWith(List::of)
                         .asConstraint(TEST_CONSTRAINT_NAME));
@@ -2571,7 +2639,8 @@ public abstract class AbstractQuadConstraintStreamTest
                 factory -> factory.forEachUniquePair(TestdataLavishEntity.class, equal(TestdataLavishEntity::getValue))
                         .join(TestdataLavishValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                         .join(TestdataLavishValue.class, equal((entity, entity2, value) -> value, identity()))
-                        .reward(SimpleScore.ONE, (entity, entity2, value, value2) -> 2)
+                        .rewardWeighted((entity, entity2, value, value2) -> 2)
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .justifyWith((a, b, c, d, score) -> new TestConstraintJustification<>(score, a, b, c, d))
                         .indictWith(List::of)
                         .asConstraint(TEST_CONSTRAINT_NAME));
@@ -2593,7 +2662,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         factory.forEachUniquePair(TestdataEntity.class, equal(TestdataEntity::getValue))
                                 .join(TestdataValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                                 .join(TestdataValue.class, equal((entity, entity2, value) -> value, identity()))
-                                .rewardLong(SimpleLongScore.ONE, (entity, entity2, value, value2) -> 2L)
+                                .rewardWeightedLong((entity, entity2, value, value2) -> 2L)
+                                .usingDefaultConstraintWeight(SimpleLongScore.ONE)
                                 .justifyWith((a, b, c, d, score) -> new TestConstraintJustification<>(score, a, b, c, d))
                                 .indictWith(List::of)
                                 .asConstraint(TEST_CONSTRAINT_NAME)
@@ -2616,8 +2686,8 @@ public abstract class AbstractQuadConstraintStreamTest
                                 factory.forEachUniquePair(TestdataEntity.class, equal(TestdataEntity::getValue))
                                         .join(TestdataValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                                         .join(TestdataValue.class, equal((entity, entity2, value) -> value, identity()))
-                                        .rewardBigDecimal(SimpleBigDecimalScore.ONE,
-                                                (entity, entity2, value, value2) -> BigDecimal.valueOf(2))
+                                        .rewardWeightedBigDecimal((entity, entity2, value, value2) -> BigDecimal.valueOf(2))
+                                        .usingDefaultConstraintWeight(SimpleBigDecimalScore.ONE)
                                         .justifyWith(
                                                 (a, b, c, d, score) -> new TestConstraintJustification<>(score, a, b, c, d))
                                         .indictWith(List::of)
@@ -2639,7 +2709,8 @@ public abstract class AbstractQuadConstraintStreamTest
                 factory -> factory.forEachUniquePair(TestdataLavishEntity.class, equal(TestdataLavishEntity::getValue))
                         .join(TestdataLavishValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                         .join(TestdataLavishValue.class, equal((entity, entity2, value) -> value, identity()))
-                        .impact(SimpleScore.ONE)
+                        .impact()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .justifyWith((a, b, c, d, score) -> new TestConstraintJustification<>(score, a, b, c, d))
                         .indictWith(List::of)
                         .asConstraint(TEST_CONSTRAINT_NAME));
@@ -2659,7 +2730,8 @@ public abstract class AbstractQuadConstraintStreamTest
                 factory -> factory.forEachUniquePair(TestdataLavishEntity.class, equal(TestdataLavishEntity::getValue))
                         .join(TestdataLavishValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                         .join(TestdataLavishValue.class, equal((entity, entity2, value) -> value, identity()))
-                        .impact(SimpleScore.ONE, (entity, entity2, value, value2) -> 2)
+                        .impactWeighted((entity, entity2, value, value2) -> 2)
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .justifyWith((a, b, c, d, score) -> new TestConstraintJustification<>(score, a, b, c, d))
                         .indictWith(List::of)
                         .asConstraint(TEST_CONSTRAINT_NAME));
@@ -2681,7 +2753,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         factory.forEachUniquePair(TestdataEntity.class, equal(TestdataEntity::getValue))
                                 .join(TestdataValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                                 .join(TestdataValue.class, equal((entity, entity2, value) -> value, identity()))
-                                .impactLong(SimpleLongScore.ONE, (entity, entity2, value, value2) -> 2L)
+                                .impactWeightedLong((entity, entity2, value, value2) -> 2L)
+                                .usingDefaultConstraintWeight(SimpleLongScore.ONE)
                                 .justifyWith((a, b, c, d, score) -> new TestConstraintJustification<>(score, a, b, c, d))
                                 .indictWith(List::of)
                                 .asConstraint(TEST_CONSTRAINT_NAME)
@@ -2704,8 +2777,8 @@ public abstract class AbstractQuadConstraintStreamTest
                                 factory.forEachUniquePair(TestdataEntity.class, equal(TestdataEntity::getValue))
                                         .join(TestdataValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                                         .join(TestdataValue.class, equal((entity, entity2, value) -> value, identity()))
-                                        .impactBigDecimal(SimpleBigDecimalScore.ONE,
-                                                (entity, entity2, value, value2) -> BigDecimal.valueOf(2))
+                                        .impactWeightedBigDecimal((entity, entity2, value, value2) -> BigDecimal.valueOf(2))
+                                        .usingDefaultConstraintWeight(SimpleBigDecimalScore.ONE)
                                         .justifyWith(
                                                 (a, b, c, d, score) -> new TestConstraintJustification<>(score, a, b, c, d))
                                         .indictWith(List::of)
@@ -2727,7 +2800,8 @@ public abstract class AbstractQuadConstraintStreamTest
                 factory -> factory.forEachUniquePair(TestdataLavishEntity.class, equal(TestdataLavishEntity::getValue))
                         .join(TestdataLavishValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                         .join(TestdataLavishValue.class, equal((entity, entity2, value) -> value, identity()))
-                        .impact(SimpleScore.ONE, (entity, entity2, value, value2) -> -2)
+                        .impactWeighted((entity, entity2, value, value2) -> -2)
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .justifyWith((a, b, c, d, score) -> new TestConstraintJustification<>(score, a, b, c, d))
                         .indictWith(List::of)
                         .asConstraint(TEST_CONSTRAINT_NAME));
@@ -2749,7 +2823,8 @@ public abstract class AbstractQuadConstraintStreamTest
                         factory.forEachUniquePair(TestdataEntity.class, equal(TestdataEntity::getValue))
                                 .join(TestdataValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                                 .join(TestdataValue.class, equal((entity, entity2, value) -> value, identity()))
-                                .impactLong(SimpleLongScore.ONE, (entity, entity2, value, value2) -> -2L)
+                                .impactWeightedLong((entity, entity2, value, value2) -> -2L)
+                                .usingDefaultConstraintWeight(SimpleLongScore.ONE)
                                 .justifyWith((a, b, c, d, score) -> new TestConstraintJustification<>(score, a, b, c, d))
                                 .indictWith(List::of)
                                 .asConstraint(TEST_CONSTRAINT_NAME)
@@ -2772,8 +2847,8 @@ public abstract class AbstractQuadConstraintStreamTest
                                 factory.forEachUniquePair(TestdataEntity.class, equal(TestdataEntity::getValue))
                                         .join(TestdataValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                                         .join(TestdataValue.class, equal((entity, entity2, value) -> value, identity()))
-                                        .impactBigDecimal(SimpleBigDecimalScore.ONE,
-                                                (entity, entity2, value, value2) -> BigDecimal.valueOf(-2))
+                                        .impactWeightedBigDecimal((entity, entity2, value, value2) -> BigDecimal.valueOf(-2))
+                                        .usingDefaultConstraintWeight(SimpleBigDecimalScore.ONE)
                                         .justifyWith(
                                                 (a, b, c, d, score) -> new TestConstraintJustification<>(score, a, b, c, d))
                                         .indictWith(List::of)
@@ -2793,7 +2868,8 @@ public abstract class AbstractQuadConstraintStreamTest
                 factory -> factory.forEachUniquePair(TestdataLavishEntity.class, equal(TestdataLavishEntity::getValue))
                         .join(TestdataLavishValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                         .join(TestdataLavishValue.class, equal((entity, entity2, value) -> value, identity()))
-                        .penalize(SimpleScore.ONE, (entity, entity2, value, value2) -> 2)
+                        .penalizeWeighted((entity, entity2, value, value2) -> 2)
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .justifyWith((a, b, c, d, score) -> new TestConstraintJustification<>(score, a, b, c, d))
                         .justifyWith((a, b, c, d, score) -> new TestConstraintJustification<>(score, a, b, c, d))
                         .indictWith(List::of)
@@ -2808,7 +2884,8 @@ public abstract class AbstractQuadConstraintStreamTest
                 factory -> factory.forEachUniquePair(TestdataLavishEntity.class, equal(TestdataLavishEntity::getValue))
                         .join(TestdataLavishValue.class, equal((entity, entity2) -> entity.getValue(), identity()))
                         .join(TestdataLavishValue.class, equal((entity, entity2, value) -> value, identity()))
-                        .penalize(SimpleScore.ONE, (entity, entity2, value, value2) -> 2)
+                        .penalizeWeighted((entity, entity2, value, value2) -> 2)
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .justifyWith((a, b, c, d, score) -> new TestConstraintJustification<>(score, a, b, c, d))
                         .indictWith(List::of)
                         .indictWith(List::of)

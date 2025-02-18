@@ -14,7 +14,8 @@ public class TestdataInterfaceEntityConstraintProvider implements ConstraintProv
     public Constraint @NonNull [] defineConstraints(@NonNull ConstraintFactory constraintFactory) {
         return new Constraint[] {
                 constraintFactory.forEach(TestdataInterfaceEntity.class)
-                        .penalize(SimpleScore.ONE, TestdataInterfaceEntity::getValue)
+                        .penalizeWeighted(TestdataInterfaceEntity::getValue)
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint("Minimize value")
         };
     }

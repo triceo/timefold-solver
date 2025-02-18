@@ -9,7 +9,6 @@ import ai.timefold.solver.core.api.function.QuadFunction;
 import ai.timefold.solver.core.api.function.QuadPredicate;
 import ai.timefold.solver.core.api.function.ToIntQuadFunction;
 import ai.timefold.solver.core.api.score.stream.ConstraintCollectors;
-import ai.timefold.solver.core.api.score.stream.ConstraintFactory;
 import ai.timefold.solver.core.api.score.stream.Joiners;
 import ai.timefold.solver.core.api.score.stream.penta.PentaJoiner;
 import ai.timefold.solver.core.api.score.stream.quad.QuadConstraintStream;
@@ -25,7 +24,6 @@ import org.junit.jupiter.api.TestTemplate;
 public abstract class AbstractQuadConstraintStreamNodeSharingTest extends AbstractConstraintStreamTest implements
         ConstraintStreamNodeSharingTest {
 
-    private ConstraintFactory constraintFactory;
     private QuadConstraintStream<TestdataEntity, TestdataEntity, TestdataEntity, TestdataEntity> baseStream;
 
     protected AbstractQuadConstraintStreamNodeSharingTest(
@@ -35,7 +33,7 @@ public abstract class AbstractQuadConstraintStreamNodeSharingTest extends Abstra
 
     @BeforeEach
     public void setup() {
-        constraintFactory = buildConstraintFactory(TestdataSolution.buildSolutionDescriptor());
+        var constraintFactory = buildConstraintFactory(TestdataSolution.buildSolutionDescriptor());
         baseStream = constraintFactory.forEach(TestdataEntity.class)
                 .join(TestdataEntity.class)
                 .join(TestdataEntity.class)

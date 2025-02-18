@@ -19,7 +19,8 @@ public class TestdataQuarkusShadowVariableConstraintProvider implements Constrai
                                 Joiners.equal(TestdataQuarkusShadowVariableEntity::getValue1,
                                         TestdataQuarkusShadowVariableEntity::getValue2))
                         .filter((a, b) -> a.getValue1AndValue2().equals(b.getValue1AndValue2()))
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint("Don't assign 2 entities the same value.")
         };
     }

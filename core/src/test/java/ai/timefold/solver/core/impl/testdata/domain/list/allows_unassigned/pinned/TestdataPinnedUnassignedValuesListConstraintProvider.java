@@ -18,14 +18,16 @@ public final class TestdataPinnedUnassignedValuesListConstraintProvider implemen
 
     private Constraint entityConstraint(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(TestdataPinnedUnassignedValuesListEntity.class)
-                .penalize(SimpleScore.ONE, e -> e.getValueList().size())
+                .penalizeWeighted(e -> e.getValueList().size())
+                .usingDefaultConstraintWeight(SimpleScore.ONE)
                 .asConstraint("Entity list size");
     }
 
     private Constraint valueConstraint(ConstraintFactory constraintFactory) {
         return constraintFactory.forEachIncludingUnassigned(TestdataPinnedUnassignedValuesListValue.class)
                 .filter(value -> value.getEntity() == null)
-                .penalize(SimpleScore.ONE)
+                .penalize()
+                .usingDefaultConstraintWeight(SimpleScore.ONE)
                 .asConstraint("Unassigned values");
     }
 

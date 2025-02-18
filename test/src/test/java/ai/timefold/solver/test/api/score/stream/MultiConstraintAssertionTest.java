@@ -89,13 +89,15 @@ class MultiConstraintAssertionTest {
 
         private Constraint penalizeEveryAssignedValue(ConstraintFactory constraintFactory) {
             return constraintFactory.forEach(TestdataAllowsUnassignedValuesListValue.class)
-                    .penalize(SimpleScore.ONE)
+                    .penalize()
+                    .usingDefaultConstraintWeight(SimpleScore.ONE)
                     .asConstraint("Penalize every unassigned value");
         }
 
         private Constraint penalizeEveryValue(ConstraintFactory constraintFactory) {
             return constraintFactory.forEachIncludingUnassigned(TestdataAllowsUnassignedValuesListValue.class)
-                    .penalize(SimpleScore.ONE)
+                    .penalize()
+                    .usingDefaultConstraintWeight(SimpleScore.ONE)
                     .asConstraint("Penalize every value");
         }
 
@@ -141,13 +143,15 @@ class MultiConstraintAssertionTest {
 
         private Constraint penalizeEveryAssignedValue(ConstraintFactory constraintFactory) {
             return constraintFactory.forEach(TestdataListValue.class)
-                    .penalize(SimpleScore.ONE)
+                    .penalize()
+                    .usingDefaultConstraintWeight(SimpleScore.ONE)
                     .asConstraint("Penalize every unassigned value");
         }
 
         private Constraint penalizeEveryValue(ConstraintFactory constraintFactory) {
             return constraintFactory.forEachIncludingUnassigned(TestdataListValue.class)
-                    .penalize(SimpleScore.ONE)
+                    .penalize()
+                    .usingDefaultConstraintWeight(SimpleScore.ONE)
                     .asConstraint("Penalize every value");
         }
 
@@ -194,13 +198,15 @@ class MultiConstraintAssertionTest {
 
         private Constraint penalizeEveryAssignedValue(ConstraintFactory constraintFactory) {
             return constraintFactory.forEach(TestdataPinnedNoShadowsListValue.class)
-                    .penalize(SimpleScore.ONE)
+                    .penalize()
+                    .usingDefaultConstraintWeight(SimpleScore.ONE)
                     .asConstraint("Penalize every unassigned value");
         }
 
         private Constraint penalizeEveryValue(ConstraintFactory constraintFactory) {
             return constraintFactory.forEachIncludingUnassigned(TestdataPinnedNoShadowsListValue.class)
-                    .penalize(SimpleScore.ONE)
+                    .penalize()
+                    .usingDefaultConstraintWeight(SimpleScore.ONE)
                     .asConstraint("Penalize every value");
         }
 

@@ -47,10 +47,11 @@ class ListRuinRecreateMoveSelectorTest {
         public Constraint @NonNull [] defineConstraints(@NonNull ConstraintFactory constraintFactory) {
             return new Constraint[] {
                     constraintFactory.forEach(TestdataListValue.class)
-                            .penalize(SimpleScore.ONE, value -> Math.abs(
+                            .penalizeWeighted(value -> Math.abs(
                                     Objects.hash(value.getEntity().getCode().hashCode(),
                                             value.getIndex(),
                                             value.getCode())) >> 8)
+                            .usingDefaultConstraintWeight(SimpleScore.ONE)
                             .asConstraint("Hash constraint")
             };
         }
@@ -112,15 +113,18 @@ class ListRuinRecreateMoveSelectorTest {
         public Constraint @NonNull [] defineConstraints(@NonNull ConstraintFactory constraintFactory) {
             return new Constraint[] {
                     constraintFactory.forEach(TestdataAllowsUnassignedValuesListEntity.class)
-                            .penalize(SimpleScore.ONE, entity -> entity.getValueList().size() * entity.getValueList().size())
+                            .penalizeWeighted(entity -> entity.getValueList().size() * entity.getValueList().size())
+                            .usingDefaultConstraintWeight(SimpleScore.ONE)
                             .asConstraint("Minimize entity list size"),
                     constraintFactory.forEachIncludingUnassigned(TestdataAllowsUnassignedValuesListValue.class)
                             .filter(value -> value.getEntity() == null)
-                            .penalize(SimpleScore.of(5))
+                            .penalize()
+                            .usingDefaultConstraintWeight(SimpleScore.of(5))
                             .asConstraint("Minimize unassigned values"),
                     constraintFactory.forEachUniquePair(TestdataAllowsUnassignedValuesListValue.class,
                             Joiners.equal(TestdataAllowsUnassignedValuesListValue::getIndex))
-                            .penalize(SimpleScore.ONE)
+                            .penalize()
+                            .usingDefaultConstraintWeight(SimpleScore.ONE)
                             .asConstraint("Maximize different indices")
             };
         }

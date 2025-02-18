@@ -17,7 +17,8 @@ public class ITestdataPlanningConstraintProvider implements ConstraintProvider {
                 factory.forEach(ITestdataPlanningEntity.class)
                         .join(ITestdataPlanningEntity.class, Joiners.equal(ITestdataPlanningEntity::getValue))
                         .filter((a, b) -> a != b)
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint("Don't assign 2 entities the same value.")
         };
     }

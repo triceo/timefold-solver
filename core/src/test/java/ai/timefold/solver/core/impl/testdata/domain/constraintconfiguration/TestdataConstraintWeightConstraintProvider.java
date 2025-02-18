@@ -1,5 +1,6 @@
 package ai.timefold.solver.core.impl.testdata.domain.constraintconfiguration;
 
+import ai.timefold.solver.core.api.score.buildin.simple.SimpleScore;
 import ai.timefold.solver.core.api.score.stream.Constraint;
 import ai.timefold.solver.core.api.score.stream.ConstraintFactory;
 import ai.timefold.solver.core.api.score.stream.ConstraintProvider;
@@ -18,7 +19,8 @@ public final class TestdataConstraintWeightConstraintProvider implements Constra
 
     private Constraint onlyConstraint(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(TestdataEntity.class)
-                .rewardConfigurable()
+                .reward()
+                .usingDefaultConstraintWeight(SimpleScore.ONE)
                 .asConstraint("First weight");
     }
 

@@ -17,7 +17,8 @@ public class TestdataSpringConstraintProvider implements ConstraintProvider {
                 factory.forEach(TestdataSpringEntity.class)
                         .join(TestdataSpringEntity.class, Joiners.equal(TestdataSpringEntity::getValue))
                         .filter((a, b) -> a != b)
-                        .penalize(SimpleScore.ONE)
+                        .penalize()
+                        .usingDefaultConstraintWeight(SimpleScore.ONE)
                         .asConstraint("Don't assign 2 entities the same value.")
         };
     }

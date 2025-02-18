@@ -17,10 +17,12 @@ public class TestdataStringLengthConstraintProvider implements ConstraintProvide
                 factory.forEach(TestdataReflectionEntity.class)
                         .join(TestdataReflectionEntity.class, Joiners.equal(TestdataReflectionEntity::getMethodValue))
                         .filter((a, b) -> !a.fieldValue.equals(b.fieldValue))
-                        .penalize(HardSoftScore.ONE_HARD)
+                        .penalize()
+                        .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                         .asConstraint("Entities with equal method values should have equal field values"),
                 factory.forEach(TestdataReflectionEntity.class)
-                        .reward(HardSoftScore.ONE_SOFT, entity -> entity.getMethodValue().length())
+                        .rewardWeighted(entity -> entity.getMethodValue().length())
+                        .usingDefaultConstraintWeight(HardSoftScore.ONE_SOFT)
                         .asConstraint("Maximize method value length")
         };
     }

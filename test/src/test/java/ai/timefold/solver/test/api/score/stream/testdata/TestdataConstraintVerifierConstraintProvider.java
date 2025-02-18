@@ -23,27 +23,30 @@ public final class TestdataConstraintVerifierConstraintProvider implements Const
 
     public Constraint penalizeEveryEntity(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(TestdataConstraintVerifierFirstEntity.class)
-                .penalize(HardSoftScore.ONE_HARD)
+                .penalize()
+                .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                 .asConstraint("Penalize every standard entity");
     }
 
     public Constraint rewardEveryEntity(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(TestdataConstraintVerifierFirstEntity.class)
-                .reward(HardSoftScore.ofSoft(2))
+                .reward()
+                .usingDefaultConstraintWeight(HardSoftScore.ofSoft(2))
                 .asConstraint("Reward every standard entity");
     }
 
     public Constraint impactEveryEntity(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(TestdataConstraintVerifierFirstEntity.class)
-                .impact(HardSoftScore.ofHard(4),
-                        entity -> Objects.equals(entity.getCode(), "A") ? 1 : -1)
+                .impactWeighted(entity -> Objects.equals(entity.getCode(), "A") ? 1 : -1)
+                .usingDefaultConstraintWeight(HardSoftScore.ofHard(4))
                 .asConstraint("Impact every standard entity");
     }
 
     public Constraint differentStringEntityHaveDifferentValues(ConstraintFactory constraintFactory) {
         return constraintFactory.forEachUniquePair(TestdataConstraintVerifierSecondEntity.class,
                 Joiners.equal(TestdataConstraintVerifierSecondEntity::getValue))
-                .penalize(HardSoftScore.ofSoft(3))
+                .penalize()
+                .usingDefaultConstraintWeight(HardSoftScore.ofSoft(3))
                 .asConstraint("Different String Entity Have Different Values");
     }
 }
