@@ -62,8 +62,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .penalize()
-                                        .withMatchWeight((a) -> 7)
+                                        .penalizeWeighted((a) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -78,8 +77,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .penalize()
-                                        .withMatchWeight((a) -> 7)
+                                        .penalizeWeighted((a) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -94,8 +92,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .penalize()
-                                        .withLongMatchWeight((a) -> 7L)
+                                        .penalizeWeightedLong((a) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -110,8 +107,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .penalize()
-                                        .withLongMatchWeight((a) -> 7L)
+                                        .penalizeWeightedLong((a) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -126,8 +122,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .penalize()
-                                        .withBigDecimalMatchWeight((a) -> BigDecimal.TEN)
+                                        .penalizeWeightedBigDecimal((a) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -142,8 +137,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .penalize()
-                                        .withBigDecimalMatchWeight((a) -> BigDecimal.TEN)
+                                        .penalizeWeightedBigDecimal((a) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -188,8 +182,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .reward()
-                                        .withMatchWeight((a) -> 7)
+                                        .rewardWeighted((a) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -204,8 +197,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .reward()
-                                        .withMatchWeight((a) -> 7)
+                                        .rewardWeighted((a) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -220,8 +212,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .reward()
-                                        .withLongMatchWeight((a) -> 7L)
+                                        .rewardWeightedLong((a) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -236,8 +227,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .reward()
-                                        .withLongMatchWeight((a) -> 7L)
+                                        .rewardWeightedLong((a) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -252,8 +242,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .reward()
-                                        .withBigDecimalMatchWeight((a) -> BigDecimal.TEN)
+                                        .rewardWeightedBigDecimal((a) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -268,8 +257,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .reward()
-                                        .withBigDecimalMatchWeight((a) -> BigDecimal.TEN)
+                                        .rewardWeightedBigDecimal((a) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -314,8 +302,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .impact()
-                                        .withMatchWeight((a) -> 7)
+                                        .impactWeighted((a) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -330,8 +317,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .impact()
-                                        .withMatchWeight((a) -> 7)
+                                        .impactWeighted((a) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -346,8 +332,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .impact()
-                                        .withLongMatchWeight((a) -> 7L)
+                                        .impactWeightedLong((a) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -362,8 +347,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .impact()
-                                        .withLongMatchWeight((a) -> 7L)
+                                        .impactWeightedLong((a) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -378,8 +362,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .impact()
-                                        .withBigDecimalMatchWeight((a) -> BigDecimal.TEN)
+                                        .impactWeightedBigDecimal((a) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -394,8 +377,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .impact()
-                                        .withBigDecimalMatchWeight((a) -> BigDecimal.TEN)
+                                        .impactWeightedBigDecimal((a) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -450,8 +432,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .penalize()
-                                        .withMatchWeight((a, b) -> 7)
+                                        .penalizeWeighted((a, b) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -468,8 +449,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .penalize()
-                                        .withMatchWeight((a, b) -> 7)
+                                        .penalizeWeighted((a, b) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -486,8 +466,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .penalize()
-                                        .withLongMatchWeight((a, b) -> 7L)
+                                        .penalizeWeightedLong((a, b) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -504,8 +483,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .penalize()
-                                        .withLongMatchWeight((a, b) -> 7L)
+                                        .penalizeWeightedLong((a, b) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -522,8 +500,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .penalize()
-                                        .withBigDecimalMatchWeight((a, b) -> BigDecimal.TEN)
+                                        .penalizeWeightedBigDecimal((a, b) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -540,8 +517,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .penalize()
-                                        .withBigDecimalMatchWeight((a, b) -> BigDecimal.TEN)
+                                        .penalizeWeightedBigDecimal((a, b) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -592,8 +568,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .reward()
-                                        .withMatchWeight((a, b) -> 7)
+                                        .rewardWeighted((a, b) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -610,8 +585,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .reward()
-                                        .withMatchWeight((a, b) -> 7)
+                                        .rewardWeighted((a, b) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -628,8 +602,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .reward()
-                                        .withLongMatchWeight((a, b) -> 7L)
+                                        .rewardWeightedLong((a, b) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -646,8 +619,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .reward()
-                                        .withLongMatchWeight((a, b) -> 7L)
+                                        .rewardWeightedLong((a, b) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -664,8 +636,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .reward()
-                                        .withBigDecimalMatchWeight((a, b) -> BigDecimal.TEN)
+                                        .rewardWeightedBigDecimal((a, b) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -682,8 +653,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .reward()
-                                        .withBigDecimalMatchWeight((a, b) -> BigDecimal.TEN)
+                                        .rewardWeightedBigDecimal((a, b) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -734,8 +704,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .impact()
-                                        .withMatchWeight((a, b) -> 7)
+                                        .impactWeighted((a, b) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -752,8 +721,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .impact()
-                                        .withMatchWeight((a, b) -> 7)
+                                        .impactWeighted((a, b) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -770,8 +738,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .impact()
-                                        .withLongMatchWeight((a, b) -> 7L)
+                                        .impactWeightedLong((a, b) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -788,8 +755,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .impact()
-                                        .withLongMatchWeight((a, b) -> 7L)
+                                        .impactWeightedLong((a, b) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -806,8 +772,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .impact()
-                                        .withBigDecimalMatchWeight((a, b) -> BigDecimal.TEN)
+                                        .impactWeightedBigDecimal((a, b) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -824,8 +789,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .impact()
-                                        .withBigDecimalMatchWeight((a, b) -> BigDecimal.TEN)
+                                        .impactWeightedBigDecimal((a, b) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -886,8 +850,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalize()
-                                        .withMatchWeight((a, b, c) -> 7)
+                                        .penalizeWeighted((a, b, c) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -906,8 +869,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalize()
-                                        .withMatchWeight((a, b, c) -> 7)
+                                        .penalizeWeighted((a, b, c) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -926,8 +888,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalize()
-                                        .withLongMatchWeight((a, b, c) -> 7L)
+                                        .penalizeWeightedLong((a, b, c) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -946,8 +907,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalize()
-                                        .withLongMatchWeight((a, b, c) -> 7L)
+                                        .penalizeWeightedLong((a, b, c) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -966,8 +926,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalize()
-                                        .withBigDecimalMatchWeight((a, b, c) -> BigDecimal.TEN)
+                                        .penalizeWeightedBigDecimal((a, b, c) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -986,8 +945,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalize()
-                                        .withBigDecimalMatchWeight((a, b, c) -> BigDecimal.TEN)
+                                        .penalizeWeightedBigDecimal((a, b, c) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -1044,8 +1002,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .reward()
-                                        .withMatchWeight((a, b, c) -> 7)
+                                        .rewardWeighted((a, b, c) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -1064,8 +1021,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .reward()
-                                        .withMatchWeight((a, b, c) -> 7)
+                                        .rewardWeighted((a, b, c) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -1084,8 +1040,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .reward()
-                                        .withLongMatchWeight((a, b, c) -> 7L)
+                                        .rewardWeightedLong((a, b, c) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -1104,8 +1059,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .reward()
-                                        .withLongMatchWeight((a, b, c) -> 7L)
+                                        .rewardWeightedLong((a, b, c) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -1124,8 +1078,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .reward()
-                                        .withBigDecimalMatchWeight((a, b, c) -> BigDecimal.TEN)
+                                        .rewardWeightedBigDecimal((a, b, c) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -1144,8 +1097,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .reward()
-                                        .withBigDecimalMatchWeight((a, b, c) -> BigDecimal.TEN)
+                                        .rewardWeightedBigDecimal((a, b, c) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -1202,8 +1154,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .impact()
-                                        .withMatchWeight((a, b, c) -> 7)
+                                        .impactWeighted((a, b, c) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -1222,8 +1173,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .impact()
-                                        .withMatchWeight((a, b, c) -> 7)
+                                        .impactWeighted((a, b, c) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -1242,8 +1192,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .impact()
-                                        .withLongMatchWeight((a, b, c) -> 7L)
+                                        .impactWeightedLong((a, b, c) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -1262,8 +1211,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .impact()
-                                        .withLongMatchWeight((a, b, c) -> 7L)
+                                        .impactWeightedLong((a, b, c) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -1282,8 +1230,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .impact()
-                                        .withBigDecimalMatchWeight((a, b, c) -> BigDecimal.TEN)
+                                        .impactWeightedBigDecimal((a, b, c) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -1302,8 +1249,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .impact()
-                                        .withBigDecimalMatchWeight((a, b, c) -> BigDecimal.TEN)
+                                        .impactWeightedBigDecimal((a, b, c) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -1370,8 +1316,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalize()
-                                        .withMatchWeight((a, b, c, d) -> 7)
+                                        .penalizeWeighted((a, b, c, d) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -1392,8 +1337,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalize()
-                                        .withMatchWeight((a, b, c, d) -> 7)
+                                        .penalizeWeighted((a, b, c, d) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -1414,8 +1358,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalize()
-                                        .withLongMatchWeight((a, b, c, d) -> 7L)
+                                        .penalizeWeightedLong((a, b, c, d) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -1436,8 +1379,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalize()
-                                        .withLongMatchWeight((a, b, c, d) -> 7L)
+                                        .penalizeWeightedLong((a, b, c, d) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -1458,8 +1400,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalize()
-                                        .withBigDecimalMatchWeight((a, b, c, d) -> BigDecimal.TEN)
+                                        .penalizeWeightedBigDecimal((a, b, c, d) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -1480,8 +1421,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalize()
-                                        .withBigDecimalMatchWeight((a, b, c, d) -> BigDecimal.TEN)
+                                        .penalizeWeightedBigDecimal((a, b, c, d) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -1544,8 +1484,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .reward()
-                                        .withMatchWeight((a, b, c, d) -> 7)
+                                        .rewardWeighted((a, b, c, d) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -1566,8 +1505,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .reward()
-                                        .withMatchWeight((a, b, c, d) -> 7)
+                                        .rewardWeighted((a, b, c, d) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -1588,8 +1526,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .reward()
-                                        .withLongMatchWeight((a, b, c, d) -> 7L)
+                                        .rewardWeightedLong((a, b, c, d) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -1610,8 +1547,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .reward()
-                                        .withLongMatchWeight((a, b, c, d) -> 7L)
+                                        .rewardWeightedLong((a, b, c, d) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -1632,8 +1568,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .reward()
-                                        .withBigDecimalMatchWeight((a, b, c, d) -> BigDecimal.TEN)
+                                        .rewardWeightedBigDecimal((a, b, c, d) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -1654,8 +1589,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .reward()
-                                        .withBigDecimalMatchWeight((a, b, c, d) -> BigDecimal.TEN)
+                                        .rewardWeightedBigDecimal((a, b, c, d) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -1718,8 +1652,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .impact()
-                                        .withMatchWeight((a, b, c, d) -> 7)
+                                        .impactWeighted((a, b, c, d) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -1740,8 +1673,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .impact()
-                                        .withMatchWeight((a, b, c, d) -> 7)
+                                        .impactWeighted((a, b, c, d) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -1762,8 +1694,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .impact()
-                                        .withLongMatchWeight((a, b, c, d) -> 7L)
+                                        .impactWeightedLong((a, b, c, d) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -1784,8 +1715,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .impact()
-                                        .withLongMatchWeight((a, b, c, d) -> 7L)
+                                        .impactWeightedLong((a, b, c, d) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));
@@ -1806,8 +1736,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .impact()
-                                        .withBigDecimalMatchWeight((a, b, c, d) -> BigDecimal.TEN)
+                                        .impactWeightedBigDecimal((a, b, c, d) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");\
                         """)));
@@ -1828,8 +1757,7 @@ class AsConstraintRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .impact()
-                                        .withBigDecimalMatchWeight((a, b, c, d) -> BigDecimal.TEN)
+                                        .impactWeightedBigDecimal((a, b, c, d) -> BigDecimal.TEN)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My package.My constraint");\
                         """)));

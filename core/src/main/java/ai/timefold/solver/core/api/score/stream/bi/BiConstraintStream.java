@@ -2,8 +2,6 @@ package ai.timefold.solver.core.api.score.stream.bi;
 
 import static ai.timefold.solver.core.impl.util.ConstantLambdaUtils.biConstantNull;
 import static ai.timefold.solver.core.impl.util.ConstantLambdaUtils.biConstantOne;
-import static ai.timefold.solver.core.impl.util.ConstantLambdaUtils.biConstantOneBigDecimal;
-import static ai.timefold.solver.core.impl.util.ConstantLambdaUtils.biConstantOneLong;
 import static ai.timefold.solver.core.impl.util.ConstantLambdaUtils.uniConstantNull;
 
 import java.math.BigDecimal;
@@ -22,6 +20,14 @@ import ai.timefold.solver.core.api.domain.solution.PlanningSolution;
 import ai.timefold.solver.core.api.function.TriFunction;
 import ai.timefold.solver.core.api.function.TriPredicate;
 import ai.timefold.solver.core.api.score.Score;
+import ai.timefold.solver.core.api.score.buildin.bendable.BendableScore;
+import ai.timefold.solver.core.api.score.buildin.bendablebigdecimal.BendableBigDecimalScore;
+import ai.timefold.solver.core.api.score.buildin.hardmediumsoft.HardMediumSoftScore;
+import ai.timefold.solver.core.api.score.buildin.hardmediumsoftbigdecimal.HardMediumSoftBigDecimalScore;
+import ai.timefold.solver.core.api.score.buildin.hardsoft.HardSoftScore;
+import ai.timefold.solver.core.api.score.buildin.hardsoftbigdecimal.HardSoftBigDecimalScore;
+import ai.timefold.solver.core.api.score.buildin.simple.SimpleScore;
+import ai.timefold.solver.core.api.score.buildin.simplebigdecimal.SimpleBigDecimalScore;
 import ai.timefold.solver.core.api.score.constraint.ConstraintMatchTotal;
 import ai.timefold.solver.core.api.score.constraint.ConstraintRef;
 import ai.timefold.solver.core.api.score.stream.Constraint;
@@ -1282,376 +1288,6 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
             @NonNull BiFunction<A, B, ResultD_> mappingD);
 
     // ************************************************************************
-    // Penalize/reward
-    // ************************************************************************
-
-    /**
-     * Applies a negative {@link Score} impact,
-     * and returns a builder to apply optional constraint properties.
-     *
-     * @return fluent builder for the constraint
-     */
-    @Override
-    @NonNull
-    BiConstraintStub<A, B> penalize();
-
-    /**
-     * As defined by {@link #penalize(Score, ToIntBiFunction)}, where the match weight is one (1).
-     * 
-     * @deprecated Use {@link #penalize()} instead, and continue fluently from there.
-     */
-    @Deprecated(forRemoval = true, since = "1.20.0")
-    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> penalize(Score_ constraintWeight) {
-        return penalize(constraintWeight, biConstantOne());
-    }
-
-    /**
-     * As defined by {@link #penalizeLong(Score, ToLongBiFunction)}, where the match weight is one (1).
-     * 
-     * @deprecated Use {@link #penalize()} instead, and continue fluently from there.
-     */
-    @Deprecated(forRemoval = true, since = "1.20.0")
-    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> penalizeLong(Score_ constraintWeight) {
-        return penalizeLong(constraintWeight, biConstantOneLong());
-    }
-
-    /**
-     * As defined by {@link #penalizeBigDecimal(Score, BiFunction)}, where the match weight is one (1).
-     * 
-     * @deprecated Use {@link #penalize()} instead, and continue fluently from there.
-     */
-    @Deprecated(forRemoval = true, since = "1.20.0")
-    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_>
-            penalizeBigDecimal(Score_ constraintWeight) {
-        return penalizeBigDecimal(constraintWeight, biConstantOneBigDecimal());
-    }
-
-    /**
-     * Applies a negative {@link Score} impact,
-     * subtracting the constraintWeight multiplied by the match weight,
-     * and returns a builder to apply optional constraint properties.
-     * <p>
-     * The constraintWeight specified here can be overridden using {@link ConstraintWeightOverrides}
-     * on the {@link PlanningSolution}-annotated class
-     * <p>
-     * For non-int {@link Score} types use {@link #penalizeLong(Score, ToLongBiFunction)} or
-     * {@link #penalizeBigDecimal(Score, BiFunction)} instead.
-     *
-     * @param matchWeigher the result of this function (matchWeight) is multiplied by the constraintWeight
-     * @deprecated Use {@link #penalize()} instead, and continue fluently from there.
-     */
-    @Deprecated(forRemoval = true, since = "1.20.0")
-    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> penalize(@NonNull Score_ constraintWeight,
-            @NonNull ToIntBiFunction<A, B> matchWeigher) {
-        return penalize()
-                .withMatchWeight(matchWeigher)
-                .usingDefaultConstraintWeight(constraintWeight);
-    }
-
-    /**
-     * As defined by {@link #penalize(Score, ToIntBiFunction)}, with a penalty of type long.
-     */
-    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> penalizeLong(
-            @NonNull Score_ constraintWeight, @NonNull ToLongBiFunction<A, B> matchWeigher) {
-        return penalize()
-                .withLongMatchWeight(matchWeigher)
-                .usingDefaultConstraintWeight(constraintWeight);
-    }
-
-    /**
-     * As defined by {@link #penalize(Score, ToIntBiFunction)}, with a penalty of type {@link BigDecimal}.
-     */
-    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> penalizeBigDecimal(
-            @NonNull Score_ constraintWeight, @NonNull BiFunction<A, B, BigDecimal> matchWeigher) {
-        return penalize()
-                .withBigDecimalMatchWeight(matchWeigher)
-                .usingDefaultConstraintWeight(constraintWeight);
-    }
-
-    /**
-     * Negatively impacts the {@link Score},
-     * subtracting the {@link ConstraintWeight} for each match,
-     * and returns a builder to apply optional constraint properties.
-     * <p>
-     * The constraintWeight comes from an {@link ConstraintWeight} annotated member on the {@link ConstraintConfiguration},
-     * so end users can change the constraint weights dynamically.
-     * This constraint may be deactivated if the {@link ConstraintWeight} is zero.
-     *
-     * @return never null
-     * @deprecated Prefer {@link #penalize(Score)} and {@link ConstraintWeightOverrides}.
-     */
-    @Deprecated(forRemoval = true, since = "1.13.0")
-    default BiConstraintBuilder<A, B, ?> penalizeConfigurable() {
-        return penalizeConfigurable(biConstantOne());
-    }
-
-    /**
-     * Negatively impacts the {@link Score},
-     * subtracting the {@link ConstraintWeight} multiplied by match weight for each match,
-     * and returns a builder to apply optional constraint properties.
-     * <p>
-     * The constraintWeight comes from an {@link ConstraintWeight} annotated member on the {@link ConstraintConfiguration},
-     * so end users can change the constraint weights dynamically.
-     * This constraint may be deactivated if the {@link ConstraintWeight} is zero.
-     *
-     * @param matchWeigher never null, the result of this function (matchWeight) is multiplied by the constraintWeight
-     * @return never null
-     * @deprecated Prefer {@link #penalize(Score, ToIntBiFunction)} and {@link ConstraintWeightOverrides}.
-     */
-    @Deprecated(forRemoval = true, since = "1.13.0")
-    BiConstraintBuilder<A, B, ?> penalizeConfigurable(ToIntBiFunction<A, B> matchWeigher);
-
-    /**
-     * As defined by {@link #penalizeConfigurable(ToIntBiFunction)}, with a penalty of type long.
-     *
-     * @deprecated Prefer {@link #penalizeLong(Score, ToLongBiFunction)} and {@link ConstraintWeightOverrides}.
-     */
-    @Deprecated(forRemoval = true, since = "1.13.0")
-    BiConstraintBuilder<A, B, ?> penalizeConfigurableLong(ToLongBiFunction<A, B> matchWeigher);
-
-    /**
-     * As defined by {@link #penalizeConfigurable(ToIntBiFunction)}, with a penalty of type {@link BigDecimal}.
-     *
-     * @deprecated Prefer {@link #penalizeBigDecimal(Score, BiFunction)} and {@link ConstraintWeightOverrides}.
-     */
-    @Deprecated(forRemoval = true, since = "1.13.0")
-    BiConstraintBuilder<A, B, ?> penalizeConfigurableBigDecimal(BiFunction<A, B, BigDecimal> matchWeigher);
-
-    /**
-     * Applies a positive {@link Score} impact,
-     * and returns a builder to apply optional constraint properties.
-     *
-     * @return fluent builder for the constraint
-     */
-    @Override
-    @NonNull
-    BiConstraintStub<A, B> reward();
-
-    /**
-     * As defined by {@link #reward(Score, ToIntBiFunction)}, where the match weight is one (1).
-     * 
-     * @deprecated Use {@link #reward()} instead, and continue fluently from there.
-     */
-    @Deprecated(forRemoval = true, since = "1.20.0")
-    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> reward(@NonNull Score_ constraintWeight) {
-        return reward(constraintWeight, biConstantOne());
-    }
-
-    /**
-     * Applies a positive {@link Score} impact,
-     * adding the constraintWeight multiplied by the match weight,
-     * and returns a builder to apply optional constraint properties.
-     * <p>
-     * The constraintWeight specified here can be overridden using {@link ConstraintWeightOverrides}
-     * on the {@link PlanningSolution}-annotated class
-     * <p>
-     * For non-int {@link Score} types use {@link #rewardLong(Score, ToLongBiFunction)} or
-     * {@link #rewardBigDecimal(Score, BiFunction)} instead.
-     *
-     * @param matchWeigher the result of this function (matchWeight) is multiplied by the constraintWeight
-     * @deprecated Use {@link #reward()} instead, and continue fluently from there.
-     */
-    @Deprecated(forRemoval = true, since = "1.20.0")
-    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> reward(@NonNull Score_ constraintWeight,
-            @NonNull ToIntBiFunction<A, B> matchWeigher) {
-        return reward()
-                .withMatchWeight(matchWeigher)
-                .usingDefaultConstraintWeight(constraintWeight);
-    }
-
-    /**
-     * As defined by {@link #reward(Score, ToIntBiFunction)}, with a reward of type long.
-     * 
-     * @deprecated Use {@link #reward()} instead, and continue fluently from there.
-     */
-    @Deprecated(forRemoval = true, since = "1.20.0")
-    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> rewardLong(
-            @NonNull Score_ constraintWeight, @NonNull ToLongBiFunction<A, B> matchWeigher) {
-        return reward()
-                .withLongMatchWeight(matchWeigher)
-                .usingDefaultConstraintWeight(constraintWeight);
-    }
-
-    /**
-     * As defined by {@link #reward(Score, ToIntBiFunction)}, with a reward of type {@link BigDecimal}.
-     * 
-     * @deprecated Use {@link #reward()} instead, and continue fluently from there.
-     */
-    @Deprecated(forRemoval = true, since = "1.20.0")
-    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_>
-            rewardBigDecimal(@NonNull Score_ constraintWeight, @NonNull BiFunction<A, B, BigDecimal> matchWeigher) {
-        return reward()
-                .withBigDecimalMatchWeight(matchWeigher)
-                .usingDefaultConstraintWeight(constraintWeight);
-    }
-
-    /**
-     * Positively impacts the {@link Score},
-     * adding the {@link ConstraintWeight} for each match,
-     * and returns a builder to apply optional constraint properties.
-     * <p>
-     * The constraintWeight comes from an {@link ConstraintWeight} annotated member on the {@link ConstraintConfiguration},
-     * so end users can change the constraint weights dynamically.
-     * This constraint may be deactivated if the {@link ConstraintWeight} is zero.
-     *
-     * @return never null
-     * @deprecated Prefer {@link #reward(Score, ToIntBiFunction)} and {@link ConstraintWeightOverrides}.
-     */
-    @Deprecated(forRemoval = true, since = "1.13.0")
-    default BiConstraintBuilder<A, B, ?> rewardConfigurable() {
-        return rewardConfigurable(biConstantOne());
-    }
-
-    /**
-     * Positively impacts the {@link Score},
-     * adding the {@link ConstraintWeight} multiplied by match weight for each match,
-     * and returns a builder to apply optional constraint properties.
-     * <p>
-     * The constraintWeight comes from an {@link ConstraintWeight} annotated member on the {@link ConstraintConfiguration},
-     * so end users can change the constraint weights dynamically.
-     * This constraint may be deactivated if the {@link ConstraintWeight} is zero.
-     *
-     * @param matchWeigher never null, the result of this function (matchWeight) is multiplied by the constraintWeight
-     * @return never null
-     * @deprecated Prefer {@link #reward(Score, ToIntBiFunction)} and {@link ConstraintWeightOverrides}.
-     */
-    @Deprecated(forRemoval = true, since = "1.13.0")
-    BiConstraintBuilder<A, B, ?> rewardConfigurable(ToIntBiFunction<A, B> matchWeigher);
-
-    /**
-     * As defined by {@link #rewardConfigurable(ToIntBiFunction)}, with a reward of type long.
-     *
-     * @deprecated Prefer {@link #rewardLong(Score, ToLongBiFunction)} and {@link ConstraintWeightOverrides}.
-     */
-    @Deprecated(forRemoval = true, since = "1.13.0")
-    BiConstraintBuilder<A, B, ?> rewardConfigurableLong(ToLongBiFunction<A, B> matchWeigher);
-
-    /**
-     * As defined by {@link #rewardConfigurable(ToIntBiFunction)}, with a reward of type {@link BigDecimal}.
-     *
-     * @deprecated Prefer {@link #rewardBigDecimal(Score, BiFunction)} and {@link ConstraintWeightOverrides}.
-     */
-    @Deprecated(forRemoval = true, since = "1.13.0")
-    BiConstraintBuilder<A, B, ?> rewardConfigurableBigDecimal(BiFunction<A, B, BigDecimal> matchWeigher);
-
-    /**
-     * Positively or negatively impacts the {@link Score}
-     * and returns a builder to apply optional constraint properties.
-     *
-     * @return fluent builder for the constraint
-     */
-    @Override
-    @NonNull
-    BiConstraintStub<A, B> impact();
-
-    /**
-     * Positively or negatively impacts the {@link Score} by the constraintWeight for each match
-     * and returns a builder to apply optional constraint properties.
-     * <p>
-     * Use {@code penalize(...)} or {@code reward(...)} instead, unless this constraint can both have positive and
-     * negative weights.
-     * 
-     * @deprecated Use {@link #impact()} instead, and continue fluently from there.
-     */
-    @Deprecated(forRemoval = true, since = "1.20.0")
-    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> impact(@NonNull Score_ constraintWeight) {
-        return impact(constraintWeight, biConstantOne());
-    }
-
-    /**
-     * Positively or negatively impacts the {@link Score} by constraintWeight multiplied by matchWeight for each match
-     * and returns a builder to apply optional constraint properties.
-     * <p>
-     * The constraintWeight specified here can be overridden using {@link ConstraintWeightOverrides}
-     * on the {@link PlanningSolution}-annotated class
-     * <p>
-     * Use {@code penalize(...)} or {@code reward(...)} instead, unless this constraint can both have positive and
-     * negative weights.
-     *
-     * @param matchWeigher the result of this function (matchWeight) is multiplied by the constraintWeight
-     * @deprecated Use {@link #impact()} instead, and continue fluently from there.
-     */
-    @Deprecated(forRemoval = true, since = "1.20.0")
-    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> impact(@NonNull Score_ constraintWeight,
-            @NonNull ToIntBiFunction<A, B> matchWeigher) {
-        return impact()
-                .withMatchWeight(matchWeigher)
-                .usingDefaultConstraintWeight(constraintWeight);
-    }
-
-    /**
-     * As defined by {@link #impact(Score, ToIntBiFunction)}, with an impact of type long.
-     * 
-     * @deprecated Use {@link #impact()} instead, and continue fluently from there.
-     */
-    @Deprecated(forRemoval = true, since = "1.20.0")
-    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> impactLong(
-            @NonNull Score_ constraintWeight, @NonNull ToLongBiFunction<A, B> matchWeigher) {
-        return impact()
-                .withLongMatchWeight(matchWeigher)
-                .usingDefaultConstraintWeight(constraintWeight);
-    }
-
-    /**
-     * As defined by {@link #impact(Score, ToIntBiFunction)}, with an impact of type {@link BigDecimal}.
-     * 
-     * @deprecated Use {@link #impact()} instead, and continue fluently from there.
-     */
-    @Deprecated(forRemoval = true, since = "1.20.0")
-    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> impactBigDecimal(
-            @NonNull Score_ constraintWeight, @NonNull BiFunction<A, B, BigDecimal> matchWeigher) {
-        return impact()
-                .withBigDecimalMatchWeight(matchWeigher)
-                .usingDefaultConstraintWeight(constraintWeight);
-    }
-
-    /**
-     * Positively impacts the {@link Score} by the {@link ConstraintWeight} for each match,
-     * and returns a builder to apply optional constraint properties.
-     * <p>
-     * The constraintWeight comes from an {@link ConstraintWeight} annotated member on the {@link ConstraintConfiguration},
-     * so end users can change the constraint weights dynamically.
-     * This constraint may be deactivated if the {@link ConstraintWeight} is zero.
-     *
-     * @return never null
-     * @deprecated Prefer {@link #impact(Score)} and {@link ConstraintWeightOverrides}.
-     */
-    @Deprecated(forRemoval = true, since = "1.13.0")
-    default BiConstraintBuilder<A, B, ?> impactConfigurable() {
-        return impactConfigurable(biConstantOne());
-    }
-
-    /**
-     * Positively impacts the {@link Score} by the {@link ConstraintWeight} multiplied by match weight for each match,
-     * and returns a builder to apply optional constraint properties.
-     * <p>
-     * The constraintWeight comes from an {@link ConstraintWeight} annotated member on the {@link ConstraintConfiguration},
-     * so end users can change the constraint weights dynamically.
-     * This constraint may be deactivated if the {@link ConstraintWeight} is zero.
-     *
-     * @return never null
-     * @deprecated Prefer {@link #impact(Score, ToIntBiFunction)} and {@link ConstraintWeightOverrides}.
-     */
-    @Deprecated(forRemoval = true, since = "1.13.0")
-    BiConstraintBuilder<A, B, ?> impactConfigurable(ToIntBiFunction<A, B> matchWeigher);
-
-    /**
-     * As defined by {@link #impactConfigurable(ToIntBiFunction)}, with an impact of type long.
-     *
-     * @deprecated Prefer {@link #impactLong(Score, ToLongBiFunction)} and {@link ConstraintWeightOverrides}.
-     */
-    @Deprecated(forRemoval = true, since = "1.13.0")
-    BiConstraintBuilder<A, B, ?> impactConfigurableLong(ToLongBiFunction<A, B> matchWeigher);
-
-    /**
-     * As defined by {@link #impactConfigurable(ToIntBiFunction)}, with an impact of type {@link BigDecimal}.
-     *
-     * @deprecated Prefer {@link #impactBigDecimal(Score, BiFunction)} and {@link ConstraintWeightOverrides}.
-     */
-    @Deprecated(forRemoval = true, since = "1.13.0")
-    BiConstraintBuilder<A, B, ?> impactConfigurableBigDecimal(BiFunction<A, B, BigDecimal> matchWeigher);
-
-    // ************************************************************************
     // complement
     // ************************************************************************
 
@@ -1686,8 +1322,563 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
     }
 
     // ************************************************************************
+    // Penalize/reward
+    // ************************************************************************
+
+    /**
+     * Applies a negative {@link Score} impact of {@code one} for each match,
+     * and returns a builder to apply optional constraint properties.
+     *
+     * @return fluent builder for the constraint
+     */
+    @Override
+    default @NonNull BiConstraintStub<A, B> penalize() {
+        return penalizeWeighted(biConstantOne());
+    }
+
+    /**
+     * Applies a negative {@link Score} impact for each match,
+     * defined by the provided function for each match,
+     * and returns a builder to apply optional constraint properties.
+     * <p>
+     * This method is applicable to problems using all {@link Score} types.
+     *
+     * @param matchWeigher the result of this function (match weight) is multiplied by the constraint weight
+     * @return fluent builder for the constraint
+     */
+    @NonNull
+    BiConstraintStub<A, B> penalizeWeighted(@NonNull ToIntBiFunction<A, B> matchWeigher);
+
+    /**
+     * Applies a negative {@link Score} impact for each match,
+     * defined by the provided function for each match,
+     * and returns a builder to apply optional constraint properties.
+     * <p>
+     * This method is applicable to problems using all {@link Score} types, except the following:
+     * <ul>
+     * <li>{@link SimpleScore}</li>
+     * <li>{@link HardSoftScore}</li>
+     * <li>{@link HardMediumSoftScore}</li>
+     * <li>{@link BendableScore}</li>
+     * </ul>
+     * These types are int-typed and therefore cannot accept a long value.
+     *
+     * @param matchWeigher the result of this function (match weight) is multiplied by the constraint weight
+     * @return fluent builder for the constraint
+     */
+    @NonNull
+    BiConstraintStub<A, B> penalizeWeightedLong(@NonNull ToLongBiFunction<A, B> matchWeigher);
+
+    /**
+     * Applies a negative {@link Score} impact for each match,
+     * defined by the provided function for each match,
+     * and returns a builder to apply optional constraint properties.
+     * <p>
+     * This method is applicable to problems using only the following {@link Score} types:
+     * <ul>
+     * <li>{@link SimpleBigDecimalScore}</li>
+     * <li>{@link HardSoftBigDecimalScore}</li>
+     * <li>{@link HardMediumSoftBigDecimalScore}</li>
+     * <li>{@link BendableBigDecimalScore}</li>
+     * </ul>
+     *
+     * @param matchWeigher the result of this function (match weight) is multiplied by the constraint weight
+     * @return fluent builder for the constraint
+     */
+    @NonNull
+    BiConstraintStub<A, B> penalizeWeightedBigDecimal(@NonNull BiFunction<A, B, BigDecimal> matchWeigher);
+
+    /**
+     * Applies a positive {@link Score} impact of {@code one} for each match,
+     * and returns a builder to apply optional constraint properties.
+     *
+     * @return fluent builder for the constraint
+     */
+    @Override
+    @NonNull
+    default BiConstraintStub<A, B> reward() {
+        return rewardWeighted(biConstantOne());
+    }
+
+    /**
+     * Applies a positive {@link Score} impact for each match,
+     * defined by the provided function for each match,
+     * and returns a builder to apply optional constraint properties.
+     * <p>
+     * This method is applicable to problems using all {@link Score} types.
+     *
+     * @param matchWeigher the result of this function (match weight) is multiplied by the constraint weight
+     * @return fluent builder for the constraint
+     */
+    @NonNull
+    BiConstraintStub<A, B> rewardWeighted(@NonNull ToIntBiFunction<A, B> matchWeigher);
+
+    /**
+     * Applies a positive {@link Score} impact for each match,
+     * defined by the provided function for each match,
+     * and returns a builder to apply optional constraint properties.
+     * <p>
+     * This method is applicable to problems using all {@link Score} types, except the following:
+     * <ul>
+     * <li>{@link SimpleScore}</li>
+     * <li>{@link HardSoftScore}</li>
+     * <li>{@link HardMediumSoftScore}</li>
+     * <li>{@link BendableScore}</li>
+     * </ul>
+     * These types are int-typed and therefore cannot accept a long value.
+     *
+     * @param matchWeigher the result of this function (match weight) is multiplied by the constraint weight
+     * @return fluent builder for the constraint
+     */
+    @NonNull
+    BiConstraintStub<A, B> rewardWeightedLong(@NonNull ToLongBiFunction<A, B> matchWeigher);
+
+    /**
+     * Applies a positive {@link Score} impact for each match,
+     * defined by the provided function for each match,
+     * and returns a builder to apply optional constraint properties.
+     * <p>
+     * This method is applicable to problems using only the following {@link Score} types:
+     * <ul>
+     * <li>{@link SimpleBigDecimalScore}</li>
+     * <li>{@link HardSoftBigDecimalScore}</li>
+     * <li>{@link HardMediumSoftBigDecimalScore}</li>
+     * <li>{@link BendableBigDecimalScore}</li>
+     * </ul>
+     *
+     * @param matchWeigher the result of this function (match weight) is multiplied by the constraint weight
+     * @return fluent builder for the constraint
+     */
+    @NonNull
+    BiConstraintStub<A, B> rewardWeightedBigDecimal(@NonNull BiFunction<A, B, BigDecimal> matchWeigher);
+
+    /**
+     * Applies a positive or negative {@link Score} impact of {@code one} for each match,
+     * and returns a builder to apply optional constraint properties.
+     *
+     * @return fluent builder for the constraint
+     */
+    @Override
+    @NonNull
+    default BiConstraintStub<A, B> impact() {
+        return impactWeighted(biConstantOne());
+    }
+
+    /**
+     * Applies a positive or negative {@link Score} impact of {@code one} for each match,
+     * defined by the provided function for each match,
+     * and returns a builder to apply optional constraint properties.
+     * <p>
+     * This method is applicable to problems using all {@link Score} types.
+     *
+     * @param matchWeigher the result of this function (match weight) is multiplied by the constraint weight
+     * @return fluent builder for the constraint
+     */
+    @NonNull
+    BiConstraintStub<A, B> impactWeighted(@NonNull ToIntBiFunction<A, B> matchWeigher);
+
+    /**
+     * Applies a positive or negative {@link Score} impact of {@code one} for each match,
+     * defined by the provided function for each match,
+     * and returns a builder to apply optional constraint properties.
+     * <p>
+     * This method is applicable to problems using all {@link Score} types, except the following:
+     * <ul>
+     * <li>{@link SimpleScore}</li>
+     * <li>{@link HardSoftScore}</li>
+     * <li>{@link HardMediumSoftScore}</li>
+     * <li>{@link BendableScore}</li>
+     * </ul>
+     * These types are int-typed and therefore cannot accept a long value.
+     *
+     * @param matchWeigher the result of this function (match weight) is multiplied by the constraint weight
+     * @return fluent builder for the constraint
+     */
+    @NonNull
+    BiConstraintStub<A, B> impactWeightedLong(@NonNull ToLongBiFunction<A, B> matchWeigher);
+
+    /**
+     * Applies a positive or negative {@link Score} impact of {@code one} for each match,
+     * defined by the provided function for each match,
+     * and returns a builder to apply optional constraint properties.
+     * <p>
+     * This method is applicable to problems using only the following {@link Score} types:
+     * <ul>
+     * <li>{@link SimpleBigDecimalScore}</li>
+     * <li>{@link HardSoftBigDecimalScore}</li>
+     * <li>{@link HardMediumSoftBigDecimalScore}</li>
+     * <li>{@link BendableBigDecimalScore}</li>
+     * </ul>
+     *
+     * @param matchWeigher the result of this function (match weight) is multiplied by the constraint weight
+     * @return fluent builder for the constraint
+     */
+    @NonNull
+    BiConstraintStub<A, B> impactWeightedBigDecimal(@NonNull BiFunction<A, B, BigDecimal> matchWeigher);
+
+    // ************************************************************************
     // Deprecated declarations
     // ************************************************************************
+
+    /**
+     * As defined by {@link #penalize(Score, ToIntBiFunction)}, where the match weight is one (1).
+     * 
+     * @deprecated Use {@link #penalize()} instead, and continue fluently from there.
+     */
+    @Deprecated(forRemoval = true, since = "1.20.0")
+    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> penalize(Score_ constraintWeight) {
+        return penalize()
+                .usingDefaultConstraintWeight(constraintWeight);
+    }
+
+    /**
+     * As defined by {@link #penalizeLong(Score, ToLongBiFunction)}, where the match weight is one (1).
+     * 
+     * @deprecated Use {@link #penalize()} instead, and continue fluently from there.
+     */
+    @Deprecated(forRemoval = true, since = "1.20.0")
+    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> penalizeLong(Score_ constraintWeight) {
+        return penalize()
+                .usingDefaultConstraintWeight(constraintWeight);
+    }
+
+    /**
+     * As defined by {@link #penalizeBigDecimal(Score, BiFunction)}, where the match weight is one (1).
+     * 
+     * @deprecated Use {@link #penalize()} instead, and continue fluently from there.
+     */
+    @Deprecated(forRemoval = true, since = "1.20.0")
+    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_>
+            penalizeBigDecimal(Score_ constraintWeight) {
+        return penalize()
+                .usingDefaultConstraintWeight(constraintWeight);
+    }
+
+    /**
+     * Applies a negative {@link Score} impact,
+     * subtracting the constraintWeight multiplied by the match weight,
+     * and returns a builder to apply optional constraint properties.
+     * <p>
+     * The constraintWeight specified here can be overridden using {@link ConstraintWeightOverrides}
+     * on the {@link PlanningSolution}-annotated class
+     *
+     * @param matchWeigher the result of this function (matchWeight) is multiplied by the constraintWeight
+     * @deprecated Use {@link #penalizeWeighted(ToIntBiFunction)} instead, and continue fluently from there.
+     */
+    @Deprecated(forRemoval = true, since = "1.20.0")
+    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> penalize(@NonNull Score_ constraintWeight,
+            @NonNull ToIntBiFunction<A, B> matchWeigher) {
+        return penalizeWeighted(matchWeigher)
+                .usingDefaultConstraintWeight(constraintWeight);
+    }
+
+    /**
+     * As defined by {@link #penalize(Score, ToIntBiFunction)}, with a penalty of type long.
+     *
+     * @deprecated Use {@link #penalizeWeightedLong(ToLongBiFunction)} instead, and continue fluently from there.
+     */
+    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> penalizeLong(
+            @NonNull Score_ constraintWeight, @NonNull ToLongBiFunction<A, B> matchWeigher) {
+        return penalizeWeightedLong(matchWeigher)
+                .usingDefaultConstraintWeight(constraintWeight);
+    }
+
+    /**
+     * As defined by {@link #penalize(Score, ToIntBiFunction)}, with a penalty of type {@link BigDecimal}.
+     *
+     * @deprecated Use {@link #penalizeWeightedBigDecimal(BiFunction)} instead, and continue fluently from there.
+     */
+    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> penalizeBigDecimal(
+            @NonNull Score_ constraintWeight, @NonNull BiFunction<A, B, BigDecimal> matchWeigher) {
+        return penalizeWeightedBigDecimal(matchWeigher)
+                .usingDefaultConstraintWeight(constraintWeight);
+    }
+
+    /**
+     * Negatively impacts the {@link Score},
+     * subtracting the {@link ConstraintWeight} for each match,
+     * and returns a builder to apply optional constraint properties.
+     * <p>
+     * The constraintWeight comes from an {@link ConstraintWeight} annotated member on the {@link ConstraintConfiguration},
+     * so end users can change the constraint weights dynamically.
+     * This constraint may be deactivated if the {@link ConstraintWeight} is zero.
+     *
+     * @return never null
+     * @deprecated Prefer {@link #penalize()} and {@link ConstraintWeightOverrides}.
+     */
+    @Deprecated(forRemoval = true, since = "1.13.0")
+    default BiConstraintBuilder<A, B, ?> penalizeConfigurable() {
+        return penalize()
+                .usingDefaultConstraintWeight(null);
+    }
+
+    /**
+     * Negatively impacts the {@link Score},
+     * subtracting the {@link ConstraintWeight} multiplied by match weight for each match,
+     * and returns a builder to apply optional constraint properties.
+     * <p>
+     * The constraintWeight comes from an {@link ConstraintWeight} annotated member on the {@link ConstraintConfiguration},
+     * so end users can change the constraint weights dynamically.
+     * This constraint may be deactivated if the {@link ConstraintWeight} is zero.
+     *
+     * @param matchWeigher never null, the result of this function (matchWeight) is multiplied by the constraintWeight
+     * @return never null
+     * @deprecated Prefer {@link #penalizeWeighted(ToIntBiFunction)} and {@link ConstraintWeightOverrides}.
+     */
+    @Deprecated(forRemoval = true, since = "1.13.0")
+    default BiConstraintBuilder<A, B, ?> penalizeConfigurable(ToIntBiFunction<A, B> matchWeigher) {
+        return penalizeWeighted(matchWeigher)
+                .usingDefaultConstraintWeight(null);
+    }
+
+    /**
+     * As defined by {@link #penalizeConfigurable(ToIntBiFunction)}, with a penalty of type long.
+     *
+     * @deprecated Prefer {@link #penalizeWeightedLong(ToLongBiFunction)} and {@link ConstraintWeightOverrides}.
+     */
+    @Deprecated(forRemoval = true, since = "1.13.0")
+    default BiConstraintBuilder<A, B, ?> penalizeConfigurableLong(ToLongBiFunction<A, B> matchWeigher) {
+        return penalizeWeightedLong(matchWeigher)
+                .usingDefaultConstraintWeight(null);
+    }
+
+    /**
+     * As defined by {@link #penalizeConfigurable(ToIntBiFunction)}, with a penalty of type {@link BigDecimal}.
+     *
+     * @deprecated Prefer {@link #penalizeWeightedBigDecimal(BiFunction)} and {@link ConstraintWeightOverrides}.
+     */
+    @Deprecated(forRemoval = true, since = "1.13.0")
+    default BiConstraintBuilder<A, B, ?> penalizeConfigurableBigDecimal(BiFunction<A, B, BigDecimal> matchWeigher) {
+        return penalizeWeightedBigDecimal(matchWeigher)
+                .usingDefaultConstraintWeight(null);
+    }
+
+    /**
+     * As defined by {@link #reward(Score, ToIntBiFunction)}, where the match weight is one (1).
+     * 
+     * @deprecated Use {@link #reward()} instead, and continue fluently from there.
+     */
+    @Deprecated(forRemoval = true, since = "1.20.0")
+    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> reward(@NonNull Score_ constraintWeight) {
+        return reward()
+                .usingDefaultConstraintWeight(constraintWeight);
+    }
+
+    /**
+     * Applies a positive {@link Score} impact,
+     * adding the constraintWeight multiplied by the match weight,
+     * and returns a builder to apply optional constraint properties.
+     * <p>
+     * The constraintWeight specified here can be overridden using {@link ConstraintWeightOverrides}
+     * on the {@link PlanningSolution}-annotated class
+     *
+     * @param matchWeigher the result of this function (matchWeight) is multiplied by the constraintWeight
+     * @deprecated Use {@link #rewardWeighted(ToIntBiFunction)} instead, and continue fluently from there.
+     */
+    @Deprecated(forRemoval = true, since = "1.20.0")
+    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> reward(@NonNull Score_ constraintWeight,
+            @NonNull ToIntBiFunction<A, B> matchWeigher) {
+        return rewardWeighted(matchWeigher)
+                .usingDefaultConstraintWeight(constraintWeight);
+    }
+
+    /**
+     * As defined by {@link #reward(Score, ToIntBiFunction)}, with a reward of type long.
+     * 
+     * @deprecated Use {@link #rewardWeightedLong(ToLongBiFunction)} instead, and continue fluently from there.
+     */
+    @Deprecated(forRemoval = true, since = "1.20.0")
+    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> rewardLong(
+            @NonNull Score_ constraintWeight, @NonNull ToLongBiFunction<A, B> matchWeigher) {
+        return rewardWeightedLong(matchWeigher)
+                .usingDefaultConstraintWeight(constraintWeight);
+    }
+
+    /**
+     * As defined by {@link #reward(Score, ToIntBiFunction)}, with a reward of type {@link BigDecimal}.
+     * 
+     * @deprecated Use {@link #rewardWeightedBigDecimal(BiFunction)} instead, and continue fluently from there.
+     */
+    @Deprecated(forRemoval = true, since = "1.20.0")
+    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_>
+            rewardBigDecimal(@NonNull Score_ constraintWeight, @NonNull BiFunction<A, B, BigDecimal> matchWeigher) {
+        return rewardWeightedBigDecimal(matchWeigher)
+                .usingDefaultConstraintWeight(constraintWeight);
+    }
+
+    /**
+     * Positively impacts the {@link Score},
+     * adding the {@link ConstraintWeight} for each match,
+     * and returns a builder to apply optional constraint properties.
+     * <p>
+     * The constraintWeight comes from an {@link ConstraintWeight} annotated member on the {@link ConstraintConfiguration},
+     * so end users can change the constraint weights dynamically.
+     * This constraint may be deactivated if the {@link ConstraintWeight} is zero.
+     *
+     * @return never null
+     * @deprecated Prefer {@link #reward()} and {@link ConstraintWeightOverrides}.
+     */
+    @Deprecated(forRemoval = true, since = "1.13.0")
+    default BiConstraintBuilder<A, B, ?> rewardConfigurable() {
+        return reward()
+                .usingDefaultConstraintWeight(null);
+    }
+
+    /**
+     * Positively impacts the {@link Score},
+     * adding the {@link ConstraintWeight} multiplied by match weight for each match,
+     * and returns a builder to apply optional constraint properties.
+     * <p>
+     * The constraintWeight comes from an {@link ConstraintWeight} annotated member on the {@link ConstraintConfiguration},
+     * so end users can change the constraint weights dynamically.
+     * This constraint may be deactivated if the {@link ConstraintWeight} is zero.
+     *
+     * @param matchWeigher never null, the result of this function (matchWeight) is multiplied by the constraintWeight
+     * @return never null
+     * @deprecated Prefer {@link #rewardWeighted(ToIntBiFunction)} and {@link ConstraintWeightOverrides}.
+     */
+    @Deprecated(forRemoval = true, since = "1.13.0")
+    default BiConstraintBuilder<A, B, ?> rewardConfigurable(ToIntBiFunction<A, B> matchWeigher) {
+        return rewardWeighted(matchWeigher)
+                .usingDefaultConstraintWeight(null);
+    }
+
+    /**
+     * As defined by {@link #rewardConfigurable(ToIntBiFunction)}, with a reward of type long.
+     *
+     * @deprecated Prefer {@link #rewardWeightedLong(ToLongBiFunction)} and {@link ConstraintWeightOverrides}.
+     */
+    @Deprecated(forRemoval = true, since = "1.13.0")
+    default BiConstraintBuilder<A, B, ?> rewardConfigurableLong(ToLongBiFunction<A, B> matchWeigher) {
+        return rewardWeightedLong(matchWeigher)
+                .usingDefaultConstraintWeight(null);
+    }
+
+    /**
+     * As defined by {@link #rewardConfigurable(ToIntBiFunction)}, with a reward of type {@link BigDecimal}.
+     *
+     * @deprecated Prefer {@link #rewardWeightedBigDecimal(BiFunction)} and {@link ConstraintWeightOverrides}.
+     */
+    @Deprecated(forRemoval = true, since = "1.13.0")
+    default BiConstraintBuilder<A, B, ?> rewardConfigurableBigDecimal(BiFunction<A, B, BigDecimal> matchWeigher) {
+        return rewardWeightedBigDecimal(matchWeigher)
+                .usingDefaultConstraintWeight(null);
+    }
+
+    /**
+     * Positively or negatively impacts the {@link Score} by the constraintWeight for each match
+     * and returns a builder to apply optional constraint properties.
+     * <p>
+     * Use {@code penalize(...)} or {@code reward(...)} instead, unless this constraint can both have positive and
+     * negative weights.
+     * 
+     * @deprecated Use {@link #impact()} instead, and continue fluently from there.
+     */
+    @Deprecated(forRemoval = true, since = "1.20.0")
+    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> impact(@NonNull Score_ constraintWeight) {
+        return impact()
+                .usingDefaultConstraintWeight(constraintWeight);
+    }
+
+    /**
+     * Positively or negatively impacts the {@link Score} by constraintWeight multiplied by matchWeight for each match
+     * and returns a builder to apply optional constraint properties.
+     * <p>
+     * The constraintWeight specified here can be overridden using {@link ConstraintWeightOverrides}
+     * on the {@link PlanningSolution}-annotated class
+     * <p>
+     * Use {@code penalize(...)} or {@code reward(...)} instead, unless this constraint can both have positive and
+     * negative weights.
+     *
+     * @param matchWeigher the result of this function (matchWeight) is multiplied by the constraintWeight
+     * @deprecated Use {@link #impactWeighted(ToIntBiFunction)} instead, and continue fluently from there.
+     */
+    @Deprecated(forRemoval = true, since = "1.20.0")
+    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> impact(@NonNull Score_ constraintWeight,
+            @NonNull ToIntBiFunction<A, B> matchWeigher) {
+        return impactWeighted(matchWeigher)
+                .usingDefaultConstraintWeight(constraintWeight);
+    }
+
+    /**
+     * As defined by {@link #impact(Score, ToIntBiFunction)}, with an impact of type long.
+     * 
+     * @deprecated Use {@link #impactWeightedLong(ToLongBiFunction)} instead, and continue fluently from there.
+     */
+    @Deprecated(forRemoval = true, since = "1.20.0")
+    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> impactLong(
+            @NonNull Score_ constraintWeight, @NonNull ToLongBiFunction<A, B> matchWeigher) {
+        return impactWeightedLong(matchWeigher)
+                .usingDefaultConstraintWeight(constraintWeight);
+    }
+
+    /**
+     * As defined by {@link #impact(Score, ToIntBiFunction)}, with an impact of type {@link BigDecimal}.
+     * 
+     * @deprecated Use {@link #impactWeightedBigDecimal(BiFunction)} instead, and continue fluently from there.
+     */
+    @Deprecated(forRemoval = true, since = "1.20.0")
+    default <Score_ extends Score<Score_>> @NonNull BiConstraintBuilder<A, B, Score_> impactBigDecimal(
+            @NonNull Score_ constraintWeight, @NonNull BiFunction<A, B, BigDecimal> matchWeigher) {
+        return impactWeightedBigDecimal(matchWeigher)
+                .usingDefaultConstraintWeight(constraintWeight);
+    }
+
+    /**
+     * Positively impacts the {@link Score} by the {@link ConstraintWeight} for each match,
+     * and returns a builder to apply optional constraint properties.
+     * <p>
+     * The constraintWeight comes from an {@link ConstraintWeight} annotated member on the {@link ConstraintConfiguration},
+     * so end users can change the constraint weights dynamically.
+     * This constraint may be deactivated if the {@link ConstraintWeight} is zero.
+     *
+     * @return never null
+     * @deprecated Prefer {@link #impact()} and {@link ConstraintWeightOverrides}.
+     */
+    @Deprecated(forRemoval = true, since = "1.13.0")
+    default BiConstraintBuilder<A, B, ?> impactConfigurable() {
+        return impact()
+                .usingDefaultConstraintWeight(null);
+    }
+
+    /**
+     * Positively impacts the {@link Score} by the {@link ConstraintWeight} multiplied by match weight for each match,
+     * and returns a builder to apply optional constraint properties.
+     * <p>
+     * The constraintWeight comes from an {@link ConstraintWeight} annotated member on the {@link ConstraintConfiguration},
+     * so end users can change the constraint weights dynamically.
+     * This constraint may be deactivated if the {@link ConstraintWeight} is zero.
+     *
+     * @return never null
+     * @deprecated Prefer {@link #impactWeighted(ToIntBiFunction)} and {@link ConstraintWeightOverrides}.
+     */
+    @Deprecated(forRemoval = true, since = "1.13.0")
+    default BiConstraintBuilder<A, B, ?> impactConfigurable(ToIntBiFunction<A, B> matchWeigher) {
+        return impactWeighted(matchWeigher)
+                .usingDefaultConstraintWeight(null);
+    }
+
+    /**
+     * As defined by {@link #impactConfigurable(ToIntBiFunction)}, with an impact of type long.
+     *
+     * @deprecated Prefer {@link #impactWeightedLong(ToLongBiFunction)} and {@link ConstraintWeightOverrides}.
+     */
+    @Deprecated(forRemoval = true, since = "1.13.0")
+    default BiConstraintBuilder<A, B, ?> impactConfigurableLong(ToLongBiFunction<A, B> matchWeigher) {
+        return impactWeightedLong(matchWeigher)
+                .usingDefaultConstraintWeight(null);
+    }
+
+    /**
+     * As defined by {@link #impactConfigurable(ToIntBiFunction)}, with an impact of type {@link BigDecimal}.
+     *
+     * @deprecated Prefer {@link #impactWeightedBigDecimal(BiFunction)} and {@link ConstraintWeightOverrides}.
+     */
+    @Deprecated(forRemoval = true, since = "1.13.0")
+    default BiConstraintBuilder<A, B, ?> impactConfigurableBigDecimal(BiFunction<A, B, BigDecimal> matchWeigher) {
+        return impactWeightedBigDecimal(matchWeigher)
+                .usingDefaultConstraintWeight(null);
+    }
 
     /**
      * @deprecated Prefer {@link #ifExistsIncludingUnassigned(Class, TriJoiner)}.
@@ -1778,36 +1969,37 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
     /**
      * Negatively impact the {@link Score}: subtract the constraintWeight multiplied by the match weight.
      * Otherwise as defined by {@link #penalize(String, Score)}.
-     * <p>
-     * For non-int {@link Score} types use {@link #penalizeLong(String, Score, ToLongBiFunction)} or
-     * {@link #penalizeBigDecimal(String, Score, BiFunction)} instead.
      *
-     * @deprecated Prefer {@link #penalize(Score, ToIntBiFunction)}.
      * @param constraintName never null, shows up in {@link ConstraintMatchTotal} during score justification
      * @param constraintWeight never null
      * @param matchWeigher never null, the result of this function (matchWeight) is multiplied by the constraintWeight
      * @return never null
+     * @deprecated Use {@link #penalizeWeighted(ToIntBiFunction)} instead, and continue fluently from there.
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Deprecated(forRemoval = true)
     default Constraint penalize(String constraintName, Score<?> constraintWeight, ToIntBiFunction<A, B> matchWeigher) {
-        return penalize((Score) constraintWeight, matchWeigher)
+        return penalizeWeighted(matchWeigher)
+                .usingDefaultConstraintWeight((Score) constraintWeight)
                 .asConstraint(constraintName);
     }
 
     /**
      * As defined by {@link #penalize(String, Score, ToIntBiFunction)}.
      *
-     * @deprecated Prefer {@link #penalize(Score, ToIntBiFunction)}.
      * @param constraintPackage never null
      * @param constraintName never null
      * @param constraintWeight never null
      * @param matchWeigher never null
      * @return never null
+     * @deprecated Use {@link #penalizeWeighted(ToIntBiFunction)} instead, and continue fluently from there.
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Deprecated(forRemoval = true)
     default Constraint penalize(String constraintPackage, String constraintName, Score<?> constraintWeight,
             ToIntBiFunction<A, B> matchWeigher) {
-        return penalize((Score) constraintWeight, matchWeigher)
+        return penalizeWeighted(matchWeigher)
+                .usingDefaultConstraintWeight((Score) constraintWeight)
                 .asConstraint(constraintPackage, constraintName);
     }
 
@@ -1815,33 +2007,37 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
      * Negatively impact the {@link Score}: subtract the constraintWeight multiplied by the match weight.
      * Otherwise as defined by {@link #penalize(String, Score)}.
      *
-     * @deprecated Prefer {@link #penalizeLong(Score, ToLongBiFunction)}.
      * @param constraintName never null, shows up in {@link ConstraintMatchTotal} during score justification
      * @param constraintWeight never null
      * @param matchWeigher never null, the result of this function (matchWeight) is multiplied by the constraintWeight
      * @return never null
+     * @deprecated Use {@link #penalizeWeightedLong(ToLongBiFunction)} instead, and continue fluently from there.
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Deprecated(forRemoval = true)
     default Constraint penalizeLong(String constraintName, Score<?> constraintWeight,
             ToLongBiFunction<A, B> matchWeigher) {
-        return penalizeLong((Score) constraintWeight, matchWeigher)
+        return penalizeWeightedLong(matchWeigher)
+                .usingDefaultConstraintWeight((Score) constraintWeight)
                 .asConstraint(constraintName);
     }
 
     /**
      * As defined by {@link #penalizeLong(String, Score, ToLongBiFunction)}.
      *
-     * @deprecated Prefer {@link #penalizeLong(Score, ToLongBiFunction)}.
      * @param constraintPackage never null
      * @param constraintName never null
      * @param constraintWeight never null
      * @param matchWeigher never null
      * @return never null
+     * @deprecated Use {@link #penalizeWeightedLong(ToLongBiFunction)} instead, and continue fluently from there.
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Deprecated(forRemoval = true)
     default Constraint penalizeLong(String constraintPackage, String constraintName, Score<?> constraintWeight,
             ToLongBiFunction<A, B> matchWeigher) {
-        return penalizeLong((Score) constraintWeight, matchWeigher)
+        return penalizeWeightedLong(matchWeigher)
+                .usingDefaultConstraintWeight((Score) constraintWeight)
                 .asConstraint(constraintPackage, constraintName);
     }
 
@@ -1849,51 +2045,53 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
      * Negatively impact the {@link Score}: subtract the constraintWeight multiplied by the match weight.
      * Otherwise as defined by {@link #penalize(String, Score)}.
      *
-     * @deprecated Prefer {@link #penalizeBigDecimal(Score, BiFunction)}.
      * @param constraintName never null, shows up in {@link ConstraintMatchTotal} during score justification
      * @param constraintWeight never null
      * @param matchWeigher never null, the result of this function (matchWeight) is multiplied by the constraintWeight
      * @return never null
+     * @deprecated Use {@link #penalizeWeightedBigDecimal(BiFunction)} instead, and continue fluently from there.
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Deprecated(forRemoval = true)
     default Constraint penalizeBigDecimal(String constraintName, Score<?> constraintWeight,
             BiFunction<A, B, BigDecimal> matchWeigher) {
-        return penalizeBigDecimal((Score) constraintWeight, matchWeigher)
+        return penalizeWeightedBigDecimal(matchWeigher)
+                .usingDefaultConstraintWeight((Score) constraintWeight)
                 .asConstraint(constraintName);
     }
 
     /**
      * As defined by {@link #penalizeBigDecimal(String, Score, BiFunction)}.
      *
-     * @deprecated Prefer {@link #penalizeBigDecimal(Score, BiFunction)}.
      * @param constraintPackage never null
      * @param constraintName never null
      * @param constraintWeight never null
      * @param matchWeigher never null
      * @return never null
+     * @deprecated Use {@link #penalizeWeightedBigDecimal(BiFunction)} instead, and continue fluently from there.
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Deprecated(forRemoval = true)
     default Constraint penalizeBigDecimal(String constraintPackage, String constraintName, Score<?> constraintWeight,
             BiFunction<A, B, BigDecimal> matchWeigher) {
-        return penalizeBigDecimal((Score) constraintWeight, matchWeigher)
+        return penalizeWeightedBigDecimal(matchWeigher)
+                .usingDefaultConstraintWeight((Score) constraintWeight)
                 .asConstraint(constraintPackage, constraintName);
     }
 
     /**
      * Negatively impact the {@link Score}: subtract the {@link ConstraintWeight} multiplied by the match weight.
      * Otherwise as defined by {@link #penalizeConfigurable(String)}.
-     * <p>
-     * For non-int {@link Score} types use {@link #penalizeConfigurableLong(String, ToLongBiFunction)} or
-     * {@link #penalizeConfigurableBigDecimal(String, BiFunction)} instead.
      *
      * @param constraintName never null, shows up in {@link ConstraintMatchTotal} during score justification
      * @param matchWeigher never null, the result of this function (matchWeight) is multiplied by the constraintWeight
      * @return never null
-     * @deprecated Prefer {@link #penalize(Score, ToIntBiFunction)} and {@link ConstraintWeightOverrides}.
+     * @deprecated Prefer {@link #penalizeWeighted(ToIntBiFunction)} and {@link ConstraintWeightOverrides}.
      */
     @Deprecated(forRemoval = true)
     default Constraint penalizeConfigurable(String constraintName, ToIntBiFunction<A, B> matchWeigher) {
-        return penalizeConfigurable(matchWeigher)
+        return penalizeWeighted(matchWeigher)
+                .usingDefaultConstraintWeight(null)
                 .asConstraint(constraintName);
     }
 
@@ -1904,12 +2102,13 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
      * @param constraintName never null
      * @param matchWeigher never null
      * @return never null
-     * @deprecated Prefer {@link #penalize(Score, ToIntBiFunction)} and {@link ConstraintWeightOverrides}.
+     * @deprecated Prefer {@link #penalizeWeighted(ToIntBiFunction)} and {@link ConstraintWeightOverrides}.
      */
     @Deprecated(forRemoval = true)
     default Constraint penalizeConfigurable(String constraintPackage, String constraintName,
             ToIntBiFunction<A, B> matchWeigher) {
-        return penalizeConfigurable(matchWeigher)
+        return penalizeWeighted(matchWeigher)
+                .usingDefaultConstraintWeight(null)
                 .asConstraint(constraintPackage, constraintName);
     }
 
@@ -1920,11 +2119,12 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
      * @param constraintName never null, shows up in {@link ConstraintMatchTotal} during score justification
      * @param matchWeigher never null, the result of this function (matchWeight) is multiplied by the constraintWeight
      * @return never null
-     * @deprecated Prefer {@link #penalizeLong(Score, ToLongBiFunction)} and {@link ConstraintWeightOverrides}.
+     * @deprecated Prefer {@link #penalizeWeightedLong(ToLongBiFunction)} and {@link ConstraintWeightOverrides}.
      */
     @Deprecated(forRemoval = true)
     default Constraint penalizeConfigurableLong(String constraintName, ToLongBiFunction<A, B> matchWeigher) {
-        return penalizeConfigurableLong(matchWeigher)
+        return penalizeWeightedLong(matchWeigher)
+                .usingDefaultConstraintWeight(null)
                 .asConstraint(constraintName);
     }
 
@@ -1935,12 +2135,13 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
      * @param constraintName never null
      * @param matchWeigher never null
      * @return never null
-     * @deprecated Prefer {@link #penalizeLong(Score, ToLongBiFunction)} and {@link ConstraintWeightOverrides}.
+     * @deprecated Prefer {@link #penalizeWeightedLong(ToLongBiFunction)} and {@link ConstraintWeightOverrides}.
      */
     @Deprecated(forRemoval = true)
     default Constraint penalizeConfigurableLong(String constraintPackage, String constraintName,
             ToLongBiFunction<A, B> matchWeigher) {
-        return penalizeConfigurableLong(matchWeigher)
+        return penalizeWeightedLong(matchWeigher)
+                .usingDefaultConstraintWeight(null)
                 .asConstraint(constraintPackage, constraintName);
     }
 
@@ -1951,12 +2152,13 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
      * @param constraintName never null, shows up in {@link ConstraintMatchTotal} during score justification
      * @param matchWeigher never null, the result of this function (matchWeight) is multiplied by the constraintWeight
      * @return never null
-     * @deprecated Prefer {@link #penalizeBigDecimal(Score, BiFunction)} and {@link ConstraintWeightOverrides}.
+     * @deprecated Prefer {@link #penalizeWeightedBigDecimal(BiFunction)} and {@link ConstraintWeightOverrides}.
      */
     @Deprecated(forRemoval = true)
     default Constraint penalizeConfigurableBigDecimal(String constraintName,
             BiFunction<A, B, BigDecimal> matchWeigher) {
-        return penalizeConfigurableBigDecimal(matchWeigher)
+        return penalizeWeightedBigDecimal(matchWeigher)
+                .usingDefaultConstraintWeight(null)
                 .asConstraint(constraintName);
     }
 
@@ -1967,48 +2169,50 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
      * @param constraintName never null
      * @param matchWeigher never null
      * @return never null
-     * @deprecated Prefer {@link #penalizeBigDecimal(Score, BiFunction)} and {@link ConstraintWeightOverrides}.
+     * @deprecated Prefer {@link #penalizeWeightedBigDecimal(BiFunction)} and {@link ConstraintWeightOverrides}.
      */
     @Deprecated(forRemoval = true)
     default Constraint penalizeConfigurableBigDecimal(String constraintPackage, String constraintName,
             BiFunction<A, B, BigDecimal> matchWeigher) {
-        return penalizeConfigurableBigDecimal(matchWeigher)
+        return penalizeWeightedBigDecimal(matchWeigher)
+                .usingDefaultConstraintWeight(null)
                 .asConstraint(constraintPackage, constraintName);
     }
 
     /**
      * Positively impact the {@link Score}: add the constraintWeight multiplied by the match weight.
      * Otherwise as defined by {@link #reward(String, Score)}.
-     * <p>
-     * For non-int {@link Score} types use {@link #rewardLong(String, Score, ToLongBiFunction)} or
-     * {@link #rewardBigDecimal(String, Score, BiFunction)} instead.
      *
-     * @deprecated Prefer {@link #reward(Score, ToIntBiFunction)}.
      * @param constraintName never null, shows up in {@link ConstraintMatchTotal} during score justification
      * @param constraintWeight never null
      * @param matchWeigher never null, the result of this function (matchWeight) is multiplied by the constraintWeight
      * @return never null
+     * @deprecated Use {@link #rewardWeighted(ToIntBiFunction)} instead, and continue fluently from there.
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Deprecated(forRemoval = true)
     default Constraint reward(String constraintName, Score<?> constraintWeight, ToIntBiFunction<A, B> matchWeigher) {
-        return reward((Score) constraintWeight, matchWeigher)
+        return rewardWeighted(matchWeigher)
+                .usingDefaultConstraintWeight((Score) constraintWeight)
                 .asConstraint(constraintName);
     }
 
     /**
      * As defined by {@link #reward(String, Score, ToIntBiFunction)}.
      *
-     * @deprecated Prefer {@link #reward(Score, ToIntBiFunction)}.
      * @param constraintPackage never null
      * @param constraintName never null
      * @param constraintWeight never null
      * @param matchWeigher never null
      * @return never null
+     * @deprecated Use {@link #rewardWeighted(ToIntBiFunction)} instead, and continue fluently from there.
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Deprecated(forRemoval = true)
     default Constraint reward(String constraintPackage, String constraintName, Score<?> constraintWeight,
             ToIntBiFunction<A, B> matchWeigher) {
-        return reward((Score) constraintWeight, matchWeigher)
+        return rewardWeighted(matchWeigher)
+                .usingDefaultConstraintWeight((Score) constraintWeight)
                 .asConstraint(constraintPackage, constraintName);
     }
 
@@ -2016,33 +2220,37 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
      * Positively impact the {@link Score}: add the constraintWeight multiplied by the match weight.
      * Otherwise as defined by {@link #reward(String, Score)}.
      *
-     * @deprecated Prefer {@link #rewardLong(Score, ToLongBiFunction)}.
      * @param constraintName never null, shows up in {@link ConstraintMatchTotal} during score justification
      * @param constraintWeight never null
      * @param matchWeigher never null, the result of this function (matchWeight) is multiplied by the constraintWeight
      * @return never null
+     * @deprecated Use {@link #rewardWeightedLong(ToLongBiFunction)} instead, and continue fluently from there.
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Deprecated(forRemoval = true)
     default Constraint rewardLong(String constraintName, Score<?> constraintWeight,
             ToLongBiFunction<A, B> matchWeigher) {
-        return rewardLong((Score) constraintWeight, matchWeigher)
+        return rewardWeightedLong(matchWeigher)
+                .usingDefaultConstraintWeight((Score) constraintWeight)
                 .asConstraint(constraintName);
     }
 
     /**
      * As defined by {@link #rewardLong(String, Score, ToLongBiFunction)}.
      *
-     * @deprecated Prefer {@link #rewardLong(Score, ToLongBiFunction)}.
      * @param constraintPackage never null
      * @param constraintName never null
      * @param constraintWeight never null
      * @param matchWeigher never null
      * @return never null
+     * @deprecated Use {@link #rewardWeightedLong(ToLongBiFunction)} instead, and continue fluently from there.
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Deprecated(forRemoval = true)
     default Constraint rewardLong(String constraintPackage, String constraintName, Score<?> constraintWeight,
             ToLongBiFunction<A, B> matchWeigher) {
-        return rewardLong((Score) constraintWeight, matchWeigher)
+        return rewardWeightedLong(matchWeigher)
+                .usingDefaultConstraintWeight((Score) constraintWeight)
                 .asConstraint(constraintPackage, constraintName);
     }
 
@@ -2050,51 +2258,53 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
      * Positively impact the {@link Score}: add the constraintWeight multiplied by the match weight.
      * Otherwise as defined by {@link #reward(String, Score)}.
      *
-     * @deprecated Prefer {@link #rewardBigDecimal(Score, BiFunction)}.
      * @param constraintName never null, shows up in {@link ConstraintMatchTotal} during score justification
      * @param constraintWeight never null
      * @param matchWeigher never null, the result of this function (matchWeight) is multiplied by the constraintWeight
      * @return never null
+     * @deprecated Use {@link #rewardWeightedBigDecimal(BiFunction)} instead, and continue fluently from there.
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Deprecated(forRemoval = true)
     default Constraint rewardBigDecimal(String constraintName, Score<?> constraintWeight,
             BiFunction<A, B, BigDecimal> matchWeigher) {
-        return rewardBigDecimal((Score) constraintWeight, matchWeigher)
+        return rewardWeightedBigDecimal(matchWeigher)
+                .usingDefaultConstraintWeight((Score) constraintWeight)
                 .asConstraint(constraintName);
     }
 
     /**
      * As defined by {@link #rewardBigDecimal(String, Score, BiFunction)}.
      *
-     * @deprecated Prefer {@link #rewardBigDecimal(Score, BiFunction)}.
      * @param constraintPackage never null
      * @param constraintName never null
      * @param constraintWeight never null
      * @param matchWeigher never null
      * @return never null
+     * @deprecated Use {@link #rewardWeightedBigDecimal(BiFunction)} instead, and continue fluently from there.
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Deprecated(forRemoval = true)
     default Constraint rewardBigDecimal(String constraintPackage, String constraintName, Score<?> constraintWeight,
             BiFunction<A, B, BigDecimal> matchWeigher) {
-        return rewardBigDecimal((Score) constraintWeight, matchWeigher)
+        return rewardWeightedBigDecimal(matchWeigher)
+                .usingDefaultConstraintWeight((Score) constraintWeight)
                 .asConstraint(constraintPackage, constraintName);
     }
 
     /**
      * Positively impact the {@link Score}: add the {@link ConstraintWeight} multiplied by the match weight.
      * Otherwise as defined by {@link #rewardConfigurable(String)}.
-     * <p>
-     * For non-int {@link Score} types use {@link #rewardConfigurableLong(String, ToLongBiFunction)} or
-     * {@link #rewardConfigurableBigDecimal(String, BiFunction)} instead.
      *
      * @param constraintName never null, shows up in {@link ConstraintMatchTotal} during score justification
      * @param matchWeigher never null, the result of this function (matchWeight) is multiplied by the constraintWeight
      * @return never null
-     * @deprecated Prefer {@link #reward(Score, ToIntBiFunction)} and {@link ConstraintWeightOverrides}.
+     * @deprecated Prefer {@link #rewardWeighted(ToIntBiFunction)} and {@link ConstraintWeightOverrides}.
      */
     @Deprecated(forRemoval = true)
     default Constraint rewardConfigurable(String constraintName, ToIntBiFunction<A, B> matchWeigher) {
-        return rewardConfigurable(matchWeigher)
+        return rewardWeighted(matchWeigher)
+                .usingDefaultConstraintWeight(null)
                 .asConstraint(constraintName);
     }
 
@@ -2105,11 +2315,12 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
      * @param constraintName never null
      * @param matchWeigher never null
      * @return never null
-     * @deprecated Prefer {@link #reward(Score, ToIntBiFunction)} and {@link ConstraintWeightOverrides}.
+     * @deprecated Prefer {@link #rewardWeighted(ToIntBiFunction)} and {@link ConstraintWeightOverrides}.
      */
     @Deprecated
     default Constraint rewardConfigurable(String constraintPackage, String constraintName, ToIntBiFunction<A, B> matchWeigher) {
-        return rewardConfigurable(matchWeigher)
+        return rewardWeighted(matchWeigher)
+                .usingDefaultConstraintWeight(null)
                 .asConstraint(constraintPackage, constraintName);
     }
 
@@ -2120,11 +2331,12 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
      * @param constraintName never null, shows up in {@link ConstraintMatchTotal} during score justification
      * @param matchWeigher never null, the result of this function (matchWeight) is multiplied by the constraintWeight
      * @return never null
-     * @deprecated Prefer {@link #rewardLong(Score, ToLongBiFunction)} and {@link ConstraintWeightOverrides}.
+     * @deprecated Prefer {@link #rewardWeightedLong(ToLongBiFunction)} and {@link ConstraintWeightOverrides}.
      */
     @Deprecated(forRemoval = true)
     default Constraint rewardConfigurableLong(String constraintName, ToLongBiFunction<A, B> matchWeigher) {
-        return rewardConfigurableLong(matchWeigher)
+        return rewardWeightedLong(matchWeigher)
+                .usingDefaultConstraintWeight(null)
                 .asConstraint(constraintName);
     }
 
@@ -2135,12 +2347,13 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
      * @param constraintName never null
      * @param matchWeigher never null
      * @return never null
-     * @deprecated Prefer {@link #rewardLong(Score, ToLongBiFunction)} and {@link ConstraintWeightOverrides}.
+     * @deprecated Prefer {@link #rewardWeightedLong(ToLongBiFunction)} and {@link ConstraintWeightOverrides}.
      */
     @Deprecated(forRemoval = true)
     default Constraint rewardConfigurableLong(String constraintPackage, String constraintName,
             ToLongBiFunction<A, B> matchWeigher) {
-        return rewardConfigurableLong(matchWeigher)
+        return rewardWeightedLong(matchWeigher)
+                .usingDefaultConstraintWeight(null)
                 .asConstraint(constraintPackage, constraintName);
     }
 
@@ -2151,11 +2364,12 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
      * @param constraintName never null, shows up in {@link ConstraintMatchTotal} during score justification
      * @param matchWeigher never null, the result of this function (matchWeight) is multiplied by the constraintWeight
      * @return never null
-     * @deprecated Prefer {@link #rewardBigDecimal(Score, BiFunction)} and {@link ConstraintWeightOverrides}.
+     * @deprecated Prefer {@link #rewardWeightedBigDecimal(BiFunction)} and {@link ConstraintWeightOverrides}.
      */
     @Deprecated(forRemoval = true)
     default Constraint rewardConfigurableBigDecimal(String constraintName, BiFunction<A, B, BigDecimal> matchWeigher) {
-        return rewardConfigurableBigDecimal(matchWeigher)
+        return rewardWeightedBigDecimal(matchWeigher)
+                .usingDefaultConstraintWeight(null)
                 .asConstraint(constraintName);
     }
 
@@ -2166,12 +2380,13 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
      * @param constraintName never null
      * @param matchWeigher never null
      * @return never null
-     * @deprecated Prefer {@link #rewardBigDecimal(Score, BiFunction)} and {@link ConstraintWeightOverrides}.
+     * @deprecated Prefer {@link #rewardWeightedBigDecimal(BiFunction)} and {@link ConstraintWeightOverrides}.
      */
     @Deprecated(forRemoval = true)
     default Constraint rewardConfigurableBigDecimal(String constraintPackage, String constraintName,
             BiFunction<A, B, BigDecimal> matchWeigher) {
-        return rewardConfigurableBigDecimal(matchWeigher)
+        return rewardWeightedBigDecimal(matchWeigher)
+                .usingDefaultConstraintWeight(null)
                 .asConstraint(constraintPackage, constraintName);
     }
 
@@ -2181,36 +2396,37 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
      * <p>
      * Use {@code penalize(...)} or {@code reward(...)} instead, unless this constraint can both have positive and
      * negative weights.
-     * <p>
-     * For non-int {@link Score} types use {@link #impactLong(String, Score, ToLongBiFunction)} or
-     * {@link #impactBigDecimal(String, Score, BiFunction)} instead.
      *
-     * @deprecated Prefer {@link #impact(Score, ToIntBiFunction)}.
      * @param constraintName never null, shows up in {@link ConstraintMatchTotal} during score justification
      * @param constraintWeight never null
      * @param matchWeigher never null, the result of this function (matchWeight) is multiplied by the constraintWeight
      * @return never null
+     * @deprecated Use {@link #impactWeighted(ToIntBiFunction)} instead, and continue fluently from there.
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Deprecated(forRemoval = true)
     default Constraint impact(String constraintName, Score<?> constraintWeight, ToIntBiFunction<A, B> matchWeigher) {
-        return impact((Score) constraintWeight, matchWeigher)
+        return impactWeighted(matchWeigher)
+                .usingDefaultConstraintWeight((Score) constraintWeight)
                 .asConstraint(constraintName);
     }
 
     /**
      * As defined by {@link #impact(String, Score, ToIntBiFunction)}.
      *
-     * @deprecated Prefer {@link #impact(Score, ToIntBiFunction)}.
      * @param constraintPackage never null
      * @param constraintName never null
      * @param constraintWeight never null
      * @param matchWeigher never null
      * @return never null
+     * @deprecated Use {@link #impactWeighted(ToIntBiFunction)} instead, and continue fluently from there.
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Deprecated(forRemoval = true)
     default Constraint impact(String constraintPackage, String constraintName, Score<?> constraintWeight,
             ToIntBiFunction<A, B> matchWeigher) {
-        return impact((Score) constraintWeight, matchWeigher)
+        return impactWeighted(matchWeigher)
+                .usingDefaultConstraintWeight((Score) constraintWeight)
                 .asConstraint(constraintPackage, constraintName);
     }
 
@@ -2221,33 +2437,37 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
      * Use {@code penalizeLong(...)} or {@code rewardLong(...)} instead, unless this constraint can both have positive
      * and negative weights.
      *
-     * @deprecated Prefer {@link #impactLong(Score, ToLongBiFunction)}.
      * @param constraintName never null, shows up in {@link ConstraintMatchTotal} during score justification
      * @param constraintWeight never null
      * @param matchWeigher never null, the result of this function (matchWeight) is multiplied by the constraintWeight
      * @return never null
+     * @deprecated Use {@link #impactWeightedLong(ToLongBiFunction)} instead, and continue fluently from there.
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Deprecated(forRemoval = true)
     default Constraint impactLong(String constraintName, Score<?> constraintWeight,
             ToLongBiFunction<A, B> matchWeigher) {
-        return impactLong((Score) constraintWeight, matchWeigher)
+        return impactWeightedLong(matchWeigher)
+                .usingDefaultConstraintWeight((Score) constraintWeight)
                 .asConstraint(constraintName);
     }
 
     /**
      * As defined by {@link #impactLong(String, Score, ToLongBiFunction)}.
      *
-     * @deprecated Prefer {@link #impactLong(Score, ToLongBiFunction)}.
      * @param constraintPackage never null
      * @param constraintName never null
      * @param constraintWeight never null
      * @param matchWeigher never null
      * @return never null
+     * @deprecated Use {@link #impactWeightedLong(ToLongBiFunction)} instead, and continue fluently from there.
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Deprecated(forRemoval = true)
     default Constraint impactLong(String constraintPackage, String constraintName, Score<?> constraintWeight,
             ToLongBiFunction<A, B> matchWeigher) {
-        return impactLong((Score) constraintWeight, matchWeigher)
+        return impactWeightedLong(matchWeigher)
+                .usingDefaultConstraintWeight((Score) constraintWeight)
                 .asConstraint(constraintPackage, constraintName);
     }
 
@@ -2258,33 +2478,37 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
      * Use {@code penalizeBigDecimal(...)} or {@code rewardBigDecimal(...)} instead, unless this constraint can both
      * have positive and negative weights.
      *
-     * @deprecated Prefer {@link #impactBigDecimal(Score, BiFunction)}.
      * @param constraintName never null, shows up in {@link ConstraintMatchTotal} during score justification
      * @param constraintWeight never null
      * @param matchWeigher never null, the result of this function (matchWeight) is multiplied by the constraintWeight
      * @return never null
+     * @deprecated Use {@link #impactWeightedBigDecimal(BiFunction)} instead, and continue fluently from there.
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Deprecated(forRemoval = true)
     default Constraint impactBigDecimal(String constraintName, Score<?> constraintWeight,
             BiFunction<A, B, BigDecimal> matchWeigher) {
-        return impactBigDecimal((Score) constraintWeight, matchWeigher)
+        return impactWeightedBigDecimal(matchWeigher)
+                .usingDefaultConstraintWeight((Score) constraintWeight)
                 .asConstraint(constraintName);
     }
 
     /**
      * As defined by {@link #impactBigDecimal(String, Score, BiFunction)}.
      *
-     * @deprecated Prefer {@link #impactBigDecimal(Score, BiFunction)}.
      * @param constraintPackage never null
      * @param constraintName never null
      * @param constraintWeight never null
      * @param matchWeigher never null
      * @return never null
+     * @deprecated Use {@link #impactWeightedBigDecimal(BiFunction)} instead, and continue fluently from there.
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Deprecated(forRemoval = true)
     default Constraint impactBigDecimal(String constraintPackage, String constraintName, Score<?> constraintWeight,
             BiFunction<A, B, BigDecimal> matchWeigher) {
-        return impactBigDecimal((Score) constraintWeight, matchWeigher)
+        return impactWeightedBigDecimal(matchWeigher)
+                .usingDefaultConstraintWeight((Score) constraintWeight)
                 .asConstraint(constraintPackage, constraintName);
     }
 
@@ -2304,11 +2528,12 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
      * @param constraintName never null, shows up in {@link ConstraintMatchTotal} during score justification
      * @param matchWeigher never null, the result of this function (matchWeight) is multiplied by the constraintWeight
      * @return never null
-     * @deprecated Prefer {@link #impact(Score, ToIntBiFunction)} and {@link ConstraintWeightOverrides}.
+     * @deprecated Prefer {@link #impact()} and {@link ConstraintWeightOverrides}.
      */
     @Deprecated(forRemoval = true)
     default Constraint impactConfigurable(String constraintName, ToIntBiFunction<A, B> matchWeigher) {
-        return impactConfigurable(matchWeigher)
+        return impactWeighted(matchWeigher)
+                .usingDefaultConstraintWeight(null)
                 .asConstraint(constraintName);
     }
 
@@ -2319,12 +2544,13 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
      * @param constraintName never null
      * @param matchWeigher never null
      * @return never null
-     * @deprecated Prefer {@link #impact(Score, ToIntBiFunction)} and {@link ConstraintWeightOverrides}.
+     * @deprecated Prefer {@link #impactWeighted(ToIntBiFunction)} and {@link ConstraintWeightOverrides}.
      */
     @Deprecated(forRemoval = true)
     default Constraint impactConfigurable(String constraintPackage, String constraintName,
             ToIntBiFunction<A, B> matchWeigher) {
-        return impactConfigurable(matchWeigher)
+        return impactWeighted(matchWeigher)
+                .usingDefaultConstraintWeight(null)
                 .asConstraint(constraintPackage, constraintName);
     }
 
@@ -2344,11 +2570,12 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
      * @param constraintName never null, shows up in {@link ConstraintMatchTotal} during score justification
      * @param matchWeigher never null, the result of this function (matchWeight) is multiplied by the constraintWeight
      * @return never null
-     * @deprecated Prefer {@link #impactLong(Score, ToLongBiFunction)} and {@link ConstraintWeightOverrides}.
+     * @deprecated Prefer {@link #impactWeightedLong(ToLongBiFunction)} and {@link ConstraintWeightOverrides}.
      */
     @Deprecated(forRemoval = true)
     default Constraint impactConfigurableLong(String constraintName, ToLongBiFunction<A, B> matchWeigher) {
-        return impactConfigurableLong(matchWeigher)
+        return impactWeightedLong(matchWeigher)
+                .usingDefaultConstraintWeight(null)
                 .asConstraint(constraintName);
     }
 
@@ -2359,12 +2586,13 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
      * @param constraintName never null
      * @param matchWeigher never null
      * @return never null
-     * @deprecated Prefer {@link #impactLong(Score, ToLongBiFunction)} and {@link ConstraintWeightOverrides}.
+     * @deprecated Prefer {@link #impactWeightedLong(ToLongBiFunction)} and {@link ConstraintWeightOverrides}.
      */
     @Deprecated(forRemoval = true)
     default Constraint impactConfigurableLong(String constraintPackage, String constraintName,
             ToLongBiFunction<A, B> matchWeigher) {
-        return impactConfigurableLong(matchWeigher)
+        return impactWeightedLong(matchWeigher)
+                .usingDefaultConstraintWeight(null)
                 .asConstraint(constraintPackage, constraintName);
     }
 
@@ -2384,12 +2612,13 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
      * @param constraintName never null, shows up in {@link ConstraintMatchTotal} during score justification
      * @param matchWeigher never null, the result of this function (matchWeight) is multiplied by the constraintWeight
      * @return never null
-     * @deprecated Prefer {@link #impactBigDecimal(Score, BiFunction)} and {@link ConstraintWeightOverrides}.
+     * @deprecated Prefer {@link #impactWeightedBigDecimal(BiFunction)} and {@link ConstraintWeightOverrides}.
      */
     @Deprecated(forRemoval = true)
     default Constraint impactConfigurableBigDecimal(String constraintName,
             BiFunction<A, B, BigDecimal> matchWeigher) {
-        return impactConfigurableBigDecimal(matchWeigher)
+        return impactWeightedBigDecimal(matchWeigher)
+                .usingDefaultConstraintWeight(null)
                 .asConstraint(constraintName);
     }
 
@@ -2400,12 +2629,13 @@ public interface BiConstraintStream<A, B> extends ConstraintStream {
      * @param constraintName never null
      * @param matchWeigher never null
      * @return never null
-     * @deprecated Prefer {@link #impactBigDecimal(Score, BiFunction)} and {@link ConstraintWeightOverrides}.
+     * @deprecated Prefer {@link #impactWeightedBigDecimal(BiFunction)} and {@link ConstraintWeightOverrides}.
      */
     @Deprecated(forRemoval = true)
     default Constraint impactConfigurableBigDecimal(String constraintPackage, String constraintName,
             BiFunction<A, B, BigDecimal> matchWeigher) {
-        return impactConfigurableBigDecimal(matchWeigher)
+        return impactWeightedBigDecimal(matchWeigher)
+                .usingDefaultConstraintWeight(null)
                 .asConstraint(constraintPackage, constraintName);
     }
 

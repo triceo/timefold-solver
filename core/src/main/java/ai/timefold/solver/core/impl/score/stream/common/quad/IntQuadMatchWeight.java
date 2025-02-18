@@ -9,7 +9,7 @@ import ai.timefold.solver.core.impl.score.stream.common.inliner.ConstraintMatchS
 import ai.timefold.solver.core.impl.score.stream.common.inliner.UndoScoreImpacter;
 import ai.timefold.solver.core.impl.score.stream.common.inliner.WeightedScoreImpacter;
 
-final class IntQuadMatchWeight<A, B, C, D> extends QuadMatchWeight<A, B, C, D> {
+final class IntQuadMatchWeight<A, B, C, D> extends AbstractQuadMatchWeight<A, B, C, D> {
 
     private final ToIntQuadFunction<A, B, C, D> weigher;
 

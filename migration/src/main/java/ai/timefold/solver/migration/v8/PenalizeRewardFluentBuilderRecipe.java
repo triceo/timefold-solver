@@ -78,24 +78,27 @@ public final class PenalizeRewardFluentBuilderRecipe extends AbstractRecipe {
                     }
                 }
 
-                var sanitizedImpactType = switch (methodName) {
-                    case "penalizeLong", "penalizeBigDecimal" -> "penalize";
-                    case "rewardLong", "rewardBigDecimal" -> "reward";
-                    case "impactLong", "impactBigDecimal" -> "impact";
-                    default -> methodName;
-                };
-                var sanitizedMatchWeight = switch (methodName) {
-                    case "penalize", "reward", "impact" -> "withMatchWeight";
-                    case "penalizeLong", "rewardLong", "impactLong" -> "withLongMatchWeight";
-                    case "penalizeBigDecimal", "rewardBigDecimal", "impactBigDecimal" -> "withBigDecimalMatchWeight";
-                    default -> throw new UnsupportedOperationException();
-                };
                 var templateCode = "#{any(" + selectType + ")}\n";
-                templateCode += "." + sanitizedImpactType + "()\n";
                 if (functionType != null) {
+                    var sanitizedImpactType = switch (methodName) {
+                        case "penalize", "reward", "impact" -> methodName + "Weighted";
+                        case "penalizeLong", "rewardLong", "impactLong" -> methodName.replace("Long", "") + "WeightedLong";
+                        case "penalizeBigDecimal", "rewardBigDecimal", "impactBigDecimal" ->
+                            methodName.replace("BigDecimal", "") + "WeightedBigDecimal";
+                        default -> methodName;
+                    };
                     var secondArgument = methodArguments.get(1);
                     var secondArgumentType = extractFunctionFqn(secondArgument.getType());
-                    templateCode += "." + sanitizedMatchWeight + "(#{any(" + secondArgumentType + ")})\n";
+                    templateCode += "." + sanitizedImpactType + "(#{any(" + secondArgumentType + ")})\n";
+                } else {
+                    var sanitizedImpactType = switch (methodName) {
+                        case "penalize", "penalizeLong", "penalizeBigDecimal" -> "penalize";
+                        case "reward", "rewardLong", "rewardBigDecimal" -> "reward";
+                        case "impact", "impactLong", "impactBigDecimal" -> "impact";
+                        default -> methodName;
+                    };
+                    templateCode += "." + sanitizedImpactType + "()\n";
+
                 }
                 templateCode += ".usingDefaultConstraintWeight(#{any(ai.timefold.solver.core.api.score.Score)})\n";
                 var template = JavaTemplate.builder(templateCode)

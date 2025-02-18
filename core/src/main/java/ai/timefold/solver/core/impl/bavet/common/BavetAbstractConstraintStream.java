@@ -69,7 +69,7 @@ public abstract class BavetAbstractConstraintStream<Solution_> extends AbstractC
         var isConstraintWeightConfigurable = constraintWeight == null;
         var constraintRef = ConstraintRef.of(resolvedConstraintPackage, constraintName);
         var constraint = new BavetConstraint<>(constraintFactory, constraintRef, description, constraintGroup,
-                isConstraintWeightConfigurable ? null : constraintWeight, matchWeight, impactType, resolvedJustificationMapping,
+                isConstraintWeightConfigurable ? null : constraintWeight, impactType, resolvedJustificationMapping,
                 resolvedIndictedObjectsMapping, stream);
         stream.setConstraint(constraint);
         return constraint;

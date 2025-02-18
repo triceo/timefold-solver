@@ -8,12 +8,12 @@ import ai.timefold.solver.core.impl.score.stream.common.MatchWeight;
 import ai.timefold.solver.core.impl.score.stream.common.inliner.UndoScoreImpacter;
 import ai.timefold.solver.core.impl.score.stream.common.inliner.WeightedScoreImpacter;
 
-public sealed abstract class QuadMatchWeight<A, B, C, D>
+public sealed abstract class AbstractQuadMatchWeight<A, B, C, D>
         implements MatchWeight
         permits BigDecimalQuadMatchWeight, IntQuadMatchWeight, LongQuadMatchWeight {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public static <A, B, C, D> QuadMatchWeight<A, B, C, D> of(Object weigher) {
+    public static <A, B, C, D> AbstractQuadMatchWeight<A, B, C, D> of(Object weigher) {
         if (weigher instanceof ToIntQuadFunction intWeigher) {
             return new IntQuadMatchWeight<A, B, C, D>(intWeigher);
         } else if (weigher instanceof ToLongQuadFunction longWeigher) {

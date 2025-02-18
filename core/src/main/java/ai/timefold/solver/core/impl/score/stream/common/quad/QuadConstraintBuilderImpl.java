@@ -21,8 +21,8 @@ public final class QuadConstraintBuilderImpl<A, B, C, D, Score_ extends Score<Sc
     private QuadFunction<A, B, C, D, Collection<Object>> indictedObjectsMapping;
 
     public QuadConstraintBuilderImpl(QuadConstraintConstructor<A, B, C, D, Score_> constraintConstructor,
-            ScoreImpactType impactType, QuadMatchWeight<A, B, C, D> matchWeight, Score_ constraintWeight) {
-        super(constraintConstructor, impactType, matchWeight, constraintWeight);
+            ScoreImpactType impactType, Score_ constraintWeight) {
+        super(constraintConstructor, impactType, constraintWeight);
     }
 
     @Override

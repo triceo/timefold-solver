@@ -45,8 +45,7 @@ class PenalizeRewardFluentBuilderRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .penalize()
-                                        .withMatchWeight(a -> 7)
+                                        .penalizeWeighted(a -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");
                         """)));
@@ -62,8 +61,7 @@ class PenalizeRewardFluentBuilderRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .penalize()
-                                        .withLongMatchWeight(a -> 7L)
+                                        .penalizeWeightedLong(a -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");
                         """)));
@@ -79,8 +77,7 @@ class PenalizeRewardFluentBuilderRecipeTest implements RewriteTest {
                         """),
                 wrap("""
                                 return f.forEach(String.class)
-                                        .penalize()
-                                        .withBigDecimalMatchWeight(a -> BigDecimal.ONE)
+                                        .penalizeWeightedBigDecimal(a -> BigDecimal.ONE)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");
                         """)));
@@ -116,8 +113,7 @@ class PenalizeRewardFluentBuilderRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .penalize()
-                                        .withMatchWeight((a, b) -> 7)
+                                        .penalizeWeighted((a, b) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");
                         """)));
@@ -135,8 +131,7 @@ class PenalizeRewardFluentBuilderRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .penalize()
-                                        .withLongMatchWeight((a, b) -> 7L)
+                                        .penalizeWeightedLong((a, b) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");
                         """)));
@@ -154,8 +149,7 @@ class PenalizeRewardFluentBuilderRecipeTest implements RewriteTest {
                 wrap("""
                                 return f.forEach(String.class)
                                         .join(String.class)
-                                        .penalize()
-                                        .withBigDecimalMatchWeight((a, b) -> BigDecimal.ONE)
+                                        .penalizeWeightedBigDecimal((a, b) -> BigDecimal.ONE)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");
                         """)));
@@ -195,8 +189,7 @@ class PenalizeRewardFluentBuilderRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalize()
-                                        .withMatchWeight((a, b, c) -> 7)
+                                        .penalizeWeighted((a, b, c) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");
                         """)));
@@ -216,8 +209,7 @@ class PenalizeRewardFluentBuilderRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalize()
-                                        .withLongMatchWeight((a, b, c) -> 7L)
+                                        .penalizeWeightedLong((a, b, c) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");
                         """)));
@@ -238,8 +230,7 @@ class PenalizeRewardFluentBuilderRecipeTest implements RewriteTest {
                                 return f.forEach(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalize()
-                                        .withBigDecimalMatchWeight((a, b, c) -> BigDecimal.ONE)
+                                        .penalizeWeightedBigDecimal((a, b, c) -> BigDecimal.ONE)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");
                         """)));
@@ -283,8 +274,7 @@ class PenalizeRewardFluentBuilderRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalize()
-                                        .withMatchWeight((a, b, c, d) -> 7)
+                                        .penalizeWeighted((a, b, c, d) -> 7)
                                         .usingDefaultConstraintWeight(HardSoftScore.ONE_HARD)
                                         .asConstraint("My constraint");
                         """)));
@@ -306,8 +296,7 @@ class PenalizeRewardFluentBuilderRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalize()
-                                        .withLongMatchWeight((a, b, c, d) -> 7L)
+                                        .penalizeWeightedLong((a, b, c, d) -> 7L)
                                         .usingDefaultConstraintWeight(HardSoftLongScore.ONE_HARD)
                                         .asConstraint("My constraint");
                         """)));
@@ -330,8 +319,7 @@ class PenalizeRewardFluentBuilderRecipeTest implements RewriteTest {
                                         .join(String.class)
                                         .join(String.class)
                                         .join(String.class)
-                                        .penalize()
-                                        .withBigDecimalMatchWeight((a, b, c, d) -> BigDecimal.ONE)
+                                        .penalizeWeightedBigDecimal((a, b, c, d) -> BigDecimal.ONE)
                                         .usingDefaultConstraintWeight(HardSoftBigDecimalScore.ONE_HARD)
                                         .asConstraint("My constraint");
                         """)));

@@ -166,24 +166,24 @@ public final class AsConstraintRecipe extends AbstractRecipe {
                             return method;
                         }
 
-                        var sanitizedImpactType = switch (matcherMeta.methodName) {
-                            case "penalizeLong", "penalizeBigDecimal" -> "penalize";
-                            case "rewardLong", "rewardBigDecimal" -> "reward";
-                            case "impactLong", "impactBigDecimal" -> "impact";
-                            default -> matcherMeta.methodName;
-                        };
                         if (!matcherMeta.matchWeigherIncluded) {
-                            templateCode += "." + sanitizedImpactType + "()\n";
-                        } else {
-                            var sanitizedMatchWeight = switch (matcherMeta.methodName) {
-                                case "penalize", "reward", "impact" -> "withMatchWeight";
-                                case "penalizeLong", "rewardLong", "impactLong" -> "withLongMatchWeight";
-                                case "penalizeBigDecimal", "rewardBigDecimal", "impactBigDecimal" ->
-                                    "withBigDecimalMatchWeight";
+                            var sanitizedImpactType = switch (matcherMeta.methodName) {
+                                case "penalize", "penalizeLong", "penalizeBigDecimal" -> "penalize";
+                                case "reward", "rewardLong", "rewardBigDecimal" -> "reward";
+                                case "impact", "impactLong", "impactBigDecimal" -> "impact";
                                 default -> matcherMeta.methodName;
                             };
                             templateCode += "." + sanitizedImpactType + "()\n";
-                            templateCode += "." + sanitizedMatchWeight + "(#{any(" + matcherMeta.functionType + ")})\n";
+                        } else {
+                            var sanitizedImpactType = switch (matcherMeta.methodName) {
+                                case "penalize", "reward", "impact" -> matcherMeta.methodName + "Weighted";
+                                case "penalizeLong", "rewardLong", "impactLong" ->
+                                    matcherMeta.methodName.replace("Long", "") + "WeightedLong";
+                                case "penalizeBigDecimal", "rewardBigDecimal", "impactBigDecimal" ->
+                                    matcherMeta.methodName.replace("BigDecimal", "") + "WeightedBigDecimal";
+                                default -> matcherMeta.methodName;
+                            };
+                            templateCode += "." + sanitizedImpactType + "(#{any(" + matcherMeta.functionType + ")})\n";
                         }
                         templateCode += ".usingDefaultConstraintWeight(#{any(ai.timefold.solver.core.api.score.Score)})\n";
                         if (!matcherMeta.constraintPackageIncluded) {

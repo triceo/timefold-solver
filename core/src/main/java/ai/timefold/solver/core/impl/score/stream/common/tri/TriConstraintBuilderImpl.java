@@ -21,8 +21,8 @@ public final class TriConstraintBuilderImpl<A, B, C, Score_ extends Score<Score_
     private TriFunction<A, B, C, Collection<Object>> indictedObjectsMapping;
 
     public TriConstraintBuilderImpl(TriConstraintConstructor<A, B, C, Score_> constraintConstructor, ScoreImpactType impactType,
-            AbstractTriMatchWeight<A, B, C> matchWeight, Score_ constraintWeight) {
-        super(constraintConstructor, impactType, matchWeight, constraintWeight);
+            Score_ constraintWeight) {
+        super(constraintConstructor, impactType, constraintWeight);
     }
 
     @Override

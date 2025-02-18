@@ -7,7 +7,7 @@ import ai.timefold.solver.core.api.score.stream.Constraint;
 public interface ConstraintConstructor<Score_ extends Score<Score_>, JustificationMapping_, IndictedObjectsMapping_> {
 
     Constraint apply(String constraintPackage, String constraintName, String constraintDescription, String constraintGroup,
-            Score_ constraintWeight, MatchWeight matchWeight, ScoreImpactType impactType,
-            JustificationMapping_ justificationMapping, IndictedObjectsMapping_ indictedObjectsMapping);
+            Score_ constraintWeight, ScoreImpactType impactType, JustificationMapping_ justificationMapping,
+            IndictedObjectsMapping_ indictedObjectsMapping);
 
 }
