@@ -8,6 +8,7 @@ import ai.timefold.solver.core.impl.domain.variable.nextprev.NextElementShadowVa
 import ai.timefold.solver.core.impl.domain.variable.nextprev.PreviousElementShadowVariableDescriptor;
 import ai.timefold.solver.core.impl.score.director.InnerScoreDirector;
 import ai.timefold.solver.core.preview.api.domain.metamodel.ElementLocation;
+import ai.timefold.solver.core.preview.api.domain.metamodel.LocationInList;
 
 import org.jspecify.annotations.NonNull;
 
@@ -19,6 +20,7 @@ final class ExternalizedListVariableStateSupply<Solution_>
 
     private boolean previousExternalized = false;
     private boolean nextExternalized = false;
+    private Solution_ workingSolution;
 
     public ExternalizedListVariableStateSupply(ListVariableDescriptor<Solution_> sourceVariableDescriptor) {
         this.sourceVariableDescriptor = sourceVariableDescriptor;
@@ -49,9 +51,9 @@ final class ExternalizedListVariableStateSupply<Solution_>
 
     @Override
     public void resetWorkingSolution(@NonNull ScoreDirector<Solution_> scoreDirector) {
+        workingSolution = scoreDirector.getWorkingSolution();
         listVariableState.initialize((InnerScoreDirector<Solution_, ?>) scoreDirector,
-                (int) sourceVariableDescriptor.getValueRangeSize(scoreDirector.getWorkingSolution(), null));
-        var workingSolution = scoreDirector.getWorkingSolution();
+                (int) sourceVariableDescriptor.getValueRangeSize(workingSolution, null));
         // Will run over all entities and unmark all present elements as unassigned.
         sourceVariableDescriptor.getEntityDescriptor()
                 .visitAllEntities(workingSolution, this::insert);
@@ -141,6 +143,20 @@ final class ExternalizedListVariableStateSupply<Solution_>
     @Override
     public boolean isAssigned(Object element) {
         return getInverseSingleton(element) != null;
+    }
+
+    @Override
+    public boolean isPinned(Object element) {
+        if (!sourceVariableDescriptor.supportsPinning()) {
+            return false;
+        }
+        var location = getLocationInList(element);
+        if (location instanceof LocationInList assignedElementLocation) {
+            return sourceVariableDescriptor.isElementPinned(workingSolution, assignedElementLocation.entity(),
+                    assignedElementLocation.index());
+        } else {
+            return false;
+        }
     }
 
     @Override

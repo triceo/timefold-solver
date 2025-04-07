@@ -17,7 +17,7 @@ class UniDatasetStreamTest {
     void forEachBasicVariable() {
         var dataStreamFactory = new DataStreamFactory<>(TestdataSolution.buildSolutionDescriptor());
         var uniDataset = ((AbstractUniDataStream<TestdataSolution, TestdataEntity>) dataStreamFactory
-                .forEach(TestdataEntity.class))
+                .forEachIncludingPinned(TestdataEntity.class))
                 .createDataset();
 
         var supplyManager = mock(SupplyManager.class);
@@ -49,7 +49,7 @@ class UniDatasetStreamTest {
     void forEachListVariable() {
         var dataStreamFactory = new DataStreamFactory<>(TestdataListSolution.buildSolutionDescriptor());
         var uniDataset = ((AbstractUniDataStream<TestdataListSolution, TestdataListEntity>) dataStreamFactory
-                .forEach(TestdataListEntity.class))
+                .forEachIncludingPinned(TestdataListEntity.class))
                 .createDataset();
 
         var supplyManager = mock(SupplyManager.class);

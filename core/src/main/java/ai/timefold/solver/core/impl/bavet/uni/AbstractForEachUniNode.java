@@ -24,7 +24,7 @@ import org.jspecify.annotations.NullMarked;
 @NullMarked
 public abstract sealed class AbstractForEachUniNode<A>
         extends AbstractNode
-        permits ForEachExcludingUnassignedUniNode, ForEachIncludingUnassignedUniNode {
+        permits ForEachExcludingUnassignedUniNode, ForEachExcludingPinnedUniNode, ForEachIncludingUnassignedUniNode {
 
     private final Class<A> forEachClass;
     private final int outputStoreSize;

@@ -61,6 +61,13 @@ public interface ListVariableStateSupply<Solution_> extends
 
     /**
      *
+     * @param element never null
+     * @return true if the element is in a pinned part of a list variable of any entity
+     */
+    boolean isPinned(Object element);
+
+    /**
+     *
      * @param value never null
      * @return never null
      */

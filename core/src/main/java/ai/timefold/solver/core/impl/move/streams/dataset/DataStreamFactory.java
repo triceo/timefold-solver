@@ -7,7 +7,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import ai.timefold.solver.core.api.score.stream.Joiners;
 import ai.timefold.solver.core.impl.domain.solution.descriptor.SolutionDescriptor;
 import ai.timefold.solver.core.impl.move.streams.FromSolutionValueCollectingFunction;
 import ai.timefold.solver.core.impl.move.streams.maybeapi.stream.UniDataStream;
@@ -24,44 +23,20 @@ public final class DataStreamFactory<Solution_> {
         this.solutionDescriptor = solutionDescriptor;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public <A> UniDataStream<Solution_, A> forEach(Class<A> sourceClass) {
+    public <A> UniDataStream<Solution_, A> forEachIncludingPinned(Class<A> sourceClass) {
         assertValidForEachType(sourceClass);
-        var entityDescriptor = solutionDescriptor.findEntityDescriptor(sourceClass);
-        if (entityDescriptor == null) {
-            // Not genuine or shadow entity; no need for filtering.
-            return share(new ForEachDataStream<>(this, sourceClass));
-        }
-        var listVariableDescriptor = solutionDescriptor.getListVariableDescriptor();
-        if (listVariableDescriptor == null || !listVariableDescriptor.acceptsValueType(sourceClass)) {
-            // No applicable list variable; don't need to check inverse relationships.
-            return share(new ForEachDataStream<>(this, sourceClass, entityDescriptor.getHasNoNullVariablesPredicateBasicVar()));
-        }
-        var entityClass = listVariableDescriptor.getEntityDescriptor().getEntityClass();
-        if (entityClass == sourceClass) {
-            throw new IllegalStateException("Impossible state: entityClass (%s) and sourceClass (%s) are the same."
-                    .formatted(entityClass.getCanonicalName(), sourceClass.getCanonicalName()));
-        }
-        var shadowDescriptor = listVariableDescriptor.getInverseRelationShadowVariableDescriptor();
-        if (shadowDescriptor == null) {
-            // The list variable element doesn't have the @InverseRelationShadowVariable annotation.
-            // We don't want the users to be forced to implement it in quickstarts,
-            // so we'll do this expensive thing instead.
-            return forEachIncludingUnassigned(sourceClass)
-                    .ifExists((Class) entityClass,
-                            Joiners.filtering(listVariableDescriptor.getInListPredicate()));
-        } else { // We have the inverse relation variable, so we can read its value directly.
-            return share(new ForEachDataStream<>(this, sourceClass, entityDescriptor.getHasNoNullVariablesPredicateListVar()));
-        }
+        return share(new ForEachIncludingPinnedDataStream<>(this, sourceClass));
     }
 
-    public <A> UniDataStream<Solution_, A> forEachIncludingUnassigned(Class<A> sourceClass) {
+    public <A> UniDataStream<Solution_, A> forEachExcludingPinned(Class<A> sourceClass) {
         assertValidForEachType(sourceClass);
-        return share(new ForEachDataStream<>(this, sourceClass));
+        return share(new ForEachExcludingPinnedDataStream<>(this,
+                solutionDescriptor.getMetaModel().entity(sourceClass)));
     }
 
-    public <A> UniDataStream<Solution_, A> forEach(FromSolutionValueCollectingFunction<Solution_, A> valueCollectingFunction) {
-        return share(new ForEachDataStream<>(this, valueCollectingFunction));
+    public <A> UniDataStream<Solution_, A>
+            forEachFromSolution(FromSolutionValueCollectingFunction<Solution_, A> valueCollectingFunction) {
+        return share(new ForEachFromSolutionDataStream<>(this, valueCollectingFunction));
     }
 
     public <A> void assertValidForEachType(Class<A> fromType) {
