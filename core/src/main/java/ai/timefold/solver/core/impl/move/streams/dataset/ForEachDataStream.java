@@ -60,7 +60,7 @@ public final class ForEachDataStream<Solution_, A>
         buildHelper.addNode(node, this, null);
     }
 
-    private AbstractForEachUniNode<Solution_, A> getNode(TupleLifecycle<UniTuple<A>> tupleLifecycle, int outputStoreSize) {
+    private AbstractForEachUniNode<A> getNode(TupleLifecycle<UniTuple<A>> tupleLifecycle, int outputStoreSize) {
         if (valueCollectingFunction != null) {
             return new ForEachFromSolutionUniNode<>(valueCollectingFunction, tupleLifecycle, outputStoreSize);
         } else if (filter == null) {

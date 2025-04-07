@@ -102,6 +102,7 @@ public final class BavetConstraintStreamScoreDirector<Solution_, Score_ extends 
     @Override
     public void close() {
         super.close();
+        session.close();
         session = null;
     }
 

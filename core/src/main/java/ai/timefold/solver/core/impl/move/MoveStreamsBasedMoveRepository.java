@@ -31,11 +31,6 @@ public final class MoveStreamsBasedMoveRepository<Solution_>
     private @Nullable Random workingRandom;
 
     public MoveStreamsBasedMoveRepository(DefaultMoveStreamFactory<Solution_> moveStreamFactory,
-            MoveProducer<Solution_> moveProducer) {
-        this(moveStreamFactory, moveProducer, false);
-    }
-
-    public MoveStreamsBasedMoveRepository(DefaultMoveStreamFactory<Solution_> moveStreamFactory,
             MoveProducer<Solution_> moveProducer, boolean random) {
         this.moveStreamFactory = Objects.requireNonNull(moveStreamFactory);
         this.moveProducer = Objects.requireNonNull(moveProducer);
@@ -93,6 +88,10 @@ public final class MoveStreamsBasedMoveRepository<Solution_>
 
     @Override
     public void phaseEnded(AbstractPhaseScope<Solution_> phaseScope) {
+        if (moveStreamSession != null) {
+            moveStreamSession.close();
+            moveStreamSession = null;
+        }
         phaseScope.getScoreDirector().setMoveRepository(null);
     }
 

@@ -24,7 +24,8 @@ import org.jspecify.annotations.NullMarked;
  */
 @NullMarked
 public final class ForEachFromSolutionUniNode<Solution_, A>
-        extends ForEachIncludingUnassignedUniNode<Solution_, A> {
+        extends ForEachIncludingUnassignedUniNode<A>
+        implements AbstractForEachUniNode.InitializableForEachNode<Solution_> {
 
     private final FromSolutionValueCollectingFunction<Solution_, A> valueCollectingFunction;
 
@@ -66,7 +67,12 @@ public final class ForEachFromSolutionUniNode<Solution_, A>
 
     @Override
     public boolean supports(LifecycleOperation lifecycleOperation) {
-        return lifecycleOperation == LifecycleOperation.INITIALIZE || lifecycleOperation == LifecycleOperation.UPDATE;
+        return lifecycleOperation == LifecycleOperation.UPDATE;
+    }
+
+    @Override
+    public void close() {
+
     }
 
 }
