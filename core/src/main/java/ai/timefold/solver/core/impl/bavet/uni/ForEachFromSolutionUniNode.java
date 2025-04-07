@@ -2,6 +2,7 @@ package ai.timefold.solver.core.impl.bavet.uni;
 
 import ai.timefold.solver.core.impl.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.bavet.common.tuple.UniTuple;
+import ai.timefold.solver.core.impl.domain.variable.supply.SupplyManager;
 import ai.timefold.solver.core.impl.move.streams.FromSolutionValueCollectingFunction;
 
 import org.jspecify.annotations.NullMarked;
@@ -36,7 +37,7 @@ public final class ForEachFromSolutionUniNode<Solution_, A>
     }
 
     @Override
-    public void initialize(Solution_ workingSolution) {
+    public void initialize(Solution_ workingSolution, SupplyManager supplyManager) {
         if (this.isInitialized) { // Failsafe.
             throw new IllegalStateException("Impossible state: initialize() has already been called on %s."
                     .formatted(this));

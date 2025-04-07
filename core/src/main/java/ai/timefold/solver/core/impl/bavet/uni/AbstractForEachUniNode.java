@@ -9,6 +9,7 @@ import ai.timefold.solver.core.impl.bavet.common.StaticPropagationQueue;
 import ai.timefold.solver.core.impl.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.bavet.common.tuple.TupleState;
 import ai.timefold.solver.core.impl.bavet.common.tuple.UniTuple;
+import ai.timefold.solver.core.impl.domain.variable.supply.SupplyManager;
 
 import org.jspecify.annotations.NullMarked;
 
@@ -37,7 +38,7 @@ public abstract sealed class AbstractForEachUniNode<Solution_, A>
         this.propagationQueue = new StaticPropagationQueue<>(nextNodesTupleLifecycle);
     }
 
-    public abstract void initialize(Solution_ workingSolution);
+    public abstract void initialize(Solution_ workingSolution, SupplyManager supplyManager);
 
     public void insert(A a) {
         var tuple = new UniTuple<>(a, outputStoreSize);

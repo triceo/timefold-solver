@@ -5,6 +5,7 @@ import java.util.function.Predicate;
 
 import ai.timefold.solver.core.impl.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.bavet.common.tuple.UniTuple;
+import ai.timefold.solver.core.impl.domain.variable.supply.SupplyManager;
 
 import org.jspecify.annotations.NullMarked;
 
@@ -49,7 +50,7 @@ public final class ForEachExcludingUnassignedUniNode<Solution_, A> extends Abstr
     }
 
     @Override
-    public void initialize(Solution_ workingSolution) {
+    public void initialize(Solution_ workingSolution, SupplyManager supplyManager) {
         throw new UnsupportedOperationException("Impossible state: initialize() is not supported on %s."
                 .formatted(this));
     }

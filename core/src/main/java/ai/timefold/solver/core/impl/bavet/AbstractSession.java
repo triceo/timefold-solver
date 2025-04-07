@@ -6,6 +6,7 @@ import java.util.Map;
 import ai.timefold.solver.core.api.domain.solution.PlanningSolution;
 import ai.timefold.solver.core.impl.bavet.uni.AbstractForEachUniNode;
 import ai.timefold.solver.core.impl.bavet.uni.AbstractForEachUniNode.LifecycleOperation;
+import ai.timefold.solver.core.impl.domain.variable.supply.SupplyManager;
 
 public abstract class AbstractSession {
 
@@ -23,9 +24,9 @@ public abstract class AbstractSession {
         this.retractEffectiveClassToNodeArrayMap = new IdentityHashMap<>(nodeNetwork.forEachNodeCount());
     }
 
-    public final void initialize(Object workingSolution) {
+    public final void initialize(Object workingSolution, SupplyManager supplyManager) {
         for (var node : findNodes(PlanningSolution.class, LifecycleOperation.INITIALIZE)) {
-            node.initialize(workingSolution);
+            node.initialize(workingSolution, supplyManager);
         }
     }
 
