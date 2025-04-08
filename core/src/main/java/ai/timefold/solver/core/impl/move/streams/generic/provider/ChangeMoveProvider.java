@@ -37,7 +37,7 @@ public class ChangeMoveProvider<Solution_, Entity_, Value_>
         var defaultMoveStreamFactory = (DefaultMoveStreamFactory<Solution_>) moveStreamFactory;
         var valueStream = defaultMoveStreamFactory.enumeratePossibleValues(variableMetaModel)
                 .filter(this::acceptValue);
-        var entityStream = defaultMoveStreamFactory.enumerateEntities(variableMetaModel)
+        var entityStream = defaultMoveStreamFactory.enumerate(variableMetaModel.entity().type())
                 .filter(this::acceptEntity);
         return moveStreamFactory.pick(entityStream)
                 .pick(valueStream, this::acceptEntityValuePair)

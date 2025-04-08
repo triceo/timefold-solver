@@ -4,6 +4,7 @@ import ai.timefold.solver.core.impl.domain.solution.descriptor.DefaultPlanningLi
 import ai.timefold.solver.core.impl.domain.solution.descriptor.DefaultPlanningVariableMetaModel;
 import ai.timefold.solver.core.impl.domain.solution.descriptor.SolutionDescriptor;
 import ai.timefold.solver.core.impl.domain.variable.descriptor.GenuineVariableDescriptor;
+import ai.timefold.solver.core.impl.domain.variable.supply.SupplyManager;
 import ai.timefold.solver.core.impl.move.streams.dataset.AbstractUniDataStream;
 import ai.timefold.solver.core.impl.move.streams.dataset.DataStreamFactory;
 import ai.timefold.solver.core.impl.move.streams.dataset.DatasetSessionFactory;
@@ -11,8 +12,6 @@ import ai.timefold.solver.core.impl.move.streams.maybeapi.stream.MoveStreamFacto
 import ai.timefold.solver.core.impl.move.streams.maybeapi.stream.UniDataStream;
 import ai.timefold.solver.core.impl.move.streams.maybeapi.stream.UniMoveStream;
 import ai.timefold.solver.core.preview.api.domain.metamodel.GenuineVariableMetaModel;
-import ai.timefold.solver.core.preview.api.domain.metamodel.PlanningEntityMetaModel;
-import ai.timefold.solver.core.preview.api.domain.metamodel.PlanningVariableMetaModel;
 
 import org.jspecify.annotations.NullMarked;
 
@@ -28,25 +27,43 @@ public final class DefaultMoveStreamFactory<Solution_>
         this.datasetSessionFactory = new DatasetSessionFactory<>(dataStreamFactory);
     }
 
-    public DefaultMoveStreamSession<Solution_> createSession(Solution_ workingSolution) {
+    public DefaultMoveStreamSession<Solution_> createSession(Solution_ workingSolution, SupplyManager supplyManager) {
         var session = datasetSessionFactory.buildSession();
-        session.initialize(workingSolution);
+        session.initialize(workingSolution, supplyManager);
         return new DefaultMoveStreamSession<>(session, workingSolution);
     }
 
     @Override
-    public <A> UniDataStream<Solution_, A> enumerate(Class<A> clz) {
-        return dataStreamFactory.forEachIncludingUnassigned(clz);
+    public <A> UniDataStream<Solution_, A> enumerate(Class<A> sourceClass) {
+        return dataStreamFactory.forEachExcludingPinned(sourceClass);
     }
 
-    public <Entity_> UniDataStream<Solution_, Entity_>
-            enumerateEntities(PlanningEntityMetaModel<Solution_, Entity_> entityMetaModel) {
-        return enumerate(entityMetaModel.type());
-    }
-
-    public <Entity_> UniDataStream<Solution_, Entity_>
-            enumerateEntities(PlanningVariableMetaModel<Solution_, Entity_, ?> variableMetaModel) {
-        return enumerateEntities(variableMetaModel.entity());
+    @Override
+    public <A> UniDataStream<Solution_, A> enumerateIncludingPinned(Class<A> sourceClass) {
+        var entityDescriptor = getSolutionDescriptor().findEntityDescriptor(sourceClass);
+        if (entityDescriptor == null) { // Not an entity, can't be pinned.
+            return dataStreamFactory.forEachIncludingPinned(sourceClass);
+        }
+        if (entityDescriptor.isGenuine()) {
+            if (entityDescriptor.supportsPinning()) {
+                return dataStreamFactory.forEachExcludingPinned(sourceClass);
+            } else {
+                return dataStreamFactory.forEachIncludingPinned(sourceClass);
+            }
+        }
+        // From now on, we are testing a shadow entity.
+        var listVariableDescriptor = getSolutionDescriptor().getListVariableDescriptor();
+        if (listVariableDescriptor == null) { // Can't be pinned when there are only basic variables.
+            return dataStreamFactory.forEachIncludingPinned(sourceClass);
+        }
+        if (!listVariableDescriptor.supportsPinning()) { // The genuine entity does not support pinning.
+            return dataStreamFactory.forEachIncludingPinned(sourceClass);
+        }
+        if (!listVariableDescriptor.acceptsValueType(sourceClass)) { // Can't be used as an element.
+            return dataStreamFactory.forEachIncludingPinned(sourceClass);
+        }
+        // Finally a valid pin-supporting type.
+        return dataStreamFactory.forEachExcludingPinned(sourceClass);
     }
 
     /**
@@ -60,7 +77,7 @@ public final class DefaultMoveStreamFactory<Solution_>
         var variableDescriptor = getVariableDescriptor(variableMetaModel);
         var valueRangeDescriptor = variableDescriptor.getValueRangeDescriptor();
         if (variableDescriptor.isValueRangeEntityIndependent()) {
-            return enumerate(new FromSolutionValueCollectingFunction<>(valueRangeDescriptor));
+            return dataStreamFactory.forEachFromSolution(new FromSolutionValueCollectingFunction<>(valueRangeDescriptor));
         } else {
             throw new UnsupportedOperationException("Value range on entity is not yet supported.");
         }
@@ -77,11 +94,6 @@ public final class DefaultMoveStreamFactory<Solution_>
                     "Impossible state: variable metamodel (%s) represents neither basic not list variable."
                             .formatted(variableMetaModel.getClass().getSimpleName()));
         }
-    }
-
-    private <A> UniDataStream<Solution_, A>
-            enumerate(FromSolutionValueCollectingFunction<Solution_, A> valueCollectingFunction) {
-        return dataStreamFactory.forEach(valueCollectingFunction);
     }
 
     @Override
