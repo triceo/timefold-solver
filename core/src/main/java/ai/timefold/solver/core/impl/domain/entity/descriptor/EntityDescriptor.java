@@ -245,6 +245,10 @@ public class EntityDescriptor<Solution_> {
         processDifficulty(entityAnnotation);
     }
 
+    /**
+     * @deprecated Remove in the next major version of Timefold Solver.
+     */
+    @Deprecated(forRemoval = true, since = "1.22.0")
     private void processMovable(PlanningEntity entityAnnotation) {
         if (entityAnnotation == null) {
             return;

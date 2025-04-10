@@ -35,7 +35,6 @@ public interface MoveStreamFactory<Solution_> {
      * @return A stream containing a tuple for each of the entities as described above.
      * @see PlanningPin An annotation to mark the entire entity as pinned.
      * @see PlanningPinToIndex An annotation to specify only a portion of {@link PlanningListVariable} is pinned.
-     * @see PlanningEntity#pinningFilter() Most flexible mechanism to specify which entities are pinned.
      * @see #enumerateIncludingPinned(Class) Specialized method exists to automatically include pinned entities as well.
      */
     <A> UniDataStream<Solution_, A> enumerate(Class<A> sourceClass);
