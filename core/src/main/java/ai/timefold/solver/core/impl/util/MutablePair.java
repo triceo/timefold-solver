@@ -44,17 +44,14 @@ public final class MutablePair<A, B> {
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof MutablePair<?, ?> other) {
-            return Objects.equals(key, other.key) && Objects.equals(value, other.value);
-        }
-        return false;
+        return o instanceof MutablePair<?, ?> other &&
+                Objects.equals(key, other.key) &&
+                Objects.equals(value, other.value);
     }
 
     @Override
-    public int hashCode() { // Not using Objects.hash(Object...) as that would create an array on the hot path.
-        int result = Objects.hashCode(key);
-        result = 31 * result + Objects.hashCode(value);
-        return result;
+    public int hashCode() {
+        return ObjectUtils.hashCode(key, value);
     }
 
     @Override

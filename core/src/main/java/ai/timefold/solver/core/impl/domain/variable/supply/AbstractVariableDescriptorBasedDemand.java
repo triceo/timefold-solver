@@ -3,6 +3,7 @@ package ai.timefold.solver.core.impl.domain.variable.supply;
 import java.util.Objects;
 
 import ai.timefold.solver.core.impl.domain.variable.descriptor.VariableDescriptor;
+import ai.timefold.solver.core.impl.util.ObjectUtils;
 
 /**
  * Some {@link Demand} implementation classes are defined by their {@link VariableDescriptor} and nothing else.
@@ -33,10 +34,8 @@ public abstract class AbstractVariableDescriptorBasedDemand<Solution_, Supply_ e
     }
 
     @Override
-    public final int hashCode() { // Don't use Objects.hashCode(...) as that would create varargs array on the hot path.
-        int result = this.getClass().getName().hashCode();
-        result = 31 * result + variableDescriptor.hashCode();
-        return result;
+    public final int hashCode() {
+        return ObjectUtils.hashCode(getClass(), variableDescriptor);
     }
 
     @Override

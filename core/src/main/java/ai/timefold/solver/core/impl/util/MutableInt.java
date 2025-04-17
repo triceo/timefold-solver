@@ -66,7 +66,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(value);
+        return Objects.hashCode(value);
     }
 
     @Override

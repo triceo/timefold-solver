@@ -1,5 +1,7 @@
 package ai.timefold.solver.core.impl.util;
 
+import java.util.Objects;
+
 /**
  * An immutable key-value tuple.
  * Two instances {@link Object#equals(Object) are equal} if both values in the first instance
@@ -9,5 +11,17 @@ package ai.timefold.solver.core.impl.util;
  * @param <Value_>
  */
 public record Pair<Key_, Value_>(Key_ key, Value_ value) {
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof Pair<?, ?> other &&
+                Objects.equals(key, other.key) &&
+                Objects.equals(value, other.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return ObjectUtils.hashCode(key, value);
+    }
 
 }
