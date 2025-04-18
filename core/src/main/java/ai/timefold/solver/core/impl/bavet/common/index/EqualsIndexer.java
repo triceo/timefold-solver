@@ -38,13 +38,19 @@ final class EqualsIndexer<T, Key_> implements Indexer<T> {
     @Override
     public ElementAwareListEntry<T> put(Object indexKeys, T tuple) {
         Key_ indexKey = keyRetriever.apply(indexKeys);
-        // Avoids computeIfAbsent in order to not create lambdas on the hot path.
-        Indexer<T> downstreamIndexer = downstreamIndexerMap.get(indexKey);
+        Indexer<T> downstreamIndexer = getDownstreamIndexer(indexKey);
+        return downstreamIndexer.put(indexKeys, tuple);
+    }
+
+    private Indexer<T> getDownstreamIndexer(Key_ indexerKey) {
+        // Does the map retrieval with minimal possible get() calls and no computeIfAbsent() calls.
+        // Micro-optimization for the hot path.
+        var downstreamIndexer = isEmpty() ? null : downstreamIndexerMap.get(indexerKey);
         if (downstreamIndexer == null) {
             downstreamIndexer = downstreamIndexerSupplier.get();
-            downstreamIndexerMap.put(indexKey, downstreamIndexer);
+            downstreamIndexerMap.put(indexerKey, downstreamIndexer);
         }
-        return downstreamIndexer.put(indexKeys, tuple);
+        return downstreamIndexer;
     }
 
     @Override
@@ -69,6 +75,9 @@ final class EqualsIndexer<T, Key_> implements Indexer<T> {
 
     @Override
     public int size(Object indexKeys) {
+        if (isEmpty()) { // Saves a lot of work on the hot path.
+            return 0;
+        }
         Key_ indexKey = keyRetriever.apply(indexKeys);
         Indexer<T> downstreamIndexer = downstreamIndexerMap.get(indexKey);
         if (downstreamIndexer == null) {
@@ -79,6 +88,9 @@ final class EqualsIndexer<T, Key_> implements Indexer<T> {
 
     @Override
     public void forEach(Object indexKeys, Consumer<T> tupleConsumer) {
+        if (isEmpty()) { // Saves a lot of work on the hot path.
+            return;
+        }
         Key_ indexKey = keyRetriever.apply(indexKeys);
         Indexer<T> downstreamIndexer = downstreamIndexerMap.get(indexKey);
         if (downstreamIndexer == null) {
