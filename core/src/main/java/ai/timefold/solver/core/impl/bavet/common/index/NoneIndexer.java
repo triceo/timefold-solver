@@ -5,13 +5,15 @@ import java.util.function.Consumer;
 import ai.timefold.solver.core.impl.util.ElementAwareList;
 import ai.timefold.solver.core.impl.util.ElementAwareListEntry;
 
-public final class NoneIndexer<T> implements Indexer<T> {
-
-    private final ElementAwareList<T> tupleList = new ElementAwareList<>();
+// To avoid needless indirection and save memory, the indexer extends the list instead of wrapping it.
+// Only operate this class through the Indexer interface.
+final class NoneIndexer<T>
+        extends ElementAwareList<T>
+        implements Indexer<T> {
 
     @Override
     public ElementAwareListEntry<T> put(Object indexKeys, T tuple) {
-        return tupleList.add(tuple);
+        return add(tuple);
     }
 
     @Override
@@ -21,22 +23,22 @@ public final class NoneIndexer<T> implements Indexer<T> {
 
     @Override
     public int size(Object indexKeys) {
-        return tupleList.size();
+        return size();
     }
 
     @Override
     public void forEach(Object indexKeys, Consumer<T> tupleConsumer) {
-        tupleList.forEach(tupleConsumer);
+        forEach(tupleConsumer);
     }
 
     @Override
     public boolean isEmpty() {
-        return tupleList.size() == 0;
+        return size() == 0;
     }
 
     @Override
     public String toString() {
-        return "size = " + tupleList.size();
+        return "size = " + size();
     }
 
 }

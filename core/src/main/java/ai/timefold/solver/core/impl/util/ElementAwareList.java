@@ -15,7 +15,7 @@ import java.util.function.Consumer;
  *
  * @param <T> The element type. Often a tuple.
  */
-public final class ElementAwareList<T> implements Iterable<T> {
+public class ElementAwareList<T> implements Iterable<T> {
 
     private int size = 0;
     private ElementAwareListEntry<T> first = null;
