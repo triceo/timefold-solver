@@ -28,6 +28,7 @@ import ai.timefold.solver.core.api.domain.solution.cloner.DeepPlanningClone;
 import ai.timefold.solver.core.api.domain.solution.cloner.SolutionCloner;
 import ai.timefold.solver.core.impl.domain.common.accessor.MemberAccessor;
 import ai.timefold.solver.core.impl.domain.solution.descriptor.SolutionDescriptor;
+import ai.timefold.solver.core.impl.util.CollectionUtils;
 
 import org.jspecify.annotations.NonNull;
 
@@ -35,6 +36,10 @@ import org.jspecify.annotations.NonNull;
  * This class is thread-safe; score directors from the same solution descriptor will share the same instance.
  */
 public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCloner<Solution_> {
+
+    // Too big for small solutions, but helps with cloning large solutions,
+    // where performance is an actual concern.
+    private static final int EXPECTED_OBJECT_COUNT = 10_000;
 
     private final SolutionDescriptor<Solution_> solutionDescriptor;
     private final Map<Class<?>, MethodHandle> constructorMemoization = new IdentityHashMap<>();
@@ -50,8 +55,8 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
 
     @Override
     public @NonNull Solution_ cloneSolution(@NonNull Solution_ originalSolution) {
-        Map<Object, Object> originalToCloneMap = new IdentityHashMap<>();
-        Queue<Unprocessed> unprocessedQueue = new ArrayDeque<>();
+        Map<Object, Object> originalToCloneMap = CollectionUtils.newIdentityHashMap(EXPECTED_OBJECT_COUNT);
+        Queue<Unprocessed> unprocessedQueue = new ArrayDeque<>(EXPECTED_OBJECT_COUNT);
         Solution_ cloneSolution = clone(originalSolution, originalToCloneMap, unprocessedQueue,
                 retrieveClassMetadata(originalSolution.getClass()));
         while (!unprocessedQueue.isEmpty()) {
