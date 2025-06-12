@@ -268,8 +268,8 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
             return (Map<K, V>) planningCloneable.createNewInstance();
         }
         if (originalMap instanceof SortedMap<K, V> map) {
-            var setComparator = map.comparator();
-            return new TreeMap<>(setComparator);
+            var comparator = map.comparator();
+            return new TreeMap<>(comparator);
         }
         var originalMapSize = originalMap.size();
         if (originalMap instanceof LinkedHashMap) { // Default to a LinkedHashMap to respect order.
@@ -283,7 +283,7 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
         synchronized (classMetadataMemoization) {
             var cachedMetadata = classMetadataMemoization.get(declaringClass);
             if (cachedMetadata == null) {
-                cachedMetadata = new ClassMetadata(declaringClass);
+                cachedMetadata = new ClassMetadata(solutionDescriptor, declaringClass);
                 classMetadataMemoization.put(declaringClass, cachedMetadata);
             }
             return cachedMetadata;
@@ -346,8 +346,9 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
         }
     }
 
-    private final class ClassMetadata {
+    private static final class ClassMetadata {
 
+        private final SolutionDescriptor<?> solutionDescriptor;
         private final Class<?> declaringClass;
         private final boolean isDeepCloned;
 
@@ -360,7 +361,8 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
          */
         private DeepCloningFieldCloner[] clonedFieldArray;
 
-        public ClassMetadata(Class<?> declaringClass) {
+        public ClassMetadata(SolutionDescriptor<?> solutionDescriptor, Class<?> declaringClass) {
+            this.solutionDescriptor = solutionDescriptor;
             this.declaringClass = declaringClass;
             this.isDeepCloned = DeepCloningUtils.isClassDeepCloned(solutionDescriptor, declaringClass);
         }
