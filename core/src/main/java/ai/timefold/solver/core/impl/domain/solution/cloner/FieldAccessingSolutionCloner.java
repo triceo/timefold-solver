@@ -1,7 +1,8 @@
 package ai.timefold.solver.core.impl.domain.solution.cloner;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayDeque;
@@ -22,24 +23,22 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.concurrent.ConcurrentMap;
 
 import ai.timefold.solver.core.api.domain.solution.cloner.DeepPlanningClone;
 import ai.timefold.solver.core.api.domain.solution.cloner.SolutionCloner;
 import ai.timefold.solver.core.impl.domain.common.accessor.MemberAccessor;
 import ai.timefold.solver.core.impl.domain.solution.descriptor.SolutionDescriptor;
-import ai.timefold.solver.core.impl.util.ConcurrentMemoization;
 
 import org.jspecify.annotations.NonNull;
 
 /**
- * This class is thread-safe.
+ * This class is thread-safe; score directors from the same solution descriptor will share the same instance.
  */
 public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCloner<Solution_> {
 
     private final SolutionDescriptor<Solution_> solutionDescriptor;
-    private final ConcurrentMap<Class<?>, Constructor<?>> constructorMemoization = new ConcurrentMemoization<>();
-    private final ConcurrentMap<Class<?>, ClassMetadata> classMetadataMemoization = new ConcurrentMemoization<>();
+    private final Map<Class<?>, MethodHandle> constructorMemoization = new IdentityHashMap<>();
+    private final Map<Class<?>, ClassMetadata> classMetadataMemoization = new IdentityHashMap<>();
 
     public FieldAccessingSolutionCloner(SolutionDescriptor<Solution_> solutionDescriptor) {
         this.solutionDescriptor = solutionDescriptor;
@@ -103,6 +102,7 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
         }
     }
 
+    @SuppressWarnings("unchecked")
     private <C> C clone(C original, Map<Object, Object> originalToCloneMap, Queue<Unprocessed> unprocessedQueue,
             ClassMetadata declaringClassMetadata) {
         if (original == null) {
@@ -125,26 +125,36 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
         return clone;
     }
 
+    @SuppressWarnings("unchecked")
     private <C> C constructClone(Class<C> clazz) {
-        var constructor = constructorMemoization.computeIfAbsent(clazz, key -> {
-            try {
-                var ctor = (Constructor<C>) key.getDeclaredConstructor();
-                ctor.setAccessible(true);
-                return ctor;
-            } catch (ReflectiveOperationException e) {
-                throw new IllegalStateException(
-                        "To create a planning clone, the class (%s) must have a no-arg constructor."
-                                .formatted(key.getCanonicalName()),
-                        e);
-            }
-        });
+        var constructor = retrieveConstructor(clazz);
         try {
-            return (C) constructor.newInstance();
-        } catch (Exception e) {
+            return (C) constructor.invoke();
+        } catch (Throwable e) {
             throw new IllegalStateException(
                     "Can not create a new instance of class (%s) for a planning clone, using its no-arg constructor."
                             .formatted(clazz.getCanonicalName()),
                     e);
+        }
+    }
+
+    private MethodHandle retrieveConstructor(Class<?> clazz) {
+        synchronized (constructorMemoization) {
+            var cachedConstructor = constructorMemoization.get(clazz);
+            if (cachedConstructor == null) {
+                try {
+                    var ctor = clazz.getDeclaredConstructor();
+                    ctor.setAccessible(true);
+                    cachedConstructor = MethodHandles.lookup()
+                            .unreflectConstructor(ctor);
+                    constructorMemoization.put(clazz, cachedConstructor);
+                } catch (ReflectiveOperationException e) {
+                    throw new IllegalStateException("To create a planning clone, the class (%s) must have a no-arg constructor."
+                            .formatted(clazz.getCanonicalName()),
+                            e);
+                }
+            }
+            return cachedConstructor;
         }
     }
 
@@ -261,9 +271,17 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
     }
 
     private ClassMetadata retrieveClassMetadata(Class<?> declaringClass) {
-        return classMetadataMemoization.computeIfAbsent(declaringClass, ClassMetadata::new);
+        synchronized (classMetadataMemoization) {
+            var cachedMetadata = classMetadataMemoization.get(declaringClass);
+            if (cachedMetadata == null) {
+                cachedMetadata = new ClassMetadata(declaringClass);
+                classMetadataMemoization.put(declaringClass, cachedMetadata);
+            }
+            return cachedMetadata;
+        }
     }
 
+    @SuppressWarnings("unchecked")
     private <C> C cloneCollectionsElementIfNeeded(C original, Map<Object, Object> originalToCloneMap,
             Queue<Unprocessed> unprocessedQueue) {
         if (original == null) {
