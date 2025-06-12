@@ -37,7 +37,7 @@ import org.jspecify.annotations.NonNull;
  */
 public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCloner<Solution_> {
 
-    // Too big for small solutions, but helps with cloning large solutions,
+    // Too big for small solutions, but helps with cloning larger solutions,
     // where performance is an actual concern.
     private static final int EXPECTED_OBJECT_COUNT = 10_000;
 
@@ -55,13 +55,13 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
 
     @Override
     public @NonNull Solution_ cloneSolution(@NonNull Solution_ originalSolution) {
-        Map<Object, Object> originalToCloneMap = CollectionUtils.newIdentityHashMap(EXPECTED_OBJECT_COUNT);
-        Queue<Unprocessed> unprocessedQueue = new ArrayDeque<>(EXPECTED_OBJECT_COUNT);
-        Solution_ cloneSolution = clone(originalSolution, originalToCloneMap, unprocessedQueue,
+        var originalToCloneMap = CollectionUtils.newIdentityHashMap(EXPECTED_OBJECT_COUNT);
+        var unprocessedQueue = new ArrayDeque<Unprocessed>(EXPECTED_OBJECT_COUNT);
+        var cloneSolution = clone(originalSolution, originalToCloneMap, unprocessedQueue,
                 retrieveClassMetadata(originalSolution.getClass()));
         while (!unprocessedQueue.isEmpty()) {
-            Unprocessed unprocessed = unprocessedQueue.remove();
-            Object cloneValue = process(unprocessed, originalToCloneMap, unprocessedQueue);
+            var unprocessed = unprocessedQueue.remove();
+            var cloneValue = process(unprocessed, originalToCloneMap, unprocessedQueue);
             FieldCloningUtils.setObjectFieldValue(unprocessed.bean, unprocessed.field, cloneValue);
         }
         validateCloneSolution(originalSolution, cloneSolution);
@@ -76,8 +76,8 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
         if (originalValue == null) {
             return null;
         }
-        Queue<Unprocessed> unprocessedQueue = new ArrayDeque<>();
-        Class<?> fieldType = originalValue.getClass();
+        var unprocessedQueue = new ArrayDeque<Unprocessed>();
+        var fieldType = originalValue.getClass();
         return clone(originalValue, originalToCloneMap, unprocessedQueue, fieldType);
     }
 
@@ -97,9 +97,9 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
 
     private Object process(Unprocessed unprocessed, Map<Object, Object> originalToCloneMap,
             Queue<Unprocessed> unprocessedQueue) {
-        Object originalValue = unprocessed.originalValue;
-        Field field = unprocessed.field;
-        Class<?> fieldType = field.getType();
+        var originalValue = unprocessed.originalValue;
+        var field = unprocessed.field;
+        var fieldType = field.getType();
         return clone(originalValue, originalToCloneMap, unprocessedQueue, fieldType);
     }
 
@@ -109,21 +109,25 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
         if (original == null) {
             return null;
         }
-        C existingClone = (C) originalToCloneMap.get(original);
+        var existingClone = (C) originalToCloneMap.get(original);
         if (existingClone != null) {
             return existingClone;
         }
 
-        Class<C> declaringClass = (Class<C>) original.getClass();
-        C clone;
-        if (original instanceof PlanningCloneable<?> planningCloneable) {
-            clone = (C) planningCloneable.createNewInstance();
-        } else {
-            clone = constructClone(declaringClass);
-        }
+        var declaringClass = (Class<C>) original.getClass();
+        var clone = constructClone(original, declaringClass);
         originalToCloneMap.put(original, clone);
         copyFields(declaringClass, original, clone, unprocessedQueue, declaringClassMetadata);
         return clone;
+    }
+
+    @SuppressWarnings("unchecked")
+    private <C> C constructClone(C original, Class<C> declaringClass) {
+        if (original instanceof PlanningCloneable<?> planningCloneable) {
+            return (C) planningCloneable.createNewInstance();
+        } else {
+            return constructClone(declaringClass);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -141,36 +145,36 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
 
     private MethodHandle retrieveConstructor(Class<?> clazz) {
         synchronized (constructorMemoization) {
-            var cachedConstructor = constructorMemoization.get(clazz);
-            if (cachedConstructor == null) {
+            var cachedCtor = constructorMemoization.get(clazz);
+            if (cachedCtor == null) {
                 try {
                     var ctor = clazz.getDeclaredConstructor();
                     ctor.setAccessible(true);
-                    cachedConstructor = MethodHandles.lookup()
+                    cachedCtor = MethodHandles.lookup()
                             .unreflectConstructor(ctor);
-                    constructorMemoization.put(clazz, cachedConstructor);
+                    constructorMemoization.put(clazz, cachedCtor);
                 } catch (ReflectiveOperationException e) {
                     throw new IllegalStateException("To create a planning clone, the class (%s) must have a no-arg constructor."
                             .formatted(clazz.getCanonicalName()),
                             e);
                 }
             }
-            return cachedConstructor;
+            return cachedCtor;
         }
     }
 
     private <C> void copyFields(Class<C> clazz, C original, C clone, Queue<Unprocessed> unprocessedQueue,
             ClassMetadata declaringClassMetadata) {
-        for (ShallowCloningFieldCloner fieldCloner : declaringClassMetadata.getCopiedFieldArray()) {
+        for (var fieldCloner : declaringClassMetadata.getCopiedFieldArray()) {
             fieldCloner.clone(original, clone);
         }
-        for (DeepCloningFieldCloner fieldCloner : declaringClassMetadata.getClonedFieldArray()) {
-            Object unprocessedValue = fieldCloner.clone(solutionDescriptor, original, clone);
+        for (var fieldCloner : declaringClassMetadata.getClonedFieldArray()) {
+            var unprocessedValue = fieldCloner.clone(solutionDescriptor, original, clone);
             if (unprocessedValue != null) {
                 unprocessedQueue.add(new Unprocessed(clone, fieldCloner.getField(), unprocessedValue));
             }
         }
-        Class<? super C> superclass = clazz.getSuperclass();
+        var superclass = clazz.getSuperclass();
         if (superclass != null && superclass != Object.class) {
             copyFields(superclass, original, clone, unprocessedQueue, retrieveClassMetadata(superclass));
         }
@@ -178,8 +182,8 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
 
     private Object cloneArray(Class<?> expectedType, Object originalArray, Map<Object, Object> originalToCloneMap,
             Queue<Unprocessed> unprocessedQueue) {
-        int arrayLength = Array.getLength(originalArray);
-        Object cloneArray = Array.newInstance(originalArray.getClass().getComponentType(), arrayLength);
+        var arrayLength = Array.getLength(originalArray);
+        var cloneArray = Array.newInstance(originalArray.getClass().getComponentType(), arrayLength);
         if (!expectedType.isInstance(cloneArray)) {
             throw new IllegalStateException("""
                     The cloneArrayClass (%s) created for originalArrayClass (%s) is not assignable to the field's type (%s).
@@ -187,8 +191,8 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
                     .formatted(cloneArray.getClass(), originalArray.getClass(), expectedType,
                             SolutionCloner.class.getSimpleName()));
         }
-        for (int i = 0; i < arrayLength; i++) {
-            Object cloneElement =
+        for (var i = 0; i < arrayLength; i++) {
+            var cloneElement =
                     cloneCollectionsElementIfNeeded(Array.get(originalArray, i), originalToCloneMap, unprocessedQueue);
             Array.set(cloneArray, i, cloneElement);
         }
@@ -197,7 +201,7 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
 
     private <E> Collection<E> cloneCollection(Class<?> expectedType, Collection<E> originalCollection,
             Map<Object, Object> originalToCloneMap, Queue<Unprocessed> unprocessedQueue) {
-        Collection<E> cloneCollection = constructCloneCollection(originalCollection);
+        var cloneCollection = constructCloneCollection(originalCollection);
         if (!expectedType.isInstance(cloneCollection)) {
             throw new IllegalStateException(
                     """
@@ -206,8 +210,8 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
                             .formatted(cloneCollection.getClass(), originalCollection.getClass(), expectedType,
                                     SolutionCloner.class.getSimpleName()));
         }
-        for (E originalElement : originalCollection) {
-            E cloneElement = cloneCollectionsElementIfNeeded(originalElement, originalToCloneMap, unprocessedQueue);
+        for (var originalElement : originalCollection) {
+            var cloneElement = cloneCollectionsElementIfNeeded(originalElement, originalToCloneMap, unprocessedQueue);
             cloneCollection.add(cloneElement);
         }
         return cloneCollection;
@@ -241,7 +245,7 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
 
     private <K, V> Map<K, V> cloneMap(Class<?> expectedType, Map<K, V> originalMap, Map<Object, Object> originalToCloneMap,
             Queue<Unprocessed> unprocessedQueue) {
-        Map<K, V> cloneMap = constructCloneMap(originalMap);
+        var cloneMap = constructCloneMap(originalMap);
         if (!expectedType.isInstance(cloneMap)) {
             throw new IllegalStateException("""
                     The cloneMapClass (%s) created for originalMapClass (%s) is not assignable to the field's type (%s).
@@ -249,9 +253,9 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
                     .formatted(cloneMap.getClass(), originalMap.getClass(), expectedType,
                             SolutionCloner.class.getSimpleName()));
         }
-        for (Map.Entry<K, V> originalEntry : originalMap.entrySet()) {
-            K cloneKey = cloneCollectionsElementIfNeeded(originalEntry.getKey(), originalToCloneMap, unprocessedQueue);
-            V cloneValue = cloneCollectionsElementIfNeeded(originalEntry.getValue(), originalToCloneMap, unprocessedQueue);
+        for (var originalEntry : originalMap.entrySet()) {
+            var cloneKey = cloneCollectionsElementIfNeeded(originalEntry.getKey(), originalToCloneMap, unprocessedQueue);
+            var cloneValue = cloneCollectionsElementIfNeeded(originalEntry.getValue(), originalToCloneMap, unprocessedQueue);
             cloneMap.put(cloneKey, cloneValue);
         }
         return cloneMap;
@@ -268,10 +272,10 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
             return new TreeMap<>(setComparator);
         }
         var originalMapSize = originalMap.size();
-        if (!(originalMap instanceof LinkedHashMap)) {
-            return new HashMap<>(originalMapSize);
-        } else { // Default to a LinkedHashMap to respect order.
+        if (originalMap instanceof LinkedHashMap) { // Default to a LinkedHashMap to respect order.
             return new LinkedHashMap<>(originalMapSize);
+        } else {
+            return new HashMap<>(originalMapSize);
         }
     }
 
@@ -305,7 +309,7 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
         } else if (original.getClass().isArray()) {
             return (C) cloneArray(original.getClass(), original, originalToCloneMap, unprocessedQueue);
         }
-        ClassMetadata classMetadata = retrieveClassMetadata(original.getClass());
+        var classMetadata = retrieveClassMetadata(original.getClass());
         if (classMetadata.isDeepCloned) {
             return clone(original, originalToCloneMap, unprocessedQueue, classMetadata);
         } else {
@@ -320,19 +324,19 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
      * @param cloneSolution never null
      */
     private void validateCloneSolution(Solution_ originalSolution, Solution_ cloneSolution) {
-        for (MemberAccessor memberAccessor : solutionDescriptor.getEntityMemberAccessorMap().values()) {
+        for (var memberAccessor : solutionDescriptor.getEntityMemberAccessorMap().values()) {
             validateCloneProperty(originalSolution, cloneSolution, memberAccessor);
         }
-        for (MemberAccessor memberAccessor : solutionDescriptor.getEntityCollectionMemberAccessorMap().values()) {
+        for (var memberAccessor : solutionDescriptor.getEntityCollectionMemberAccessorMap().values()) {
             validateCloneProperty(originalSolution, cloneSolution, memberAccessor);
         }
     }
 
     private static <Solution_> void validateCloneProperty(Solution_ originalSolution, Solution_ cloneSolution,
             MemberAccessor memberAccessor) {
-        Object originalProperty = memberAccessor.executeGetter(originalSolution);
+        var originalProperty = memberAccessor.executeGetter(originalSolution);
         if (originalProperty != null) {
-            Object cloneProperty = memberAccessor.executeGetter(cloneSolution);
+            var cloneProperty = memberAccessor.executeGetter(cloneSolution);
             if (originalProperty == cloneProperty) {
                 throw new IllegalStateException("""
                         The solutionProperty (%s) was not cloned as expected.
@@ -401,4 +405,5 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
 
     private record Unprocessed(Object bean, Field field, Object originalValue) {
     }
+
 }
