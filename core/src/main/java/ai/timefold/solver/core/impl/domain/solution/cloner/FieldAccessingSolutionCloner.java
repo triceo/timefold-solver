@@ -73,6 +73,11 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
         }
         Queue<Unprocessed> unprocessedQueue = new ArrayDeque<>();
         Class<?> fieldType = originalValue.getClass();
+        return clone(originalValue, originalToCloneMap, unprocessedQueue, fieldType);
+    }
+
+    private Object clone(Object originalValue, Map<Object, Object> originalToCloneMap, Queue<Unprocessed> unprocessedQueue,
+            Class<?> fieldType) {
         if (originalValue instanceof Collection<?> collection) {
             return cloneCollection(fieldType, collection, originalToCloneMap, unprocessedQueue);
         } else if (originalValue instanceof Map<?, ?> map) {
@@ -90,16 +95,7 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
         Object originalValue = unprocessed.originalValue;
         Field field = unprocessed.field;
         Class<?> fieldType = field.getType();
-        if (originalValue instanceof Collection<?> collection) {
-            return cloneCollection(fieldType, collection, originalToCloneMap, unprocessedQueue);
-        } else if (originalValue instanceof Map<?, ?> map) {
-            return cloneMap(fieldType, map, originalToCloneMap, unprocessedQueue);
-        } else if (originalValue.getClass().isArray()) {
-            return cloneArray(fieldType, originalValue, originalToCloneMap, unprocessedQueue);
-        } else {
-            return clone(originalValue, originalToCloneMap, unprocessedQueue,
-                    retrieveClassMetadata(originalValue.getClass()));
-        }
+        return clone(originalValue, originalToCloneMap, unprocessedQueue, fieldType);
     }
 
     @SuppressWarnings("unchecked")
