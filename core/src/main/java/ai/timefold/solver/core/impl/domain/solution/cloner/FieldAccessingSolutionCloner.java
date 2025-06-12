@@ -10,11 +10,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.IdentityHashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
@@ -199,8 +197,12 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
         return cloneArray;
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private <E> Collection<E> cloneCollection(Class<?> expectedType, Collection<E> originalCollection,
             Map<Object, Object> originalToCloneMap, Queue<Unprocessed> unprocessedQueue) {
+        if (originalCollection instanceof EnumSet enumSet) {
+            return EnumSet.copyOf(enumSet);
+        }
         var cloneCollection = constructCloneCollection(originalCollection);
         if (!expectedType.isInstance(cloneCollection)) {
             throw new IllegalStateException(
@@ -231,10 +233,8 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
             if (originalCollection instanceof SortedSet<E> set) {
                 var setComparator = set.comparator();
                 return new TreeSet<>(setComparator);
-            } else if (!(originalCollection instanceof LinkedHashSet)) {
-                return new HashSet<>(size);
             } else { // Default to a LinkedHashSet to respect order.
-                return new LinkedHashSet<>(size);
+                return CollectionUtils.newLinkedHashSet(size);
             }
         } else if (originalCollection instanceof Deque) {
             return new ArrayDeque<>(size);
@@ -243,8 +243,20 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
         return new ArrayList<>(size);
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private <K, V> Map<K, V> cloneMap(Class<?> expectedType, Map<K, V> originalMap, Map<Object, Object> originalToCloneMap,
             Queue<Unprocessed> unprocessedQueue) {
+        if (originalMap instanceof EnumMap<?, ?> enumMap) {
+            var cloneMap = new EnumMap(enumMap);
+            for (var originalEntry : enumMap.entrySet()) {
+                var originalValue = originalEntry.getValue();
+                var cloneValue = cloneCollectionsElementIfNeeded(originalValue, originalToCloneMap, unprocessedQueue);
+                if (originalValue != cloneValue) {
+                    cloneMap.put(originalEntry.getKey(), cloneValue);
+                }
+            }
+            return cloneMap;
+        }
         var cloneMap = constructCloneMap(originalMap);
         if (!expectedType.isInstance(cloneMap)) {
             throw new IllegalStateException("""
@@ -271,12 +283,8 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
             var comparator = map.comparator();
             return new TreeMap<>(comparator);
         }
-        var originalMapSize = originalMap.size();
-        if (originalMap instanceof LinkedHashMap) { // Default to a LinkedHashMap to respect order.
-            return new LinkedHashMap<>(originalMapSize);
-        } else {
-            return new HashMap<>(originalMapSize);
-        }
+        // Default to a LinkedHashMap to respect order.
+        return CollectionUtils.newLinkedHashMap(originalMap.size());
     }
 
     private ClassMetadata retrieveClassMetadata(Class<?> declaringClass) {
