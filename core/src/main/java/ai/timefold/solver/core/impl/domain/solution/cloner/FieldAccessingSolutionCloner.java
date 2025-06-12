@@ -3,7 +3,6 @@ package ai.timefold.solver.core.impl.domain.solution.cloner;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Array;
-import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -60,7 +59,7 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
         while (!unprocessedQueue.isEmpty()) {
             var unprocessed = unprocessedQueue.remove();
             var cloneValue = process(unprocessed, originalToCloneMap, unprocessedQueue);
-            FieldCloningUtils.setObjectFieldValue(unprocessed.bean, unprocessed.field, cloneValue);
+            FieldCloningUtils.setObjectFieldValue(unprocessed.bean, unprocessed.cloner.getFieldHandles(), cloneValue);
         }
         validateCloneSolution(originalSolution, cloneSolution);
         return cloneSolution;
@@ -96,7 +95,7 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
     private Object process(Unprocessed unprocessed, Map<Object, Object> originalToCloneMap,
             Queue<Unprocessed> unprocessedQueue) {
         var originalValue = unprocessed.originalValue;
-        var field = unprocessed.field;
+        var field = unprocessed.cloner.getFieldHandles().field();
         var fieldType = field.getType();
         return clone(originalValue, originalToCloneMap, unprocessedQueue, fieldType);
     }
@@ -169,7 +168,7 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
         for (var fieldCloner : declaringClassMetadata.getClonedFieldArray()) {
             var unprocessedValue = fieldCloner.clone(solutionDescriptor, original, clone);
             if (unprocessedValue != null) {
-                unprocessedQueue.add(new Unprocessed(clone, fieldCloner.getField(), unprocessedValue));
+                unprocessedQueue.add(new Unprocessed(clone, fieldCloner, unprocessedValue));
             }
         }
         var superclass = clazz.getSuperclass();
@@ -389,8 +388,6 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
                                         Maybe do not reference planning entities inside Java records?"""
                                         .formatted(f.getName(), declaringClass.getCanonicalName(),
                                                 f.getType().getCanonicalName(), DeepPlanningClone.class.getSimpleName()));
-                            } else {
-                                f.setAccessible(true);
                             }
                         })
                         .map(ShallowCloningFieldCloner::of)
@@ -404,7 +401,6 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
                 clonedFieldArray = Arrays.stream(declaringClass.getDeclaredFields())
                         .filter(f -> !Modifier.isStatic(f.getModifiers()))
                         .filter(field -> !DeepCloningUtils.isImmutable(field.getType()))
-                        .peek(f -> f.setAccessible(true))
                         .map(DeepCloningFieldCloner::new)
                         .toArray(DeepCloningFieldCloner[]::new);
             }
@@ -413,7 +409,7 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
 
     }
 
-    private record Unprocessed(Object bean, Field field, Object originalValue) {
+    private record Unprocessed(Object bean, DeepCloningFieldCloner cloner, Object originalValue) {
     }
 
 }
