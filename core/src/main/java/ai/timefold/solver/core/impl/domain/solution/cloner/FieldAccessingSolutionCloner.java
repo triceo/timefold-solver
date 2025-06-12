@@ -181,10 +181,11 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
         int arrayLength = Array.getLength(originalArray);
         Object cloneArray = Array.newInstance(originalArray.getClass().getComponentType(), arrayLength);
         if (!expectedType.isInstance(cloneArray)) {
-            throw new IllegalStateException("The cloneArrayClass (" + cloneArray.getClass()
-                    + ") created for originalArrayClass (" + originalArray.getClass()
-                    + ") is not assignable to the field's type (" + expectedType + ").\n"
-                    + "Maybe consider replacing the default " + SolutionCloner.class.getSimpleName() + ".");
+            throw new IllegalStateException("""
+                    The cloneArrayClass (%s) created for originalArrayClass (%s) is not assignable to the field's type (%s).
+                    Maybe consider replacing the default %s."""
+                    .formatted(cloneArray.getClass(), originalArray.getClass(), expectedType,
+                            SolutionCloner.class.getSimpleName()));
         }
         for (int i = 0; i < arrayLength; i++) {
             Object cloneElement =
@@ -198,10 +199,12 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
             Map<Object, Object> originalToCloneMap, Queue<Unprocessed> unprocessedQueue) {
         Collection<E> cloneCollection = constructCloneCollection(originalCollection);
         if (!expectedType.isInstance(cloneCollection)) {
-            throw new IllegalStateException("The cloneCollectionClass (" + cloneCollection.getClass()
-                    + ") created for originalCollectionClass (" + originalCollection.getClass()
-                    + ") is not assignable to the field's type (" + expectedType + ").\n"
-                    + "Maybe consider replacing the default " + SolutionCloner.class.getSimpleName() + ".");
+            throw new IllegalStateException(
+                    """
+                            The cloneCollectionClass (%s) created for originalCollectionClass (%s) is not assignable to the field's type (%s).
+                            Maybe consider replacing the default %s."""
+                            .formatted(cloneCollection.getClass(), originalCollection.getClass(), expectedType,
+                                    SolutionCloner.class.getSimpleName()));
         }
         for (E originalElement : originalCollection) {
             E cloneElement = cloneCollectionsElementIfNeeded(originalElement, originalToCloneMap, unprocessedQueue);
@@ -240,10 +243,11 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
             Queue<Unprocessed> unprocessedQueue) {
         Map<K, V> cloneMap = constructCloneMap(originalMap);
         if (!expectedType.isInstance(cloneMap)) {
-            throw new IllegalStateException("The cloneMapClass (" + cloneMap.getClass()
-                    + ") created for originalMapClass (" + originalMap.getClass()
-                    + ") is not assignable to the field's type (" + expectedType + ").\n"
-                    + "Maybe consider replacing the default " + SolutionCloner.class.getSimpleName() + ".");
+            throw new IllegalStateException("""
+                    The cloneMapClass (%s) created for originalMapClass (%s) is not assignable to the field's type (%s).
+                    Maybe consider replacing the default %s."""
+                    .formatted(cloneMap.getClass(), originalMap.getClass(), expectedType,
+                            SolutionCloner.class.getSimpleName()));
         }
         for (Map.Entry<K, V> originalEntry : originalMap.entrySet()) {
             K cloneKey = cloneCollectionsElementIfNeeded(originalEntry.getKey(), originalToCloneMap, unprocessedQueue);
@@ -330,10 +334,10 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
         if (originalProperty != null) {
             Object cloneProperty = memberAccessor.executeGetter(cloneSolution);
             if (originalProperty == cloneProperty) {
-                throw new IllegalStateException(
-                        "The solutionProperty (" + memberAccessor.getName() + ") was not cloned as expected."
-                                + " The " + FieldAccessingSolutionCloner.class.getSimpleName() + " failed to recognize"
-                                + " that property's field, probably because its field name is different.");
+                throw new IllegalStateException("""
+                        The solutionProperty (%s) was not cloned as expected.
+                        The %s failed to recognize that property's field, probably because its field name is different."""
+                        .formatted(memberAccessor.getName(), FieldAccessingSolutionCloner.class.getSimpleName()));
             }
         }
     }
@@ -368,9 +372,7 @@ public final class FieldAccessingSolutionCloner<Solution_> implements SolutionCl
                                         The field (%s) of class (%s) needs to be deep-cloned,
                                         but its type (%s) is immutable and can not be deep-cloned.
                                         Maybe remove the @%s annotation from the field?
-                                        Maybe do not reference planning entities inside Java records?
-                                        """
-                                        .strip()
+                                        Maybe do not reference planning entities inside Java records?"""
                                         .formatted(f.getName(), declaringClass.getCanonicalName(),
                                                 f.getType().getCanonicalName(), DeepPlanningClone.class.getSimpleName()));
                             } else {
