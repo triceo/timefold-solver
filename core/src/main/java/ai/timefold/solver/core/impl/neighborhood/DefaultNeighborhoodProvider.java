@@ -25,16 +25,20 @@ public final class DefaultNeighborhoodProvider<Solution_> implements Neighborhoo
     public Neighborhood defineNeighborhood(NeighborhoodBuilder<Solution_> builder) {
         var solutionMetaModel = builder.getSolutionMetaModel();
         for (var entityMetaModel : solutionMetaModel.genuineEntities()) {
+            var hasBasicVariable = false;
             for (var variableMetaModel : entityMetaModel.genuineVariables()) {
                 if (variableMetaModel instanceof PlanningListVariableMetaModel<Solution_, ?, ?> listVariableMetaModel) {
                     // TODO Implement 2-opt and 3-opt moves for list variables.
                     builder.add(new ListChangeMoveProvider<>(listVariableMetaModel));
                     builder.add(new ListSwapMoveProvider<>(listVariableMetaModel));
                 } else if (variableMetaModel instanceof PlanningVariableMetaModel<Solution_, ?, ?> basicVariableMetaModel) {
+                    hasBasicVariable = true;
                     builder.add(new ChangeMoveProvider<>(basicVariableMetaModel));
                 }
             }
-            builder.add(new SwapMoveProvider<>(entityMetaModel));
+            if (hasBasicVariable) {
+                builder.add(new SwapMoveProvider<>(entityMetaModel));
+            }
         }
         return builder.build();
     }
