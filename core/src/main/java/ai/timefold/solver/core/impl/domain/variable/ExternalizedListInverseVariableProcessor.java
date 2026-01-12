@@ -43,10 +43,6 @@ final class ExternalizedListInverseVariableProcessor<Solution_> {
         scoreDirector.afterVariableChanged(shadowVariableDescriptor, element);
     }
 
-    public void removeElement(InnerScoreDirector<Solution_, ?> scoreDirector, Object entity, Object element) {
-        setInverseAsserted(scoreDirector, element, null, entity);
-    }
-
     public void unassignElement(InnerScoreDirector<Solution_, ?> scoreDirector, Object element) {
         changeElement(scoreDirector, null, element);
     }

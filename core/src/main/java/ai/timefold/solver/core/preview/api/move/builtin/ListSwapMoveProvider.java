@@ -33,9 +33,7 @@ public class ListSwapMoveProvider<Solution_, Entity_, Value_> implements MovePro
                 (BiNeighborhoodsPredicate<Solution_, FullElementPosition<Value_>, FullElementPosition<Value_>>) this::isValidSwap;
         // We do not exclude duplicate swaps (A<>B and B<>A) to keep it simple and fast.
         // Move selectors don't do anything about duplicate moves either.
-        return moveStreamFactory.pick(assignedValueStream)
-                .pick(assignedValueStream,
-                        NeighborhoodsJoiners.filtering(predicate))
+        return moveStreamFactory.pick(assignedValueStream).pick(assignedValueStream, NeighborhoodsJoiners.filtering(predicate))
                 .asMove(this::buildMove);
     }
 

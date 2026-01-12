@@ -136,36 +136,6 @@ final class ListVariableState<Solution_> {
         unassignedCount--;
     }
 
-    public void removeElement(Object entity, Object element, int index) {
-        if (requiresPositionMap) {
-            var oldPosition = elementPositionMap.remove(element);
-            if (oldPosition == null) {
-                throw new IllegalStateException(
-                        "The supply for list variable (%s) is corrupted, because the element (%s) at index (%d) was already unassigned (%s)."
-                                .formatted(sourceVariableDescriptor, element, index, oldPosition));
-            }
-            var oldIndex = oldPosition.getIndex();
-            if (oldIndex != index) {
-                throw new IllegalStateException(
-                        "The supply for list variable (%s) is corrupted, because the element (%s) at index (%d) had an old index (%d) which is not the current index (%d)."
-                                .formatted(sourceVariableDescriptor, element, index, oldIndex, index));
-            }
-        }
-        if (externalizedIndexProcessor != null) {
-            externalizedIndexProcessor.removeElement(scoreDirector, element);
-        }
-        if (externalizedInverseProcessor != null) {
-            externalizedInverseProcessor.removeElement(scoreDirector, entity, element);
-        }
-        if (externalizedPreviousElementProcessor != null) {
-            externalizedPreviousElementProcessor.unsetElement(scoreDirector, element);
-        }
-        if (externalizedNextElementProcessor != null) {
-            externalizedNextElementProcessor.unsetElement(scoreDirector, element);
-        }
-        unassignedCount++;
-    }
-
     public void unassignElement(Object element) {
         if (requiresPositionMap) {
             var oldPosition = elementPositionMap.remove(element);

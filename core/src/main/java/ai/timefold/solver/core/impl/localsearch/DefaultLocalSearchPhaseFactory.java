@@ -37,6 +37,7 @@ import ai.timefold.solver.core.impl.localsearch.decider.acceptor.AcceptorFactory
 import ai.timefold.solver.core.impl.localsearch.decider.forager.LocalSearchForager;
 import ai.timefold.solver.core.impl.localsearch.decider.forager.LocalSearchForagerFactory;
 import ai.timefold.solver.core.impl.neighborhood.DefaultNeighborhoodProvider;
+import ai.timefold.solver.core.impl.neighborhood.DefaultNeighborhoodsBasedMoveRepository;
 import ai.timefold.solver.core.impl.neighborhood.MoveRepository;
 import ai.timefold.solver.core.impl.neighborhood.MoveSelectorBasedMoveRepository;
 import ai.timefold.solver.core.impl.neighborhood.NeighborhoodsBasedMoveRepository;
@@ -144,7 +145,7 @@ public class DefaultLocalSearchPhaseFactory<Solution_> extends AbstractPhaseFact
                 "neighborhoodProviderClass", neighborhoodProviderClass);
         var neighborhoodBuilder = new DefaultNeighborhoodBuilder<>(solutionMetaModel);
         var moveStreamFactory = new DefaultMoveStreamFactory<>(solutionDescriptor, configPolicy.getEnvironmentMode());
-        return new NeighborhoodsBasedMoveRepository<>(moveStreamFactory,
+        return new DefaultNeighborhoodsBasedMoveRepository<>(moveStreamFactory,
                 ((DefaultNeighborhood<Solution_>) neighborhoodProvider.defineNeighborhood(neighborhoodBuilder))
                         .getMoveProviderList(),
                 pickSelectionOrder() == SelectionOrder.RANDOM);

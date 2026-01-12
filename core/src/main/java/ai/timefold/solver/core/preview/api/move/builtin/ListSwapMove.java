@@ -171,9 +171,9 @@ public class ListSwapMove<Solution_, Entity_, Value_> extends AbstractMove<Solut
 
     @Override
     public String toString() {
-        return String.format("%s {%s[%d]} <-> %s {%s[%d]}",
-                getLeftValueCache(), leftEntity, leftIndex,
-                getRightValueCache(), rightEntity, rightIndex);
+        return String.format("%s[%d] <-> %s[%d]",
+                leftEntity, leftIndex,
+                rightEntity, rightIndex);
     }
 
 }
