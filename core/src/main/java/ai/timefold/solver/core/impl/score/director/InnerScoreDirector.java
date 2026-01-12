@@ -32,6 +32,7 @@ import ai.timefold.solver.core.impl.domain.variable.descriptor.ListVariableDescr
 import ai.timefold.solver.core.impl.domain.variable.supply.SupplyManager;
 import ai.timefold.solver.core.impl.move.MoveDirector;
 import ai.timefold.solver.core.impl.neighborhood.MoveRepository;
+import ai.timefold.solver.core.impl.neighborhood.NeighborhoodsBasedMoveRepository;
 import ai.timefold.solver.core.impl.phase.scope.SolverLifecyclePoint;
 import ai.timefold.solver.core.impl.score.constraint.ConstraintMatchPolicy;
 import ai.timefold.solver.core.impl.score.definition.ScoreDefinition;
@@ -111,6 +112,14 @@ public interface InnerScoreDirector<Solution_, Score_ extends Score<Score_>>
      * and also calling it again at the end to null it out.
      */
     void setMoveRepository(@Nullable MoveRepository<Solution_> moveRepository);
+
+    /**
+     * A notifier that can be used to notify a {@link NeighborhoodsBasedMoveRepository} of changes
+     * to the internal state that do not affect any variables (genuine or shadow).
+     * 
+     * @return never null
+     */
+    NeighborhoodNotifier<Solution_> getNeighborhoodNotifier();
 
     /**
      * Calculates the {@link Score} and updates the {@link PlanningSolution working solution} accordingly.

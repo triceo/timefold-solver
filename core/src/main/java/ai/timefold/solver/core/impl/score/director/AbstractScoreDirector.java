@@ -73,7 +73,7 @@ public abstract class AbstractScoreDirector<Solution_, Score_ extends Score<Scor
     protected final Factory_ scoreDirectorFactory;
     private final VariableDescriptorCache<Solution_> variableDescriptorCache;
     protected final VariableListenerSupport<Solution_> variableListenerSupport;
-
+    protected final NeighborhoodNotifier neighborhoodNotifier;
     private boolean expectShadowVariablesInCorrectState;
 
     private long workingEntityListRevision = 0L;
@@ -104,6 +104,7 @@ public abstract class AbstractScoreDirector<Solution_, Score_ extends Score<Scor
         this.lookUpManager = lookUpEnabled ? new LookUpManager(solutionDescriptor.getLookUpStrategyResolver()) : null;
         this.constraintMatchPolicy = builder.constraintMatchPolicy;
         this.expectShadowVariablesInCorrectState = builder.expectShadowVariablesInCorrectState;
+        this.neighborhoodNotifier = new NeighborhoodNotifier<>();
         this.variableDescriptorCache = new VariableDescriptorCache<>(solutionDescriptor);
         this.variableListenerSupport = VariableListenerSupport.create(this);
         this.variableListenerSupport.linkVariableListeners();
@@ -217,6 +218,10 @@ public abstract class AbstractScoreDirector<Solution_, Score_ extends Score<Scor
         return moveDirector;
     }
 
+    public NeighborhoodNotifier<Solution_> getNeighborhoodNotifier() {
+        return neighborhoodNotifier;
+    }
+
     // ************************************************************************
     // Complex methods
     // ************************************************************************
@@ -301,6 +306,11 @@ public abstract class AbstractScoreDirector<Solution_, Score_ extends Score<Scor
         if (moveRepository != null) {
             moveRepository.initialize(new SessionContext<>(this));
         }
+        if (moveRepository instanceof NeighborhoodsBasedMoveRepository<Solution_> neighborhoodsBasedMoveRepository) {
+            neighborhoodNotifier.setMoveRepository(neighborhoodsBasedMoveRepository);
+        } else {
+            neighborhoodNotifier.setMoveRepository(null);
+        }
     }
 
     private void assertInitScoreZeroOrLess() {
@@ -314,7 +324,9 @@ public abstract class AbstractScoreDirector<Solution_, Score_ extends Score<Scor
 
     @Override
     public void executeMove(Move<Solution_> move) {
+        neighborhoodNotifier.setTracking(true);
         moveDirector.execute(move);
+        neighborhoodNotifier.setTracking(false);
     }
 
     @Override
@@ -486,7 +498,8 @@ public abstract class AbstractScoreDirector<Solution_, Score_ extends Score<Scor
         if (variableDescriptor.isGenuineAndUninitialized(entity)) {
             workingInitScore--;
         }
-        if (moveRepository instanceof NeighborhoodsBasedMoveRepository<Solution_> neighborhoodsBasedMoveRepository) {
+        if (moveRepository instanceof NeighborhoodsBasedMoveRepository<Solution_> neighborhoodsBasedMoveRepository
+                && !allChangesWillBeUndoneBeforeStepEnds) {
             neighborhoodsBasedMoveRepository.update(entity);
         }
         variableListenerSupport.afterVariableChanged(variableDescriptor, entity);
@@ -502,7 +515,8 @@ public abstract class AbstractScoreDirector<Solution_, Score_ extends Score<Scor
             workingInitScore++;
             assertInitScoreZeroOrLess();
         }
-        if (moveRepository instanceof NeighborhoodsBasedMoveRepository<Solution_> neighborhoodsBasedMoveRepository) {
+        if (moveRepository instanceof NeighborhoodsBasedMoveRepository<Solution_> neighborhoodsBasedMoveRepository
+                && !allChangesWillBeUndoneBeforeStepEnds) {
             neighborhoodsBasedMoveRepository.update(element);
         }
     }
@@ -518,7 +532,8 @@ public abstract class AbstractScoreDirector<Solution_, Score_ extends Score<Scor
             workingInitScore--;
         }
         variableListenerSupport.afterElementUnassigned(variableDescriptor, element);
-        if (moveRepository instanceof NeighborhoodsBasedMoveRepository<Solution_> neighborhoodsBasedMoveRepository) {
+        if (moveRepository instanceof NeighborhoodsBasedMoveRepository<Solution_> neighborhoodsBasedMoveRepository
+                && !allChangesWillBeUndoneBeforeStepEnds) {
             neighborhoodsBasedMoveRepository.update(element);
         }
     }
@@ -537,47 +552,15 @@ public abstract class AbstractScoreDirector<Solution_, Score_ extends Score<Scor
                             .formatted(variableDescriptor, entity, fromIndex, toIndex));
         }
         variableListenerSupport.beforeListVariableChanged(variableDescriptor, entity, fromIndex, toIndex);
-        if (moveRepository instanceof NeighborhoodsBasedMoveRepository<Solution_> neighborhoodsBasedMoveRepository) {
-            ensureBoundaryUpdates(neighborhoodsBasedMoveRepository, variableDescriptor, entity, fromIndex, toIndex);
-        }
-    }
-
-    private static <Solution_> void ensureBoundaryUpdates(
-            NeighborhoodsBasedMoveRepository<Solution_> neighborhoodsBasedMoveRepository,
-            ListVariableDescriptor<Solution_> variableDescriptor, Object entity, int fromIndex, int toIndex) {
-        // In cases where fromIndex and toIndex on list var update is the same (= empty list)
-        // it means that an element is either getting added or removed.
-        // These changes are typically reflected by the variable listener machinery,
-        // but in this case we need to manually ensure the neighbors are updated.
-        // This is because the empty list would only come in the before method,
-        // but all processing happens in the after method.
-        // Between the before- and after- methods, the list would have been updated already,
-        // and therefore the information about the original boundary element is lost.
-        if (fromIndex != toIndex) {
-            return;
-        }
-        var list = variableDescriptor.getValue(entity);
-        if (list.isEmpty()) {
-            return;
-        }
-        var bound = list.size() - 1;
-        if (fromIndex >= 0 && fromIndex <= bound) {
-            if (fromIndex > 0) {
-                neighborhoodsBasedMoveRepository.update(list.get(fromIndex - 1));
-            }
-            if (fromIndex < bound) {
-                neighborhoodsBasedMoveRepository.update(list.get(fromIndex + 1));
-            }
-        }
     }
 
     @Override
     public void afterListVariableChanged(ListVariableDescriptor<Solution_> variableDescriptor, Object entity, int fromIndex,
             int toIndex) {
         variableListenerSupport.afterListVariableChanged(variableDescriptor, entity, fromIndex, toIndex);
-        if (moveRepository instanceof NeighborhoodsBasedMoveRepository<Solution_> neighborhoodsBasedMoveRepository) {
+        if (moveRepository instanceof NeighborhoodsBasedMoveRepository<Solution_> neighborhoodsBasedMoveRepository
+                && !allChangesWillBeUndoneBeforeStepEnds) {
             neighborhoodsBasedMoveRepository.update(entity);
-            ensureBoundaryUpdates(neighborhoodsBasedMoveRepository, variableDescriptor, entity, fromIndex, toIndex);
         }
     }
 

@@ -2,6 +2,7 @@ package ai.timefold.solver.core.impl.domain.variable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import ai.timefold.solver.core.impl.domain.variable.descriptor.ListVariableDescriptor;
 import ai.timefold.solver.core.impl.domain.variable.index.IndexShadowVariableDescriptor;
@@ -16,6 +17,7 @@ import ai.timefold.solver.core.preview.api.domain.metamodel.PositionInList;
 final class ListVariableState<Solution_> {
 
     private final ListVariableDescriptor<Solution_> sourceVariableDescriptor;
+    private final Consumer<Object> notifier;
 
     private ExternalizedIndexVariableProcessor<Solution_> externalizedIndexProcessor = null;
     private ExternalizedListInverseVariableProcessor<Solution_> externalizedInverseProcessor = null;
@@ -27,8 +29,10 @@ final class ListVariableState<Solution_> {
     private int unassignedCount = 0;
     private Map<Object, MutablePosition> elementPositionMap;
 
-    public ListVariableState(ListVariableDescriptor<Solution_> sourceVariableDescriptor) {
+    public ListVariableState(ListVariableDescriptor<Solution_> sourceVariableDescriptor,
+            Consumer<Object> notifier) {
         this.sourceVariableDescriptor = sourceVariableDescriptor;
+        this.notifier = notifier;
     }
 
     public void linkShadowVariable(IndexShadowVariableDescriptor<Solution_> shadowVariableDescriptor) {
@@ -133,6 +137,7 @@ final class ListVariableState<Solution_> {
         if (externalizedNextElementProcessor != null) {
             externalizedNextElementProcessor.setElement(scoreDirector, elements, element, index);
         }
+        notifier.accept(element);
         unassignedCount--;
     }
 
@@ -157,6 +162,7 @@ final class ListVariableState<Solution_> {
         if (externalizedNextElementProcessor != null) {
             externalizedNextElementProcessor.unsetElement(scoreDirector, element);
         }
+        notifier.accept(element);
         unassignedCount++;
     }
 
@@ -177,6 +183,7 @@ final class ListVariableState<Solution_> {
         if (externalizedNextElementProcessor != null) {
             externalizedNextElementProcessor.setElement(scoreDirector, elements, element, index);
         }
+        notifier.accept(element);
         return difference.anythingChanged;
     }
 
