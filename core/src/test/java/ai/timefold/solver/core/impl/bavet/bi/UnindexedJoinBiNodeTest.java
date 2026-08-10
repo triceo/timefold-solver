@@ -58,7 +58,7 @@ class UnindexedJoinBiNodeTest {
 
     @Test
     void updateLeft_refreshesLeftFact() {
-        var node = new UnindexedJoinBiNode<String, String>(downstream, (a, b) -> true, new TestTracker());
+        var node = new UnindexedJoinBiNode<String, String>(downstream, new TestTracker());
         var left = createInputTuple("L1");
         var right = createInputTuple("R1");
         node.insertLeft(left);
@@ -66,20 +66,18 @@ class UnindexedJoinBiNodeTest {
         // Filtering joins defer their cross-match to prepareForSettle(); the network calls this before
         // every layer's propagate phase (see AbstractBavetNodeNetwork#settleLayer), so a direct node test
         // must too.
-        node.prepareForSettle();
         node.getPropagator().propagateEverything();
         verify(downstream).insert(argThat(t -> t.getA().equals("L1") && t.getB().equals("R1")));
 
         left.setA("L2");
         node.updateLeft(left);
-        node.prepareForSettle();
         node.getPropagator().propagateEverything();
         verify(downstream).update(argThat(t -> t.getA().equals("L2") && t.getB().equals("R1")));
     }
 
     @Test
     void updateRight_refreshesRightFact() {
-        var node = new UnindexedJoinBiNode<String, String>(downstream, (a, b) -> true, new TestTracker());
+        var node = new UnindexedJoinBiNode<String, String>(downstream, new TestTracker());
         var left = createInputTuple("L1");
         var right = createInputTuple("R1");
         node.insertLeft(left);
@@ -87,13 +85,11 @@ class UnindexedJoinBiNodeTest {
         // Filtering joins defer their cross-match to prepareForSettle(); the network calls this before
         // every layer's propagate phase (see AbstractBavetNodeNetwork#settleLayer), so a direct node test
         // must too.
-        node.prepareForSettle();
         node.getPropagator().propagateEverything();
         verify(downstream).insert(argThat(t -> t.getA().equals("L1") && t.getB().equals("R1")));
 
         right.setA("R2");
         node.updateRight(right);
-        node.prepareForSettle();
         node.getPropagator().propagateEverything();
         verify(downstream).update(argThat(t -> t.getA().equals("L1") && t.getB().equals("R2")));
     }

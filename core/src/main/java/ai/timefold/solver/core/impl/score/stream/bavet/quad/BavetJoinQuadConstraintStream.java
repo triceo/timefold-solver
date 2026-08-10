@@ -61,9 +61,10 @@ public final class BavetJoinQuadConstraintStream<Solution_, A, B, C, D>
         IndexerFactory<D> indexerFactory = new IndexerFactory<>(joiner);
         var positionTracker =
                 buildHelper.getTupleStorePositionTracker(this, leftParent.getTupleSource(), rightParent.getTupleSource());
+        var newDownstream = (filtering != null) ? TupleLifecycle.conditionally(downstream, filtering) : downstream;
         var node = indexerFactory.hasJoiners()
-                ? new IndexedJoinQuadNode<>(indexerFactory, downstream, filtering, positionTracker)
-                : new UnindexedJoinQuadNode<>(downstream, filtering, positionTracker);
+                ? new IndexedJoinQuadNode<>(indexerFactory, newDownstream, positionTracker)
+                : new UnindexedJoinQuadNode<>(newDownstream, positionTracker);
         buildHelper.addNode(node, this, leftParent, rightParent);
     }
 

@@ -61,9 +61,10 @@ public final class BavetJoinTriConstraintStream<Solution_, A, B, C>
         IndexerFactory<C> indexerFactory = new IndexerFactory<>(joiner);
         var positionTracker =
                 buildHelper.getTupleStorePositionTracker(this, leftParent.getTupleSource(), rightParent.getTupleSource());
+        var newDownstream = (filtering != null) ? TupleLifecycle.conditionally(downstream, filtering) : downstream;
         var node = indexerFactory.hasJoiners()
-                ? new IndexedJoinTriNode<>(indexerFactory, downstream, filtering, positionTracker)
-                : new UnindexedJoinTriNode<>(downstream, filtering, positionTracker);
+                ? new IndexedJoinTriNode<>(indexerFactory, newDownstream, positionTracker)
+                : new UnindexedJoinTriNode<>(newDownstream, positionTracker);
         buildHelper.addNode(node, this, leftParent, rightParent);
     }
 

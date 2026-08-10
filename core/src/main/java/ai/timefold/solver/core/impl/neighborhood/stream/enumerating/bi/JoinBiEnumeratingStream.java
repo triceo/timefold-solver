@@ -54,8 +54,8 @@ public final class JoinBiEnumeratingStream<Solution_, A, B> extends AbstractBiEn
         var positionTracker =
                 buildHelper.getTupleStorePositionTracker(this, leftParent.getTupleSource(), rightParent.getTupleSource());
         var node = indexerFactory.hasJoiners()
-                ? new IndexedJoinBiNode<>(indexerFactory, downstream, filteringDataJoiner, positionTracker)
-                : new UnindexedJoinBiNode<>(downstream, filteringDataJoiner, positionTracker);
+                ? new IndexedJoinBiNode<>(indexerFactory, downstream, positionTracker)
+                : new UnindexedJoinBiNode<>(downstream, positionTracker);
         buildHelper.addNode(node, this, leftParent, rightParent);
     }
 

@@ -27,7 +27,7 @@ class JoinBiNodeActivityTest {
 
     private static UnindexedJoinBiNode<String, String> node(TupleLifecycle<BiTuple<String, String>> downstream) {
         var tracker = mock(InOutTupleStorePositionTracker.class);
-        return new UnindexedJoinBiNode<>(downstream, null, tracker);
+        return new UnindexedJoinBiNode<>(downstream, tracker);
     }
 
     @Test

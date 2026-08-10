@@ -58,9 +58,11 @@ public final class BavetJoinBiConstraintStream<Solution_, A, B> extends BavetAbs
         IndexerFactory<B> indexerFactory = new IndexerFactory<>(joiner);
         var positionTracker =
                 buildHelper.getTupleStorePositionTracker(this, leftParent.getTupleSource(), rightParent.getTupleSource());
+
+        var newDownstream = (filtering != null) ? TupleLifecycle.conditionally(downstream, filtering) : downstream;
         var node = indexerFactory.hasJoiners()
-                ? new IndexedJoinBiNode<>(indexerFactory, downstream, filtering, positionTracker)
-                : new UnindexedJoinBiNode<>(downstream, filtering, positionTracker);
+                ? new IndexedJoinBiNode<>(indexerFactory, newDownstream, positionTracker)
+                : new UnindexedJoinBiNode<>(newDownstream, positionTracker);
         buildHelper.addNode(node, this, leftParent, rightParent);
     }
 

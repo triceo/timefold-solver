@@ -1,6 +1,5 @@
 package ai.timefold.solver.core.impl.bavet.tri;
 
-import ai.timefold.solver.core.api.function.TriPredicate;
 import ai.timefold.solver.core.impl.bavet.common.AbstractIndexedJoinNode;
 import ai.timefold.solver.core.impl.bavet.common.index.IndexerFactory;
 import ai.timefold.solver.core.impl.bavet.common.tuple.BiTuple;
@@ -12,13 +11,10 @@ import ai.timefold.solver.core.impl.bavet.common.tuple.UniTuple;
 public final class IndexedJoinTriNode<A, B, C>
         extends AbstractIndexedJoinNode<BiTuple<A, B>, C, TriTuple<A, B, C>> {
 
-    private final TriPredicate<A, B, C> filtering;
-
     public IndexedJoinTriNode(IndexerFactory<C> indexerFactory, TupleLifecycle<TriTuple<A, B, C>> nextNodesTupleLifecycle,
-            TriPredicate<A, B, C> filtering, InOutTupleStorePositionTracker tupleStorePositionTracker) {
-        super(indexerFactory.buildBiLeftKeysExtractor(), indexerFactory, nextNodesTupleLifecycle, filtering != null,
+            InOutTupleStorePositionTracker tupleStorePositionTracker) {
+        super(indexerFactory.buildBiLeftKeysExtractor(), indexerFactory, nextNodesTupleLifecycle,
                 tupleStorePositionTracker);
-        this.filtering = filtering;
     }
 
     @Override
@@ -35,11 +31,6 @@ public final class IndexedJoinTriNode<A, B, C>
     @Override
     protected void setOutTupleRightFact(TriTuple<A, B, C> outTuple, UniTuple<C> rightTuple) {
         outTuple.setC(rightTuple.getA());
-    }
-
-    @Override
-    protected boolean testFiltering(BiTuple<A, B> leftTuple, UniTuple<C> rightTuple) {
-        return filtering.test(leftTuple.getA(), leftTuple.getB(), rightTuple.getA());
     }
 
 }
