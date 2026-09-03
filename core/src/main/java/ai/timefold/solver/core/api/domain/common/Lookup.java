@@ -1,11 +1,10 @@
 package ai.timefold.solver.core.api.domain.common;
 
-import java.util.Objects;
-
 import ai.timefold.solver.core.api.solver.change.ProblemChange;
 import ai.timefold.solver.core.preview.api.move.Move;
-
 import org.jspecify.annotations.Nullable;
+
+import java.util.Objects;
 
 /**
  * Allows to transfer an entity or fact instance (often from another {@link Thread})
@@ -36,7 +35,7 @@ public interface Lookup {
      * but does not accept null arguments and cannot return null.
      */
     default <T> T lookUpNonNullWorkingObject(T problemFactOrPlanningEntity) {
-        return lookUpWorkingObject(Objects.requireNonNull(problemFactOrPlanningEntity));
+        return Objects.requireNonNull(lookUpWorkingObject(Objects.requireNonNull(problemFactOrPlanningEntity)));
     }
 
 }
