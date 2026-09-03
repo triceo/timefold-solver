@@ -1,10 +1,11 @@
 package ai.timefold.solver.core.api.domain.common;
 
+import java.util.Objects;
+
 import ai.timefold.solver.core.api.solver.change.ProblemChange;
 import ai.timefold.solver.core.preview.api.move.Move;
-import org.jspecify.annotations.Nullable;
 
-import java.util.Objects;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Allows to transfer an entity or fact instance (often from another {@link Thread})

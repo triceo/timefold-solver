@@ -1,5 +1,7 @@
 package ai.timefold.solver.core.preview.api.neighborhood.stream.enumerating;
 
+import java.util.function.Function;
+
 import ai.timefold.solver.core.preview.api.move.SolutionView;
 import ai.timefold.solver.core.preview.api.neighborhood.MoveIteratorProvider;
 import ai.timefold.solver.core.preview.api.neighborhood.MoveIteratorSession;
@@ -11,9 +13,8 @@ import ai.timefold.solver.core.preview.api.neighborhood.stream.function.UniNeigh
 import ai.timefold.solver.core.preview.api.neighborhood.stream.function.UniNeighborhoodsPredicate;
 import ai.timefold.solver.core.preview.api.neighborhood.stream.joiner.BiNeighborhoodsJoiner;
 import ai.timefold.solver.core.preview.api.neighborhood.stream.picking.UniPickingStream;
-import org.jspecify.annotations.NullMarked;
 
-import java.util.function.Function;
+import org.jspecify.annotations.NullMarked;
 
 @NullMarked
 public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
@@ -48,7 +49,7 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      * @return a stream containing every tuple of both streams
      */
     <B> BiEnumeratingStream<Solution_, A, B> concat(BiEnumeratingStream<Solution_, A, B> otherStream,
-                                                    Function<A, B> paddingFunction);
+            Function<A, B> paddingFunction);
 
     /**
      * As defined by {@link #join(UniEnumeratingStream, BiNeighborhoodsJoiner[])}, with the array being empty.
@@ -63,8 +64,8 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      */
     @SuppressWarnings("unchecked")
     default <B> BiEnumeratingStream<Solution_, A, B> join(UniEnumeratingStream<Solution_, B> otherStream,
-                                                          BiNeighborhoodsJoiner<A, B> joiner) {
-        return join(otherStream, new BiNeighborhoodsJoiner[]{joiner});
+            BiNeighborhoodsJoiner<A, B> joiner) {
+        return join(otherStream, new BiNeighborhoodsJoiner[] { joiner });
     }
 
     /**
@@ -72,9 +73,9 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      */
     @SuppressWarnings("unchecked")
     default <B> BiEnumeratingStream<Solution_, A, B> join(UniEnumeratingStream<Solution_, B> otherStream,
-                                                          BiNeighborhoodsJoiner<A, B> joiner1,
-                                                          BiNeighborhoodsJoiner<A, B> joiner2) {
-        return join(otherStream, new BiNeighborhoodsJoiner[]{joiner1, joiner2});
+            BiNeighborhoodsJoiner<A, B> joiner1,
+            BiNeighborhoodsJoiner<A, B> joiner2) {
+        return join(otherStream, new BiNeighborhoodsJoiner[] { joiner1, joiner2 });
     }
 
     /**
@@ -82,9 +83,9 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      */
     @SuppressWarnings("unchecked")
     default <B> BiEnumeratingStream<Solution_, A, B> join(UniEnumeratingStream<Solution_, B> otherStream,
-                                                          BiNeighborhoodsJoiner<A, B> joiner1,
-                                                          BiNeighborhoodsJoiner<A, B> joiner2, BiNeighborhoodsJoiner<A, B> joiner3) {
-        return join(otherStream, new BiNeighborhoodsJoiner[]{joiner1, joiner2, joiner3});
+            BiNeighborhoodsJoiner<A, B> joiner1,
+            BiNeighborhoodsJoiner<A, B> joiner2, BiNeighborhoodsJoiner<A, B> joiner3) {
+        return join(otherStream, new BiNeighborhoodsJoiner[] { joiner1, joiner2, joiner3 });
     }
 
     /**
@@ -92,9 +93,9 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      */
     @SuppressWarnings("unchecked")
     default <B> BiEnumeratingStream<Solution_, A, B> join(UniEnumeratingStream<Solution_, B> otherStream,
-                                                          BiNeighborhoodsJoiner<A, B> joiner1,
-                                                          BiNeighborhoodsJoiner<A, B> joiner2, BiNeighborhoodsJoiner<A, B> joiner3, BiNeighborhoodsJoiner<A, B> joiner4) {
-        return join(otherStream, new BiNeighborhoodsJoiner[]{joiner1, joiner2, joiner3, joiner4});
+            BiNeighborhoodsJoiner<A, B> joiner1,
+            BiNeighborhoodsJoiner<A, B> joiner2, BiNeighborhoodsJoiner<A, B> joiner3, BiNeighborhoodsJoiner<A, B> joiner4) {
+        return join(otherStream, new BiNeighborhoodsJoiner[] { joiner1, joiner2, joiner3, joiner4 });
     }
 
     /**
@@ -110,7 +111,7 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      * @return a stream that matches every combination of A and B for which the {@link BiNeighborhoodsJoiner} is true
      */
     <B> BiEnumeratingStream<Solution_, A, B> join(UniEnumeratingStream<Solution_, B> otherStream,
-                                                  BiNeighborhoodsJoiner<A, B>... joiners);
+            BiNeighborhoodsJoiner<A, B>... joiners);
 
     /**
      * As defined by {@link #join(Class, BiNeighborhoodsJoiner[])}, with the array being empty.
@@ -125,7 +126,7 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      */
     @SuppressWarnings("unchecked")
     default <B> BiEnumeratingStream<Solution_, A, B> join(Class<B> otherClass, BiNeighborhoodsJoiner<A, B> joiner) {
-        return join(otherClass, new BiNeighborhoodsJoiner[]{joiner});
+        return join(otherClass, new BiNeighborhoodsJoiner[] { joiner });
     }
 
     /**
@@ -133,8 +134,8 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      */
     @SuppressWarnings("unchecked")
     default <B> BiEnumeratingStream<Solution_, A, B> join(Class<B> otherClass, BiNeighborhoodsJoiner<A, B> joiner1,
-                                                          BiNeighborhoodsJoiner<A, B> joiner2) {
-        return join(otherClass, new BiNeighborhoodsJoiner[]{joiner1, joiner2});
+            BiNeighborhoodsJoiner<A, B> joiner2) {
+        return join(otherClass, new BiNeighborhoodsJoiner[] { joiner1, joiner2 });
     }
 
     /**
@@ -142,9 +143,9 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      */
     @SuppressWarnings("unchecked")
     default <B> BiEnumeratingStream<Solution_, A, B> join(Class<B> otherClass, BiNeighborhoodsJoiner<A, B> joiner1,
-                                                          BiNeighborhoodsJoiner<A, B> joiner2,
-                                                          BiNeighborhoodsJoiner<A, B> joiner3) {
-        return join(otherClass, new BiNeighborhoodsJoiner[]{joiner1, joiner2, joiner3});
+            BiNeighborhoodsJoiner<A, B> joiner2,
+            BiNeighborhoodsJoiner<A, B> joiner3) {
+        return join(otherClass, new BiNeighborhoodsJoiner[] { joiner1, joiner2, joiner3 });
     }
 
     /**
@@ -152,9 +153,9 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      */
     @SuppressWarnings("unchecked")
     default <B> BiEnumeratingStream<Solution_, A, B> join(Class<B> otherClass, BiNeighborhoodsJoiner<A, B> joiner1,
-                                                          BiNeighborhoodsJoiner<A, B> joiner2,
-                                                          BiNeighborhoodsJoiner<A, B> joiner3, BiNeighborhoodsJoiner<A, B> joiner4) {
-        return join(otherClass, new BiNeighborhoodsJoiner[]{joiner1, joiner2, joiner3, joiner4});
+            BiNeighborhoodsJoiner<A, B> joiner2,
+            BiNeighborhoodsJoiner<A, B> joiner3, BiNeighborhoodsJoiner<A, B> joiner4) {
+        return join(otherClass, new BiNeighborhoodsJoiner[] { joiner1, joiner2, joiner3, joiner4 });
     }
 
     /**
@@ -186,8 +187,8 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      */
     @SuppressWarnings("unchecked")
     default <B> UniEnumeratingStream<Solution_, A> ifExists(UniEnumeratingStream<Solution_, B> otherStream,
-                                                            BiNeighborhoodsJoiner<A, B> joiner) {
-        return ifExists(otherStream, new BiNeighborhoodsJoiner[]{joiner});
+            BiNeighborhoodsJoiner<A, B> joiner) {
+        return ifExists(otherStream, new BiNeighborhoodsJoiner[] { joiner });
     }
 
     /**
@@ -195,9 +196,9 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      */
     @SuppressWarnings("unchecked")
     default <B> UniEnumeratingStream<Solution_, A> ifExists(UniEnumeratingStream<Solution_, B> otherStream,
-                                                            BiNeighborhoodsJoiner<A, B> joiner1,
-                                                            BiNeighborhoodsJoiner<A, B> joiner2) {
-        return ifExists(otherStream, new BiNeighborhoodsJoiner[]{joiner1, joiner2});
+            BiNeighborhoodsJoiner<A, B> joiner1,
+            BiNeighborhoodsJoiner<A, B> joiner2) {
+        return ifExists(otherStream, new BiNeighborhoodsJoiner[] { joiner1, joiner2 });
     }
 
     /**
@@ -205,9 +206,9 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      */
     @SuppressWarnings("unchecked")
     default <B> UniEnumeratingStream<Solution_, A> ifExists(UniEnumeratingStream<Solution_, B> otherStream,
-                                                            BiNeighborhoodsJoiner<A, B> joiner1,
-                                                            BiNeighborhoodsJoiner<A, B> joiner2, BiNeighborhoodsJoiner<A, B> joiner3) {
-        return ifExists(otherStream, new BiNeighborhoodsJoiner[]{joiner1, joiner2, joiner3});
+            BiNeighborhoodsJoiner<A, B> joiner1,
+            BiNeighborhoodsJoiner<A, B> joiner2, BiNeighborhoodsJoiner<A, B> joiner3) {
+        return ifExists(otherStream, new BiNeighborhoodsJoiner[] { joiner1, joiner2, joiner3 });
     }
 
     /**
@@ -215,9 +216,9 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      */
     @SuppressWarnings("unchecked")
     default <B> UniEnumeratingStream<Solution_, A> ifExists(UniEnumeratingStream<Solution_, B> otherStream,
-                                                            BiNeighborhoodsJoiner<A, B> joiner1,
-                                                            BiNeighborhoodsJoiner<A, B> joiner2, BiNeighborhoodsJoiner<A, B> joiner3, BiNeighborhoodsJoiner<A, B> joiner4) {
-        return ifExists(otherStream, new BiNeighborhoodsJoiner[]{joiner1, joiner2, joiner3, joiner4});
+            BiNeighborhoodsJoiner<A, B> joiner1,
+            BiNeighborhoodsJoiner<A, B> joiner2, BiNeighborhoodsJoiner<A, B> joiner3, BiNeighborhoodsJoiner<A, B> joiner4) {
+        return ifExists(otherStream, new BiNeighborhoodsJoiner[] { joiner1, joiner2, joiner3, joiner4 });
     }
 
     /**
@@ -229,7 +230,7 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      */
     @SuppressWarnings("unchecked")
     <B> UniEnumeratingStream<Solution_, A> ifExists(UniEnumeratingStream<Solution_, B> otherStream,
-                                                    BiNeighborhoodsJoiner<A, B>... joiners);
+            BiNeighborhoodsJoiner<A, B>... joiners);
 
     /**
      * As defined by {@link #ifExists(Class, BiNeighborhoodsJoiner[])}, with the array being empty.
@@ -244,7 +245,7 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      */
     @SuppressWarnings("unchecked")
     default <B> UniEnumeratingStream<Solution_, A> ifExists(Class<B> otherClass, BiNeighborhoodsJoiner<A, B> joiner) {
-        return ifExists(otherClass, new BiNeighborhoodsJoiner[]{joiner});
+        return ifExists(otherClass, new BiNeighborhoodsJoiner[] { joiner });
     }
 
     /**
@@ -252,8 +253,8 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      */
     @SuppressWarnings("unchecked")
     default <B> UniEnumeratingStream<Solution_, A> ifExists(Class<B> otherClass, BiNeighborhoodsJoiner<A, B> joiner1,
-                                                            BiNeighborhoodsJoiner<A, B> joiner2) {
-        return ifExists(otherClass, new BiNeighborhoodsJoiner[]{joiner1, joiner2});
+            BiNeighborhoodsJoiner<A, B> joiner2) {
+        return ifExists(otherClass, new BiNeighborhoodsJoiner[] { joiner1, joiner2 });
     }
 
     /**
@@ -261,9 +262,9 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      */
     @SuppressWarnings("unchecked")
     default <B> UniEnumeratingStream<Solution_, A> ifExists(Class<B> otherClass, BiNeighborhoodsJoiner<A, B> joiner1,
-                                                            BiNeighborhoodsJoiner<A, B> joiner2,
-                                                            BiNeighborhoodsJoiner<A, B> joiner3) {
-        return ifExists(otherClass, new BiNeighborhoodsJoiner[]{joiner1, joiner2, joiner3});
+            BiNeighborhoodsJoiner<A, B> joiner2,
+            BiNeighborhoodsJoiner<A, B> joiner3) {
+        return ifExists(otherClass, new BiNeighborhoodsJoiner[] { joiner1, joiner2, joiner3 });
     }
 
     /**
@@ -271,8 +272,8 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      */
     @SuppressWarnings("unchecked")
     default <B> UniEnumeratingStream<Solution_, A> ifExists(Class<B> otherClass, BiNeighborhoodsJoiner<A, B> joiner1,
-                                                            BiNeighborhoodsJoiner<A, B> joiner2, BiNeighborhoodsJoiner<A, B> joiner3, BiNeighborhoodsJoiner<A, B> joiner4) {
-        return ifExists(otherClass, new BiNeighborhoodsJoiner[]{joiner1, joiner2, joiner3, joiner4});
+            BiNeighborhoodsJoiner<A, B> joiner2, BiNeighborhoodsJoiner<A, B> joiner3, BiNeighborhoodsJoiner<A, B> joiner4) {
+        return ifExists(otherClass, new BiNeighborhoodsJoiner[] { joiner1, joiner2, joiner3, joiner4 });
     }
 
     /**
@@ -298,8 +299,8 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      */
     @SuppressWarnings("unchecked")
     default <B> UniEnumeratingStream<Solution_, A> ifNotExists(UniEnumeratingStream<Solution_, B> otherStream,
-                                                               BiNeighborhoodsJoiner<A, B> joiner) {
-        return ifNotExists(otherStream, new BiNeighborhoodsJoiner[]{joiner});
+            BiNeighborhoodsJoiner<A, B> joiner) {
+        return ifNotExists(otherStream, new BiNeighborhoodsJoiner[] { joiner });
     }
 
     /**
@@ -307,9 +308,9 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      */
     @SuppressWarnings("unchecked")
     default <B> UniEnumeratingStream<Solution_, A> ifNotExists(UniEnumeratingStream<Solution_, B> otherStream,
-                                                               BiNeighborhoodsJoiner<A, B> joiner1,
-                                                               BiNeighborhoodsJoiner<A, B> joiner2) {
-        return ifNotExists(otherStream, new BiNeighborhoodsJoiner[]{joiner1, joiner2});
+            BiNeighborhoodsJoiner<A, B> joiner1,
+            BiNeighborhoodsJoiner<A, B> joiner2) {
+        return ifNotExists(otherStream, new BiNeighborhoodsJoiner[] { joiner1, joiner2 });
     }
 
     /**
@@ -317,9 +318,9 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      */
     @SuppressWarnings("unchecked")
     default <B> UniEnumeratingStream<Solution_, A> ifNotExists(UniEnumeratingStream<Solution_, B> otherStream,
-                                                               BiNeighborhoodsJoiner<A, B> joiner1,
-                                                               BiNeighborhoodsJoiner<A, B> joiner2, BiNeighborhoodsJoiner<A, B> joiner3) {
-        return ifNotExists(otherStream, new BiNeighborhoodsJoiner[]{joiner1, joiner2, joiner3});
+            BiNeighborhoodsJoiner<A, B> joiner1,
+            BiNeighborhoodsJoiner<A, B> joiner2, BiNeighborhoodsJoiner<A, B> joiner3) {
+        return ifNotExists(otherStream, new BiNeighborhoodsJoiner[] { joiner1, joiner2, joiner3 });
     }
 
     /**
@@ -327,9 +328,9 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      */
     @SuppressWarnings("unchecked")
     default <B> UniEnumeratingStream<Solution_, A> ifNotExists(UniEnumeratingStream<Solution_, B> otherStream,
-                                                               BiNeighborhoodsJoiner<A, B> joiner1,
-                                                               BiNeighborhoodsJoiner<A, B> joiner2, BiNeighborhoodsJoiner<A, B> joiner3, BiNeighborhoodsJoiner<A, B> joiner4) {
-        return ifNotExists(otherStream, new BiNeighborhoodsJoiner[]{joiner1, joiner2, joiner3, joiner4});
+            BiNeighborhoodsJoiner<A, B> joiner1,
+            BiNeighborhoodsJoiner<A, B> joiner2, BiNeighborhoodsJoiner<A, B> joiner3, BiNeighborhoodsJoiner<A, B> joiner4) {
+        return ifNotExists(otherStream, new BiNeighborhoodsJoiner[] { joiner1, joiner2, joiner3, joiner4 });
     }
 
     /**
@@ -341,7 +342,7 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      */
     @SuppressWarnings("unchecked")
     <B> UniEnumeratingStream<Solution_, A> ifNotExists(UniEnumeratingStream<Solution_, B> otherStream,
-                                                       BiNeighborhoodsJoiner<A, B>... joiners);
+            BiNeighborhoodsJoiner<A, B>... joiners);
 
     /**
      * As defined by {@link #ifNotExists(Class, BiNeighborhoodsJoiner[])}, with the array being empty.
@@ -356,7 +357,7 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      */
     @SuppressWarnings("unchecked")
     default <B> UniEnumeratingStream<Solution_, A> ifNotExists(Class<B> otherClass, BiNeighborhoodsJoiner<A, B> joiner) {
-        return ifNotExists(otherClass, new BiNeighborhoodsJoiner[]{joiner});
+        return ifNotExists(otherClass, new BiNeighborhoodsJoiner[] { joiner });
     }
 
     /**
@@ -364,8 +365,8 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      */
     @SuppressWarnings("unchecked")
     default <B> UniEnumeratingStream<Solution_, A> ifNotExists(Class<B> otherClass, BiNeighborhoodsJoiner<A, B> joiner1,
-                                                               BiNeighborhoodsJoiner<A, B> joiner2) {
-        return ifNotExists(otherClass, new BiNeighborhoodsJoiner[]{joiner1, joiner2});
+            BiNeighborhoodsJoiner<A, B> joiner2) {
+        return ifNotExists(otherClass, new BiNeighborhoodsJoiner[] { joiner1, joiner2 });
     }
 
     /**
@@ -373,8 +374,8 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      */
     @SuppressWarnings("unchecked")
     default <B> UniEnumeratingStream<Solution_, A> ifNotExists(Class<B> otherClass, BiNeighborhoodsJoiner<A, B> joiner1,
-                                                               BiNeighborhoodsJoiner<A, B> joiner2, BiNeighborhoodsJoiner<A, B> joiner3) {
-        return ifNotExists(otherClass, new BiNeighborhoodsJoiner[]{joiner1, joiner2, joiner3});
+            BiNeighborhoodsJoiner<A, B> joiner2, BiNeighborhoodsJoiner<A, B> joiner3) {
+        return ifNotExists(otherClass, new BiNeighborhoodsJoiner[] { joiner1, joiner2, joiner3 });
     }
 
     /**
@@ -382,8 +383,8 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      */
     @SuppressWarnings("unchecked")
     default <B> UniEnumeratingStream<Solution_, A> ifNotExists(Class<B> otherClass, BiNeighborhoodsJoiner<A, B> joiner1,
-                                                               BiNeighborhoodsJoiner<A, B> joiner2, BiNeighborhoodsJoiner<A, B> joiner3, BiNeighborhoodsJoiner<A, B> joiner4) {
-        return ifNotExists(otherClass, new BiNeighborhoodsJoiner[]{joiner1, joiner2, joiner3, joiner4});
+            BiNeighborhoodsJoiner<A, B> joiner2, BiNeighborhoodsJoiner<A, B> joiner3, BiNeighborhoodsJoiner<A, B> joiner4) {
+        return ifNotExists(otherClass, new BiNeighborhoodsJoiner[] { joiner1, joiner2, joiner3, joiner4 });
     }
 
     /**
@@ -439,7 +440,7 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      * Use with caution,
      * as the increased memory allocation rates coming from tuple creation may negatively affect performance.
      *
-     * @param mapping    function to convert the original tuple into the new tuple
+     * @param mapping function to convert the original tuple into the new tuple
      * @param <ResultA_> the type of the only fact in the resulting {@link UniEnumeratingStream}'s tuple
      * @return a {@link UniEnumeratingStream} of the new tuples created by the mapping function
      */
@@ -456,10 +457,10 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
     /**
      * Groups the stream by a single key, producing one element (the key) per group.
      *
-     * @param key         mapping function to extract the group key from each element
+     * @param key mapping function to extract the group key from each element
      * @param <GroupKey_> the type of the group key
      * @return a {@link UniEnumeratingStream} where the only fact is the group key,
-     * and there is one tuple for each group of original tuples that share the same group key
+     *         and there is one tuple for each group of original tuples that share the same group key
      */
     <GroupKey_> UniEnumeratingStream<Solution_, GroupKey_> groupBy(UniNeighborhoodsMapper<Solution_, A, GroupKey_> key);
 
@@ -469,7 +470,7 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      * @param collector the collector to apply to the stream
      * @param <Result_> the type of the result
      * @return a {@link UniEnumeratingStream} with a single element,
-     * which is the result of applying the collector to the entire stream
+     *         which is the result of applying the collector to the entire stream
      */
     <Result_> UniEnumeratingStream<Solution_, Result_> groupBy(UniNeighborhoodsCollector<Solution_, A, ?, Result_> collector);
 
@@ -477,12 +478,12 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      * Groups the stream by a key and applies a collector to each group,
      * producing one pair (key, result) per group.
      *
-     * @param key         mapping function to extract the group key
-     * @param collector   the collector to apply to each group
+     * @param key mapping function to extract the group key
+     * @param collector the collector to apply to each group
      * @param <GroupKey_> the type of the group key
-     * @param <Result_>   the type of the collected result
+     * @param <Result_> the type of the collected result
      * @return a {@link BiEnumeratingStream} where the first fact is the group key
-     * and the second fact is the collected result for that group
+     *         and the second fact is the collected result for that group
      */
     <GroupKey_, Result_> BiEnumeratingStream<Solution_, GroupKey_, Result_> groupBy(
             UniNeighborhoodsMapper<Solution_, A, GroupKey_> key,
@@ -499,7 +500,7 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      * duplicate copies of the same tuple will be omitted at a performance cost.
      *
      * @return a stream that is guaranteed to have distinct tuples,
-     * at the cost of increased time and memory usage.
+     *         at the cost of increased time and memory usage.
      */
     UniEnumeratingStream<Solution_, A> distinct();
 
@@ -515,7 +516,7 @@ public interface UniEnumeratingStream<Solution_, A> extends EnumeratingStream {
      * and the rows are materialized only once.
      *
      * @return Any operations called on the returned instance will not be cached.
-     * This method creates the boundary the in-memory caching from the just-in-time computations.
+     *         This method creates the boundary the in-memory caching from the just-in-time computations.
      * @see UniPickingStream For the declarative alternative, which reads from this stream directly.
      */
     UniDataset<Solution_, A> asCachedDataset();
