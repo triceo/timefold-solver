@@ -100,8 +100,8 @@ public abstract class AbstractIndexedJoinNode<LeftTuple_ extends Tuple, Right_, 
             insertLeft(leftTuple);
             return;
         }
-        var newCompositeKey = keysExtractorLeft.apply(leftTuple);
-        if (oldCompositeKey.equals(newCompositeKey)) {
+        var newCompositeKey = keysExtractorLeft.apply(leftTuple, oldCompositeKey);
+        if (newCompositeKey == oldCompositeKey) {
             // No need for re-indexing because the index keys didn't change
             if (isFiltering) {
                 crossMatchLeft(leftTuple);
@@ -205,8 +205,8 @@ public abstract class AbstractIndexedJoinNode<LeftTuple_ extends Tuple, Right_, 
             insertRight(rightTuple);
             return;
         }
-        var newCompositeKey = keysExtractorRight.apply(rightTuple);
-        if (oldCompositeKey.equals(newCompositeKey)) {
+        var newCompositeKey = keysExtractorRight.apply(rightTuple, oldCompositeKey);
+        if (newCompositeKey == oldCompositeKey) {
             // No need for re-indexing because the index keys didn't change
             if (isFiltering) {
                 crossMatchRight(rightTuple);

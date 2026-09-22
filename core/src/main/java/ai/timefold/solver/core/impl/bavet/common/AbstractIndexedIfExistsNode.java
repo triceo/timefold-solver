@@ -122,11 +122,11 @@ public abstract class AbstractIndexedIfExistsNode<LeftTuple_ extends Tuple, Righ
             insertLeft(leftTuple);
             return;
         }
-        var newCompositeKey = keysExtractorLeft.apply(leftTuple);
+        var newCompositeKey = keysExtractorLeft.apply(leftTuple, oldCompositeKey);
         ListEntry<ExistsCounter<LeftTuple_>> counterEntry = leftTuple.getStore(inputStoreIndexLeftCounterEntry);
         var counter = counterEntry.element();
 
-        if (oldCompositeKey.equals(newCompositeKey)) {
+        if (newCompositeKey == oldCompositeKey) {
             // No need for re-indexing because the index keys didn't change
             // The indexers contain counters in the DEAD state, to track the rightCount.
             if (!isFiltering) {
@@ -224,8 +224,8 @@ public abstract class AbstractIndexedIfExistsNode<LeftTuple_ extends Tuple, Righ
             insertRight(rightTuple);
             return;
         }
-        var newCompositeKey = keysExtractorRight.apply(rightTuple);
-        if (oldCompositeKey.equals(newCompositeKey)) {
+        var newCompositeKey = keysExtractorRight.apply(rightTuple, oldCompositeKey);
+        if (newCompositeKey == oldCompositeKey) {
             // No need for re-indexing because the index keys didn't change
             if (isFiltering) {
                 // Eager own-side cleanup, then defer the re-walk of the opposite side.
