@@ -21,9 +21,6 @@ import ai.timefold.solver.core.impl.bavet.penta.joiner.DefaultPentaJoiner;
 import ai.timefold.solver.core.impl.bavet.quad.joiner.DefaultQuadJoiner;
 import ai.timefold.solver.core.impl.bavet.tri.joiner.DefaultTriJoiner;
 import ai.timefold.solver.core.impl.neighborhood.stream.joiner.DefaultBiNeighborhoodsJoiner;
-import ai.timefold.solver.core.impl.util.Pair;
-import ai.timefold.solver.core.impl.util.Quadruple;
-import ai.timefold.solver.core.impl.util.Triple;
 
 /**
  * {@link Indexer Indexers} form a parent-child hierarchy,
@@ -53,8 +50,8 @@ import ai.timefold.solver.core.impl.util.Triple;
  * The comber reorders joiners equal-first, so all equal joiners form a single leading run;
  * that run is merged into a single (top-most) indexer.
  * In that case,
- * a composite keyFunction is created of type {@link Pair}, {@link Triple},
- * {@link Quadruple} or {@link IndexerKey},
+ * a composite keyFunction is created of type {@link BiEqualKey}, {@link TriEqualKey},
+ * {@link QuadEqualKey} or {@link IndexerKey},
  * based on the length of the equal prefix (number of leading equal joiners).
  *
  * <ul>
@@ -184,20 +181,20 @@ public final class IndexerFactory<Right_> {
                 case 2 -> {
                     var mapping1 = mappingExtractor.apply(levelStart);
                     var mapping2 = mappingExtractor.apply(levelStart + 1);
-                    yield a -> new Pair<>(mapping1.apply(a), mapping2.apply(a));
+                    yield a -> new BiEqualKey(mapping1.apply(a), mapping2.apply(a));
                 }
                 case 3 -> {
                     var mapping1 = mappingExtractor.apply(levelStart);
                     var mapping2 = mappingExtractor.apply(levelStart + 1);
                     var mapping3 = mappingExtractor.apply(levelStart + 2);
-                    yield a -> new Triple<>(mapping1.apply(a), mapping2.apply(a), mapping3.apply(a));
+                    yield a -> new TriEqualKey(mapping1.apply(a), mapping2.apply(a), mapping3.apply(a));
                 }
                 case 4 -> {
                     var mapping1 = mappingExtractor.apply(levelStart);
                     var mapping2 = mappingExtractor.apply(levelStart + 1);
                     var mapping3 = mappingExtractor.apply(levelStart + 2);
                     var mapping4 = mappingExtractor.apply(levelStart + 3);
-                    yield a -> new Quadruple<>(mapping1.apply(a), mapping2.apply(a), mapping3.apply(a), mapping4.apply(a));
+                    yield a -> new QuadEqualKey(mapping1.apply(a), mapping2.apply(a), mapping3.apply(a), mapping4.apply(a));
                 }
                 default -> {
                     Function<A, Object>[] mappings = new Function[keyFunctionLength];
@@ -293,20 +290,20 @@ public final class IndexerFactory<Right_> {
                 case 2 -> {
                     var mapping1 = castJoiner.getLeftMapping(levelStart);
                     var mapping2 = castJoiner.getLeftMapping(levelStart + 1);
-                    yield (a, b) -> new Pair<>(mapping1.apply(a, b), mapping2.apply(a, b));
+                    yield (a, b) -> new BiEqualKey(mapping1.apply(a, b), mapping2.apply(a, b));
                 }
                 case 3 -> {
                     var mapping1 = castJoiner.getLeftMapping(levelStart);
                     var mapping2 = castJoiner.getLeftMapping(levelStart + 1);
                     var mapping3 = castJoiner.getLeftMapping(levelStart + 2);
-                    yield (a, b) -> new Triple<>(mapping1.apply(a, b), mapping2.apply(a, b), mapping3.apply(a, b));
+                    yield (a, b) -> new TriEqualKey(mapping1.apply(a, b), mapping2.apply(a, b), mapping3.apply(a, b));
                 }
                 case 4 -> {
                     var mapping1 = castJoiner.getLeftMapping(levelStart);
                     var mapping2 = castJoiner.getLeftMapping(levelStart + 1);
                     var mapping3 = castJoiner.getLeftMapping(levelStart + 2);
                     var mapping4 = castJoiner.getLeftMapping(levelStart + 3);
-                    yield (a, b) -> new Quadruple<>(mapping1.apply(a, b), mapping2.apply(a, b), mapping3.apply(a, b),
+                    yield (a, b) -> new QuadEqualKey(mapping1.apply(a, b), mapping2.apply(a, b), mapping3.apply(a, b),
                             mapping4.apply(a, b));
                 }
                 default -> {
@@ -375,20 +372,21 @@ public final class IndexerFactory<Right_> {
                 case 2 -> {
                     var mapping1 = castJoiner.getLeftMapping(levelStart);
                     var mapping2 = castJoiner.getLeftMapping(levelStart + 1);
-                    yield (a, b, c) -> new Pair<>(mapping1.apply(a, b, c), mapping2.apply(a, b, c));
+                    yield (a, b, c) -> new BiEqualKey(mapping1.apply(a, b, c), mapping2.apply(a, b, c));
                 }
                 case 3 -> {
                     var mapping1 = castJoiner.getLeftMapping(levelStart);
                     var mapping2 = castJoiner.getLeftMapping(levelStart + 1);
                     var mapping3 = castJoiner.getLeftMapping(levelStart + 2);
-                    yield (a, b, c) -> new Triple<>(mapping1.apply(a, b, c), mapping2.apply(a, b, c), mapping3.apply(a, b, c));
+                    yield (a, b, c) -> new TriEqualKey(mapping1.apply(a, b, c), mapping2.apply(a, b, c),
+                            mapping3.apply(a, b, c));
                 }
                 case 4 -> {
                     var mapping1 = castJoiner.getLeftMapping(levelStart);
                     var mapping2 = castJoiner.getLeftMapping(levelStart + 1);
                     var mapping3 = castJoiner.getLeftMapping(levelStart + 2);
                     var mapping4 = castJoiner.getLeftMapping(levelStart + 3);
-                    yield (a, b, c) -> new Quadruple<>(mapping1.apply(a, b, c), mapping2.apply(a, b, c),
+                    yield (a, b, c) -> new QuadEqualKey(mapping1.apply(a, b, c), mapping2.apply(a, b, c),
                             mapping3.apply(a, b, c), mapping4.apply(a, b, c));
                 }
                 default -> {
@@ -459,13 +457,13 @@ public final class IndexerFactory<Right_> {
                 case 2 -> {
                     var mapping1 = castJoiner.getLeftMapping(levelStart);
                     var mapping2 = castJoiner.getLeftMapping(levelStart + 1);
-                    yield (a, b, c, d) -> new Pair<>(mapping1.apply(a, b, c, d), mapping2.apply(a, b, c, d));
+                    yield (a, b, c, d) -> new BiEqualKey(mapping1.apply(a, b, c, d), mapping2.apply(a, b, c, d));
                 }
                 case 3 -> {
                     var mapping1 = castJoiner.getLeftMapping(levelStart);
                     var mapping2 = castJoiner.getLeftMapping(levelStart + 1);
                     var mapping3 = castJoiner.getLeftMapping(levelStart + 2);
-                    yield (a, b, c, d) -> new Triple<>(mapping1.apply(a, b, c, d), mapping2.apply(a, b, c, d),
+                    yield (a, b, c, d) -> new TriEqualKey(mapping1.apply(a, b, c, d), mapping2.apply(a, b, c, d),
                             mapping3.apply(a, b, c, d));
                 }
                 case 4 -> {
@@ -473,7 +471,7 @@ public final class IndexerFactory<Right_> {
                     var mapping2 = castJoiner.getLeftMapping(levelStart + 1);
                     var mapping3 = castJoiner.getLeftMapping(levelStart + 2);
                     var mapping4 = castJoiner.getLeftMapping(levelStart + 3);
-                    yield (a, b, c, d) -> new Quadruple<>(mapping1.apply(a, b, c, d), mapping2.apply(a, b, c, d),
+                    yield (a, b, c, d) -> new QuadEqualKey(mapping1.apply(a, b, c, d), mapping2.apply(a, b, c, d),
                             mapping3.apply(a, b, c, d), mapping4.apply(a, b, c, d));
                 }
                 default -> {

@@ -2,33 +2,50 @@ package ai.timefold.solver.core.impl.bavet.common.index;
 
 import java.util.Arrays;
 
-import ai.timefold.solver.core.impl.util.Pair;
-import ai.timefold.solver.core.impl.util.Triple;
-
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /**
- * Often replaced by a specialization such as {@link Pair}, {@link Triple}, ...
+ * An {@link EqualKey} of more than 4 values; smaller runs use {@link BiEqualKey}, {@link TriEqualKey}, ...
  * Overrides {@link Object#equals(Object)} and {@link Object#hashCode()} as it references external object.
  */
 @NullMarked
-record IndexerKey(Object... properties) {
+final class IndexerKey implements EqualKey {
+
+    private final @Nullable Object[] properties;
+    private final int hash;
+
+    IndexerKey(@Nullable Object... properties) {
+        this.properties = properties;
+        this.hash = Arrays.deepHashCode(properties);
+    }
+
+    @Override
+    public @Nullable Object get(int index) {
+        return properties[index];
+    }
+
+    @Override
+    public int size() {
+        return properties.length;
+    }
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof IndexerKey other) {
-            return Arrays.deepEquals(properties, other.properties);
+        if (this == o) {
+            return true;
         }
-        return false;
+        return o instanceof IndexerKey other && hash == other.hash && Arrays.deepEquals(properties, other.properties);
     }
 
     @Override
     public int hashCode() {
-        return Arrays.deepHashCode(properties);
+        return hash;
     }
 
     @Override
     public String toString() {
         return Arrays.toString(properties);
     }
+
 }
