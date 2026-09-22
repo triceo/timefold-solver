@@ -2,6 +2,7 @@ package ai.timefold.solver.core.impl.bavet;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -60,6 +61,21 @@ public abstract class AbstractBavetNodeNetwork {
      * so the common case pays nothing beyond an empty-array iteration in {@link #settleLayer}.
      */
     private DeferredSettleAware @Nullable [][] layeredActiveDeferredNodes;
+    /**
+     * Aligned 1:1 with {@link #layeredActivePropagators}:
+     * for each layer, the indices of its propagators with pending work.
+     * See {@link Propagator#setDirtyTracking}.
+     */
+    private BitSet @Nullable [] layeredDirtyBits;
+    /**
+     * Indices of layers in {@link #layeredActivePropagators} with at least one dirty propagator.
+     */
+    private final BitSet dirtyLayers = new BitSet();
+    /**
+     * Indices of layers in {@link #layeredActivePropagators} with at least one deferring node;
+     * those must be visited on every settle, as their pending work only reaches the queue in prepareForSettle().
+     */
+    private BitSet deferredLayers = new BitSet();
     /**
      * For testing only:
      * the set of nodes that remained active after {@link #settle()};
@@ -147,13 +163,48 @@ public abstract class AbstractBavetNodeNetwork {
                             .map(DeferredSettleAware.class::cast)
                             .toArray(DeferredSettleAware[]::new))
                     .toArray(DeferredSettleAware[][]::new);
+            initDirtyTracking(layeredActiveNodes);
             notifyPreload(true);
         }
-        for (var i = 0; i < layeredActivePropagators.length; i++) {
+        var i = nextLayer(0);
+        while (i >= 0) {
             settleLayer(i);
+            i = nextLayer(i + 1);
         }
         if (preloadingActive) {
             notifyPreload(false);
+        }
+    }
+
+    private void initDirtyTracking(AbstractNode[][] layeredActiveNodes) {
+        var layerCount = layeredActiveNodes.length;
+        layeredDirtyBits = new BitSet[layerCount];
+        deferredLayers = new BitSet(layerCount);
+        for (var layer = 0; layer < layerCount; layer++) {
+            var nodesInLayer = layeredActiveNodes[layer];
+            var bits = new BitSet(nodesInLayer.length);
+            for (var i = 0; i < nodesInLayer.length; i++) {
+                // The raw queue, not the decorated propagator; that is what the node writes into.
+                nodesInLayer[i].getPropagator().setDirtyTracking(dirtyLayers, layer, bits, i);
+            }
+            bits.set(0, nodesInLayer.length); // The preload settle processes everything.
+            layeredDirtyBits[layer] = bits;
+            dirtyLayers.set(layer);
+            if (layeredActiveDeferredNodes[layer].length > 0) {
+                deferredLayers.set(layer);
+            }
+        }
+    }
+
+    private int nextLayer(int fromIndex) {
+        var nextDirty = dirtyLayers.nextSetBit(fromIndex);
+        var nextDeferred = deferredLayers.nextSetBit(fromIndex);
+        if (nextDirty < 0) {
+            return nextDeferred;
+        } else if (nextDeferred < 0) {
+            return nextDirty;
+        } else {
+            return Math.min(nextDirty, nextDeferred);
         }
     }
 
@@ -173,20 +224,27 @@ public abstract class AbstractBavetNodeNetwork {
         for (var node : layeredActiveDeferredNodes[layerId]) {
             node.prepareForSettle();
         }
+        var dirtyBits = layeredDirtyBits[layerId];
+        var first = dirtyBits.nextSetBit(0);
+        if (first < 0) { // Only visited for its deferred nodes, which had nothing to do.
+            return;
+        }
         var nodesInLayer = layeredActivePropagators[layerId];
-        if (nodesInLayer.length == 1) { // Avoid iteration.
-            nodesInLayer[0].propagateEverything();
+        if (dirtyBits.nextSetBit(first + 1) < 0) { // Only one dirty node; avoid iteration.
+            nodesInLayer[first].propagateEverything();
         } else {
-            for (var node : nodesInLayer) {
-                node.propagateRetracts();
+            for (var i = first; i >= 0; i = dirtyBits.nextSetBit(i + 1)) {
+                nodesInLayer[i].propagateRetracts();
             }
-            for (var node : nodesInLayer) {
-                node.propagateUpdates();
+            for (var i = first; i >= 0; i = dirtyBits.nextSetBit(i + 1)) {
+                nodesInLayer[i].propagateUpdates();
             }
-            for (var node : nodesInLayer) {
-                node.propagateInserts();
+            for (var i = first; i >= 0; i = dirtyBits.nextSetBit(i + 1)) {
+                nodesInLayer[i].propagateInserts();
             }
         }
+        dirtyBits.clear();
+        dirtyLayers.clear(layerId);
     }
 
     Set<AbstractNode> getActiveNodes() {

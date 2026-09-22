@@ -9,6 +9,8 @@ import ai.timefold.solver.core.impl.bavet.common.tuple.Tuple;
 import ai.timefold.solver.core.impl.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.bavet.common.tuple.TupleState;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * This implementation has the capability to move tuples between the individual propagation queues.
  * This is significantly less efficient than the {@link StaticPropagationQueue}.
@@ -27,6 +29,12 @@ final class DynamicPropagationQueue<Tuple_ extends Tuple, Carrier_ extends Abstr
     private final BitSet insertQueue;
     private final BitSet scratchQueue; // Scratch space for propagateUpdates(); avoids allocation.
     private final TupleLifecycle<Tuple_> nextNodesTupleLifecycle;
+    // Dirty tracking; see Propagator.setDirtyTracking(...).
+    private @Nullable BitSet dirtyLayers;
+    private int layerIndex;
+    private @Nullable BitSet layerDirtyBits;
+    private int layerDirtyIndex;
+    private boolean dirty = true;
 
     private DynamicPropagationQueue(TupleLifecycle<Tuple_> nextNodesTupleLifecycle, Consumer<Carrier_> preprocessor,
             int size) {
@@ -53,7 +61,28 @@ final class DynamicPropagationQueue<Tuple_ extends Tuple, Carrier_ extends Abstr
     }
 
     @Override
+    public void setDirtyTracking(BitSet dirtyLayers, int layerIndex, BitSet layerDirtyBits, int index) {
+        if (this.layerDirtyBits != null) {
+            throw new IllegalStateException("Impossible state: dirty tracking of (%s) is already set.".formatted(this));
+        }
+        this.dirtyLayers = dirtyLayers;
+        this.layerIndex = layerIndex;
+        this.layerDirtyBits = layerDirtyBits;
+        this.layerDirtyIndex = index;
+        this.dirty = true;
+    }
+
+    private void markDirty() {
+        if (!dirty) { // Only false when tracking is set.
+            dirty = true;
+            layerDirtyBits.set(layerDirtyIndex);
+            dirtyLayers.set(layerIndex);
+        }
+    }
+
+    @Override
     public void insert(Carrier_ carrier) {
+        markDirty();
         var positionInDirtyList = carrier.positionInDirtyList;
         if (positionInDirtyList < 0) {
             makeDirty(carrier, insertQueue);
@@ -81,6 +110,7 @@ final class DynamicPropagationQueue<Tuple_ extends Tuple, Carrier_ extends Abstr
 
     @Override
     public void update(Carrier_ carrier) {
+        markDirty();
         var positionInDirtyList = carrier.positionInDirtyList;
         if (positionInDirtyList < 0) {
             dirtyList.add(carrier);
@@ -99,6 +129,7 @@ final class DynamicPropagationQueue<Tuple_ extends Tuple, Carrier_ extends Abstr
 
     @Override
     public void retract(Carrier_ carrier, TupleState state) {
+        markDirty();
         if (state.isActive() || state == TupleState.DEAD) {
             throw new IllegalArgumentException("Impossible state: The state (%s) is not a valid retract state."
                     .formatted(state));
@@ -206,6 +237,7 @@ final class DynamicPropagationQueue<Tuple_ extends Tuple, Carrier_ extends Abstr
         }
         retractQueue.clear();
         dirtyList.clear();
+        dirty = layerDirtyBits == null;
     }
 
 }

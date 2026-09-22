@@ -1,5 +1,7 @@
 package ai.timefold.solver.core.impl.bavet.common;
 
+import java.util.BitSet;
+
 public record ProfilingPropagator(InnerConstraintProfiler profiler, ConstraintNodeProfileId profileId,
         Propagator delegate) implements Propagator {
 
@@ -15,6 +17,11 @@ public record ProfilingPropagator(InnerConstraintProfiler profiler, ConstraintNo
         profiler.measure(profileId,
                 InnerConstraintProfiler.Operation.UPDATE,
                 delegate::propagateUpdates);
+    }
+
+    @Override
+    public void setDirtyTracking(BitSet dirtyLayers, int layerIndex, BitSet layerDirtyBits, int index) {
+        delegate.setDirtyTracking(dirtyLayers, layerIndex, layerDirtyBits, index);
     }
 
     @Override
