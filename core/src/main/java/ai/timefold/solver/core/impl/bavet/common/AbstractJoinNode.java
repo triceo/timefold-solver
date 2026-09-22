@@ -110,15 +110,23 @@ public abstract class AbstractJoinNode<LeftTuple_ extends Tuple, Right_, OutTupl
         propagationQueue.insert(outTuple);
     }
 
-    protected final void innerUpdateLeft(LeftTuple_ leftTuple, Consumer<Consumer<UniTuple<Right_>>> rightTupleConsumer) {
-        // Prefer an update over retract-insert if possible
+    /**
+     * Non-filtering update; callers use it directly to avoid allocating the consumer of {@link #innerUpdateLeft}.
+     */
+    protected final void updateOutTuplesLeft(LeftTuple_ leftTuple) {
         TupleList<OutTuple_> outTupleListLeft = leftTuple.getStore(inputStoreIndexLeftOutTupleList);
         // Propagate the update for downstream filters, matchWeighers, ...
+        for (var outTuple = outTupleListLeft.first(); outTuple != null; outTuple = outTupleListLeft.next(outTuple)) {
+            updateOutTupleLeft(outTuple, leftTuple);
+        }
+    }
+
+    protected final void innerUpdateLeft(LeftTuple_ leftTuple, Consumer<Consumer<UniTuple<Right_>>> rightTupleConsumer) {
+        // Prefer an update over retract-insert if possible
         if (!isFiltering) {
-            for (var outTuple = outTupleListLeft.first(); outTuple != null; outTuple = outTupleListLeft.next(outTuple)) {
-                updateOutTupleLeft(outTuple, leftTuple);
-            }
+            updateOutTuplesLeft(leftTuple);
         } else {
+            TupleList<OutTuple_> outTupleListLeft = leftTuple.getStore(inputStoreIndexLeftOutTupleList);
             if (!leftTuple.getState().isActive()) {
                 // See insertOutTupleIfActiveFiltered(...): the out-tuple must be retracted anyway,
                 // so any further update to it is pointless.
@@ -206,16 +214,23 @@ public abstract class AbstractJoinNode<LeftTuple_ extends Tuple, Right_, OutTupl
         propagationQueue.retract(outTuple, state == TupleState.CREATING ? TupleState.ABORTING : TupleState.DYING);
     }
 
+    /**
+     * The mirror image of {@link #updateOutTuplesLeft}.
+     */
+    protected final void updateOutTuplesRight(UniTuple<Right_> rightTuple) {
+        TupleList<OutTuple_> outTupleListRight = rightTuple.getStore(inputStoreIndexRightOutTupleList);
+        // Propagate the update for downstream filters, matchWeighers, ...
+        for (var outTuple = outTupleListRight.first(); outTuple != null; outTuple = outTupleListRight.next(outTuple)) {
+            updateOutTupleRight(outTuple, rightTuple);
+        }
+    }
+
     protected final void innerUpdateRight(UniTuple<Right_> rightTuple, Consumer<Consumer<LeftTuple_>> leftTupleConsumer) {
         // Prefer an update over retract-insert if possible
-        TupleList<OutTuple_> outTupleListRight = rightTuple.getStore(inputStoreIndexRightOutTupleList);
         if (!isFiltering) {
-            // Propagate the update for downstream filters, matchWeighers, ...
-            for (var outTuple = outTupleListRight.first(); outTuple != null; outTuple = outTupleListRight.next(outTuple)) {
-                setOutTupleRightFact(outTuple, rightTuple);
-                doUpdateOutTuple(outTuple);
-            }
+            updateOutTuplesRight(rightTuple);
         } else {
+            TupleList<OutTuple_> outTupleListRight = rightTuple.getStore(inputStoreIndexRightOutTupleList);
             if (!rightTuple.getState().isActive()) {
                 // The mirror image of innerUpdateLeft(...): here the right tuple is the retracting one,
                 // and its out-tuples are about to be retracted regardless of what the predicate now says.

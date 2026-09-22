@@ -67,7 +67,7 @@ public abstract class AbstractUnindexedJoinNode<LeftTuple_ extends Tuple, Right_
         if (isFiltering) {
             crossMatchLeft(leftTuple);
         } else {
-            innerUpdateLeft(leftTuple, rightTupleList::forEach);
+            updateOutTuplesLeft(leftTuple);
         }
     }
 
@@ -112,7 +112,7 @@ public abstract class AbstractUnindexedJoinNode<LeftTuple_ extends Tuple, Right_
         if (isFiltering) {
             crossMatchRight(rightTuple);
         } else {
-            innerUpdateRight(rightTuple, leftTupleList::forEach);
+            updateOutTuplesRight(rightTuple);
         }
     }
 

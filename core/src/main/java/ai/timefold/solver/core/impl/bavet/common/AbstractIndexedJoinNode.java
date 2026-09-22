@@ -107,7 +107,7 @@ public abstract class AbstractIndexedJoinNode<LeftTuple_ extends Tuple, Right_, 
                 crossMatchLeft(leftTuple);
             } else {
                 // Prefer an update over retract-insert if possible
-                innerUpdateLeft(leftTuple, consumer -> forEachRightMatch(leftTuple, oldCompositeKey, consumer));
+                updateOutTuplesLeft(leftTuple);
             }
         } else {
             TupleList<OutTuple_> outTupleListLeft = leftTuple.getStore(inputStoreIndexLeftOutTupleList);
@@ -212,7 +212,7 @@ public abstract class AbstractIndexedJoinNode<LeftTuple_ extends Tuple, Right_, 
                 crossMatchRight(rightTuple);
             } else {
                 // Prefer an update over retract-insert if possible
-                innerUpdateRight(rightTuple, consumer -> forEachLeftMatch(rightTuple, oldCompositeKey, consumer));
+                updateOutTuplesRight(rightTuple);
             }
         } else {
             TupleList<OutTuple_> outTupleListRight = rightTuple.getStore(inputStoreIndexRightOutTupleList);
