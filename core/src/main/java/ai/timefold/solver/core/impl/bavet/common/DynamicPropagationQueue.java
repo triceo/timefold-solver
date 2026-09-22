@@ -25,6 +25,7 @@ final class DynamicPropagationQueue<Tuple_ extends Tuple, Carrier_ extends Abstr
     private final List<Carrier_> dirtyList;
     private final BitSet retractQueue;
     private final BitSet insertQueue;
+    private final BitSet scratchQueue; // Scratch space for propagateUpdates(); avoids allocation.
     private final TupleLifecycle<Tuple_> nextNodesTupleLifecycle;
 
     private DynamicPropagationQueue(TupleLifecycle<Tuple_> nextNodesTupleLifecycle, Consumer<Carrier_> preprocessor,
@@ -39,6 +40,7 @@ final class DynamicPropagationQueue<Tuple_ extends Tuple, Carrier_ extends Abstr
         // Updates tend to be dominant; update queue isn't stored, it's deduced as neither insert nor retract.
         this.retractQueue = new BitSet(size);
         this.insertQueue = new BitSet(size);
+        this.scratchQueue = new BitSet(size);
         this.nextNodesTupleLifecycle = nextNodesTupleLifecycle;
     }
 
@@ -148,7 +150,7 @@ final class DynamicPropagationQueue<Tuple_ extends Tuple, Carrier_ extends Abstr
     @Override
     public void propagateUpdates() {
         var dirtyListSize = dirtyList.size();
-        var insertAndRetractQueue = buildInsertAndRetractQueue(insertQueue, retractQueue);
+        var insertAndRetractQueue = buildInsertAndRetractQueue();
         if (insertAndRetractQueue == null) { // Iterate over the entire list more efficiently.
             for (var i = 0; i < dirtyListSize; i++) {
                 // Not using enhanced for loop in order not to create so many iterators in the hot path.
@@ -163,7 +165,7 @@ final class DynamicPropagationQueue<Tuple_ extends Tuple, Carrier_ extends Abstr
         }
     }
 
-    private static BitSet buildInsertAndRetractQueue(BitSet insertQueue, BitSet retractQueue) {
+    private BitSet buildInsertAndRetractQueue() {
         var noInserts = insertQueue.isEmpty();
         var noRetracts = retractQueue.isEmpty();
         if (noInserts && noRetracts) {
@@ -173,10 +175,10 @@ final class DynamicPropagationQueue<Tuple_ extends Tuple, Carrier_ extends Abstr
         } else if (noRetracts) {
             return insertQueue;
         } else {
-            var updateQueue = new BitSet(Math.max(insertQueue.length(), retractQueue.length()));
-            updateQueue.or(insertQueue);
-            updateQueue.or(retractQueue);
-            return updateQueue;
+            scratchQueue.clear();
+            scratchQueue.or(insertQueue);
+            scratchQueue.or(retractQueue);
+            return scratchQueue;
         }
     }
 
