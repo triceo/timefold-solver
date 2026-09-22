@@ -65,7 +65,8 @@ public final class ForEachFilteredUniNode<A>
         } else if (filter.test(a)) {
             updateExisting(a, tuple);
         } else { // Tuple no longer passes the filter; the fact itself remains inserted.
-            retractIfPresent(a);
+            tupleMap.remove(a);
+            super.retractExisting(a, tuple);
         }
     }
 
