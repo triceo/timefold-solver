@@ -1,7 +1,5 @@
 package ai.timefold.solver.core.impl.bavet.common;
 
-import java.util.BitSet;
-
 import ai.timefold.solver.core.impl.score.stream.bavet.BavetConstraintSession;
 
 /**
@@ -69,14 +67,5 @@ public sealed interface Propagator
         propagateUpdates();
         propagateInserts();
     }
-
-    /**
-     * Called once, when the node network activates, for every active node.
-     * From then on, the first insert/update/retract after a settle marks this propagator
-     * in {@code layerDirtyBits} at {@code index}, and marks its layer in {@code dirtyLayers} at {@code layerIndex},
-     * so that the network only propagates nodes with pending work.
-     * Until this is called, the propagator is always considered dirty and marks nothing.
-     */
-    void setDirtyTracking(BitSet dirtyLayers, int layerIndex, BitSet layerDirtyBits, int index);
 
 }

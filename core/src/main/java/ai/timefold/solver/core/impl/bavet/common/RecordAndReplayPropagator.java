@@ -1,7 +1,6 @@
 package ai.timefold.solver.core.impl.bavet.common;
 
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -20,7 +19,6 @@ import ai.timefold.solver.core.impl.score.stream.bavet.common.BavetPrecomputeBui
 import ai.timefold.solver.core.impl.util.CollectionUtils;
 
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
 
 /**
  * The implementation records the tuples each object affects inside
@@ -42,12 +40,6 @@ public final class RecordAndReplayPropagator<Tuple_ extends Tuple>
     private final Set<Object> seenFactSet;
 
     private final Supplier<BavetPrecomputeBuildHelper<Tuple_>> precomputeBuildHelperSupplier;
-    // Dirty tracking; see Propagator.setDirtyTracking(...).
-    private @Nullable BitSet dirtyLayers;
-    private int layerIndex;
-    private @Nullable BitSet layerDirtyBits;
-    private int layerDirtyIndex;
-    private boolean dirty = true;
     private final UnaryOperator<Tuple_> internalTupleToOutputTupleMapper;
     private final Map<Object, List<Tuple_>> objectToOutputTuplesMap;
     /**
@@ -93,34 +85,12 @@ public final class RecordAndReplayPropagator<Tuple_ extends Tuple>
                 || !insertQueue.isEmpty(); // Tuples will be produced, unless retract removes them from the insert queue.
     }
 
-    @Override
-    public void setDirtyTracking(BitSet dirtyLayers, int layerIndex, BitSet layerDirtyBits, int index) {
-        if (this.layerDirtyBits != null) {
-            throw new IllegalStateException("Impossible state: dirty tracking of (%s) is already set.".formatted(this));
-        }
-        this.dirtyLayers = dirtyLayers;
-        this.layerIndex = layerIndex;
-        this.layerDirtyBits = layerDirtyBits;
-        this.layerDirtyIndex = index;
-        this.dirty = true;
-    }
-
-    private void markDirty() {
-        if (!dirty) { // Only false when tracking is set.
-            dirty = true;
-            layerDirtyBits.set(layerDirtyIndex);
-            dirtyLayers.set(layerIndex);
-        }
-    }
-
     public void insert(Object object) {
-        markDirty();
         // do not remove a retract of the same fact (a fact was updated)
         insertQueue.add(object);
     }
 
     public void update(Object object) {
-        markDirty(); // Before the early return; propagateUpdates() must run to clear alreadyUpdatingSet.
         if (!alreadyUpdatingSet.add(object)) {
             // The list was already sent to the propagation queue.
             // Don't iterate over it again, even though the queue would deduplicate its contents.
@@ -136,7 +106,6 @@ public final class RecordAndReplayPropagator<Tuple_ extends Tuple>
     }
 
     public void retract(Object object) {
-        markDirty();
         // remove an insert then retract (a fact was inserted but retracted before settling)
         // do not remove a retract then insert (a fact was updated)
         if (!insertQueue.remove(object)) {
@@ -214,7 +183,6 @@ public final class RecordAndReplayPropagator<Tuple_ extends Tuple>
     public void propagateInserts() {
         // propagateRetracts clears/process the insertQueue
         propagationQueue.propagateInserts();
-        dirty = layerDirtyBits == null;
     }
 
     private void insertIfAbsent(Tuple_ tuple) {

@@ -1,15 +1,12 @@
 package ai.timefold.solver.core.impl.bavet.common;
 
 import java.util.ArrayDeque;
-import java.util.BitSet;
 import java.util.Deque;
 import java.util.function.Consumer;
 
 import ai.timefold.solver.core.impl.bavet.common.tuple.Tuple;
 import ai.timefold.solver.core.impl.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.bavet.common.tuple.TupleState;
-
-import org.jspecify.annotations.Nullable;
 
 /**
  * The implementation moves tuples directly into an either retract, update or insert queue,
@@ -26,12 +23,6 @@ public final class StaticPropagationQueue<Tuple_ extends Tuple>
     private final Deque<Tuple_> updateQueue;
     private final Deque<Tuple_> insertQueue;
     private final TupleLifecycle<Tuple_> nextNodesTupleLifecycle;
-    // Dirty tracking; see Propagator.setDirtyTracking(...).
-    private @Nullable BitSet dirtyLayers;
-    private int layerIndex;
-    private @Nullable BitSet layerDirtyBits;
-    private int layerDirtyIndex;
-    private boolean dirty = true;
 
     public StaticPropagationQueue(TupleLifecycle<Tuple_> nextNodesTupleLifecycle, int size) {
         // Guesstimate that updates are dominant.
@@ -46,28 +37,7 @@ public final class StaticPropagationQueue<Tuple_ extends Tuple>
     }
 
     @Override
-    public void setDirtyTracking(BitSet dirtyLayers, int layerIndex, BitSet layerDirtyBits, int index) {
-        if (this.layerDirtyBits != null) {
-            throw new IllegalStateException("Impossible state: dirty tracking of (%s) is already set.".formatted(this));
-        }
-        this.dirtyLayers = dirtyLayers;
-        this.layerIndex = layerIndex;
-        this.layerDirtyBits = layerDirtyBits;
-        this.layerDirtyIndex = index;
-        this.dirty = true;
-    }
-
-    private void markDirty() {
-        if (!dirty) { // Only false when tracking is set.
-            dirty = true;
-            layerDirtyBits.set(layerDirtyIndex);
-            dirtyLayers.set(layerIndex);
-        }
-    }
-
-    @Override
     public void insert(Tuple_ carrier) {
-        markDirty();
         if (carrier.getState() == TupleState.CREATING) {
             throw new IllegalStateException("Impossible state: The tuple (%s) is already in the insert queue."
                     .formatted(carrier));
@@ -78,7 +48,6 @@ public final class StaticPropagationQueue<Tuple_ extends Tuple>
 
     @Override
     public void update(Tuple_ carrier) {
-        markDirty();
         if (carrier.getState() == TupleState.UPDATING) { // Skip double updates.
             return;
         }
@@ -88,7 +57,6 @@ public final class StaticPropagationQueue<Tuple_ extends Tuple>
 
     @Override
     public void retract(Tuple_ carrier, TupleState state) {
-        markDirty();
         var carrierState = carrier.getState();
         if (carrierState == state) { // Skip double retracts.
             return;
@@ -152,7 +120,6 @@ public final class StaticPropagationQueue<Tuple_ extends Tuple>
             throw new IllegalStateException("Impossible state: The update queue (%s) is not empty."
                     .formatted(updateQueue));
         }
-        dirty = layerDirtyBits == null;
     }
 
 }
