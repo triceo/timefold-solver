@@ -4,6 +4,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import ai.timefold.solver.core.config.solver.EnvironmentMode;
 import ai.timefold.solver.core.impl.bavet.AbstractSession;
 import ai.timefold.solver.core.impl.bavet.common.tuple.UniTuple;
 import ai.timefold.solver.core.impl.neighborhood.NeighborhoodsBavetNodeNetwork;
@@ -35,8 +36,9 @@ public final class DatasetSession<Solution_>
     private final Map<AbstractDataset<Solution_>, AbstractDatasetInstance<Solution_, ?>> datasetInstanceMap =
             new IdentityHashMap<>();
 
-    DatasetSession(NeighborhoodsBavetNodeNetwork nodeNetwork, SolutionView<Solution_> solutionView) {
-        super(nodeNetwork);
+    DatasetSession(NeighborhoodsBavetNodeNetwork nodeNetwork, SolutionView<Solution_> solutionView,
+            EnvironmentMode environmentMode) {
+        super(nodeNetwork, environmentMode);
         this.solutionView = Objects.requireNonNull(solutionView);
     }
 

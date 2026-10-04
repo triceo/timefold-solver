@@ -98,8 +98,15 @@ public sealed class BavetConstraintStreamScoreDirectorFactory<Solution_, Score_ 
     public BavetConstraintSession<Score_> newSession(@Nullable Solution_ workingSolution,
             ConsistencyTracker<Solution_> consistencyTracker, ConstraintMatchPolicy constraintMatchPolicy,
             boolean scoreDirectorDerived) {
+        return newSession(workingSolution, consistencyTracker, constraintMatchPolicy, scoreDirectorDerived,
+                globalEnvironmentMode);
+    }
+
+    public BavetConstraintSession<Score_> newSession(@Nullable Solution_ workingSolution,
+            ConsistencyTracker<Solution_> consistencyTracker, ConstraintMatchPolicy constraintMatchPolicy,
+            boolean scoreDirectorDerived, EnvironmentMode environmentMode) {
         return constraintSessionFactory.buildSession(workingSolution, consistencyTracker, constraintMatchPolicy,
-                scoreDirectorDerived);
+                scoreDirectorDerived, environmentMode);
     }
 
     @Override

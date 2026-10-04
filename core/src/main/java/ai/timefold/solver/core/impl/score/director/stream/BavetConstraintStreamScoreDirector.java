@@ -77,7 +77,7 @@ public final class BavetConstraintStreamScoreDirector<Solution_, Score_ extends 
     @Override
     public void setWorkingSolutionWithoutUpdatingShadows(Solution_ workingSolution) {
         session = scoreDirectorFactory.newSession(workingSolution, variableSupport.getConsistencyTracker(),
-                constraintMatchPolicy, derived);
+                constraintMatchPolicy, derived, environmentMode);
         super.setWorkingSolutionWithoutUpdatingShadows(workingSolution, session::insert);
     }
 
@@ -143,15 +143,16 @@ public final class BavetConstraintStreamScoreDirector<Solution_, Score_ extends 
 
     @Override
     public void afterVariableChanged(VariableDescriptor<Solution_> variableDescriptor, Object entity) {
-        session.update(entity);
+        // After the shadow writes it triggers; the session combines only consecutive updates of the same fact.
         super.afterVariableChanged(variableDescriptor, entity);
+        session.update(entity);
     }
 
     @Override
     public void afterListVariableChanged(ListVariableDescriptor<Solution_> variableDescriptor, Object entity, int fromIndex,
             int toIndex) {
-        session.update(entity);
         super.afterListVariableChanged(variableDescriptor, entity, fromIndex, toIndex);
+        session.update(entity);
     }
 
     // public void beforeEntityRemoved(EntityDescriptor entityDescriptor, Object entity) // Do nothing

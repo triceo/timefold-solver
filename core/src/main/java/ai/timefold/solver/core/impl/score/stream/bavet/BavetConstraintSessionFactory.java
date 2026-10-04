@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import ai.timefold.solver.core.api.score.Score;
 import ai.timefold.solver.core.api.score.stream.Constraint;
 import ai.timefold.solver.core.api.score.stream.ConstraintMetaModel;
+import ai.timefold.solver.core.config.solver.EnvironmentMode;
 import ai.timefold.solver.core.enterprise.TimefoldSolverEnterpriseService;
 import ai.timefold.solver.core.impl.bavet.common.AbstractRootNode;
 import ai.timefold.solver.core.impl.bavet.common.BavetAbstractConstraintStream;
@@ -56,7 +57,7 @@ public final class BavetConstraintSessionFactory<Solution_, Score_ extends Score
     @SuppressWarnings("unchecked")
     public BavetConstraintSession<Score_> buildSession(Solution_ workingSolution,
             ConsistencyTracker<Solution_> consistencyTracker, ConstraintMatchPolicy constraintMatchPolicy,
-            boolean scoreDirectorDerived) {
+            boolean scoreDirectorDerived, EnvironmentMode environmentMode) {
         var constraintWeightSupplier = solutionDescriptor.getConstraintWeightSupplier();
         var constraints = constraintMetaModel.getConstraints();
         if (constraintWeightSupplier != null) { // Fail fast on unknown constraints.
@@ -109,7 +110,7 @@ public final class BavetConstraintSessionFactory<Solution_, Score_ extends Score
         var scoreInliner = AbstractScoreInliner.buildScoreInliner(scoreDefinition, constraintWeightMap, constraintMatchPolicy);
         if (constraintStreamSet.isEmpty()) {
             LOGGER.warn("No constraints enabled for solution ({}).", workingSolution);
-            return new BavetConstraintSession<>(scoreInliner);
+            return new BavetConstraintSession<>(scoreInliner, environmentMode);
         }
 
         if (constraintWeightLoggingEnabled) {
@@ -117,7 +118,8 @@ public final class BavetConstraintSessionFactory<Solution_, Score_ extends Score
         }
         return new BavetConstraintSession<>(scoreInliner,
                 buildNodeNetwork(workingSolution, consistencyTracker, constraintStreamSet, scoreInliner, constraintProfiler,
-                        constraintMatchPolicy.isIndictmentsEnabled(), scoreDirectorDerived));
+                        constraintMatchPolicy.isIndictmentsEnabled(), scoreDirectorDerived),
+                environmentMode);
     }
 
     private ConstraintStreamsBavetNodeNetwork buildNodeNetwork(Solution_ workingSolution,

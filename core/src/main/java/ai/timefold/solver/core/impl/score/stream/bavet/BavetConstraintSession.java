@@ -4,6 +4,7 @@ import java.util.Map;
 
 import ai.timefold.solver.core.api.score.Score;
 import ai.timefold.solver.core.api.score.stream.ConstraintRef;
+import ai.timefold.solver.core.config.solver.EnvironmentMode;
 import ai.timefold.solver.core.impl.bavet.AbstractSession;
 import ai.timefold.solver.core.impl.bavet.common.PropagationQueue;
 import ai.timefold.solver.core.impl.domain.variable.declarative.ConsistencyTracker;
@@ -29,12 +30,13 @@ public final class BavetConstraintSession<Score_ extends Score<Score_>>
 
     private final AbstractScoreInliner<Score_> scoreInliner;
 
-    BavetConstraintSession(AbstractScoreInliner<Score_> scoreInliner) {
-        this(scoreInliner, ConstraintStreamsBavetNodeNetwork.EMPTY);
+    BavetConstraintSession(AbstractScoreInliner<Score_> scoreInliner, EnvironmentMode environmentMode) {
+        this(scoreInliner, ConstraintStreamsBavetNodeNetwork.EMPTY, environmentMode);
     }
 
-    BavetConstraintSession(AbstractScoreInliner<Score_> scoreInliner, ConstraintStreamsBavetNodeNetwork nodeNetwork) {
-        super(nodeNetwork);
+    BavetConstraintSession(AbstractScoreInliner<Score_> scoreInliner, ConstraintStreamsBavetNodeNetwork nodeNetwork,
+            EnvironmentMode environmentMode) {
+        super(nodeNetwork, environmentMode);
         this.scoreInliner = scoreInliner;
     }
 

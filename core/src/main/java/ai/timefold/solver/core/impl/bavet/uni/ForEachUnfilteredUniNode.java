@@ -1,5 +1,6 @@
 package ai.timefold.solver.core.impl.bavet.uni;
 
+import ai.timefold.solver.core.config.solver.EnvironmentMode;
 import ai.timefold.solver.core.impl.bavet.common.AbstractRootNode;
 import ai.timefold.solver.core.impl.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.bavet.common.tuple.UniTuple;
@@ -35,8 +36,12 @@ public final class ForEachUnfilteredUniNode<A>
     public void update(@Nullable A a) {
         var tuple = tupleMap.get(a);
         if (tuple == null) {
-            throw new IllegalStateException("The fact (%s) was never inserted."
-                    .formatted(a));
+            throw new IllegalStateException("""
+                    The fact (%s) was never inserted.
+                    Below environment mode (%s), consecutive updates of one fact are sent only at the next update \
+                    of a different fact, insert, retract or settle, so the stack trace can point to a later call.
+                    Maybe run with environment mode (%s) to see the original call."""
+                    .formatted(a, EnvironmentMode.STEP_ASSERT, EnvironmentMode.STEP_ASSERT));
         }
         updateExisting(a, tuple);
     }

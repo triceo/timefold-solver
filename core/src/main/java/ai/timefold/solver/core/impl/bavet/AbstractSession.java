@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import ai.timefold.solver.core.config.solver.EnvironmentMode;
 import ai.timefold.solver.core.impl.bavet.common.AbstractRootNode;
 import ai.timefold.solver.core.impl.bavet.common.AbstractRootNode.LifecycleOperation;
 
@@ -32,15 +33,24 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
     private AbstractRootNode<Object>[] lastRetractNodeArray = EMPTY_NODE_ARRAY;
     private boolean initialized = false;
     private boolean settled = false;
+    /**
+     * Consecutive updates of one fact are sent as one, after the last of them,
+     * so that a filtering root node evaluates its filter on the final state.
+     */
+    private @Nullable Object pendingUpdateFact;
+    // Asserted modes send each update at once, so that root node errors point to the call that caused them.
+    private final boolean combineUpdates;
 
-    protected AbstractSession(Network_ nodeNetwork) {
+    protected AbstractSession(Network_ nodeNetwork, EnvironmentMode environmentMode) {
         this.nodeNetwork = nodeNetwork;
+        this.combineUpdates = !environmentMode.isStepAssertOrMore();
         this.insertEffectiveClassToNodeArrayMap = HashMap.newHashMap(nodeNetwork.forEachNodeCount());
         this.updateEffectiveClassToNodeArrayMap = HashMap.newHashMap(nodeNetwork.forEachNodeCount());
         this.retractEffectiveClassToNodeArrayMap = HashMap.newHashMap(nodeNetwork.forEachNodeCount());
     }
 
     public final void insert(Object fact) {
+        flushPendingUpdate();
         settled = false;
         for (var node : getInsertNodes(fact.getClass())) {
             node.insert(fact);
@@ -73,8 +83,30 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
         return nodeArray;
     }
 
+    /**
+     * Below {@link EnvironmentMode#STEP_ASSERT}, the update reaches the nodes only at the next update of a different fact,
+     * or at the next {@link #insert(Object)}, {@link #retract(Object)} or {@link #settle()}.
+     */
     public final void update(Object fact) {
         settled = false;
+        if (!combineUpdates) {
+            sendUpdate(fact);
+        } else if (fact != pendingUpdateFact) {
+            flushPendingUpdate();
+            pendingUpdateFact = fact;
+        }
+    }
+
+    private void flushPendingUpdate() {
+        var fact = pendingUpdateFact;
+        if (fact == null) {
+            return;
+        }
+        pendingUpdateFact = null;
+        sendUpdate(fact);
+    }
+
+    private void sendUpdate(Object fact) {
         for (var node : getUpdateNodes(fact.getClass())) {
             node.update(fact);
         }
@@ -89,6 +121,11 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
     }
 
     public final void retract(Object fact) {
+        if (fact == pendingUpdateFact) { // The retract makes the pending update moot.
+            pendingUpdateFact = null;
+        } else {
+            flushPendingUpdate();
+        }
         settled = false;
         for (var node : getRetractNodes(fact.getClass())) {
             node.retract(fact);
@@ -104,6 +141,7 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
     }
 
     public final void settle() {
+        flushPendingUpdate();
         if (settled) {
             return;
         }
@@ -127,6 +165,7 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
                 .toArray(AbstractRootNode[]::new));
     }
 
+    /** Read node state only after {@link #settle()}, which sends any pending update. */
     public Network_ getNodeNetwork() {
         return nodeNetwork;
     }
