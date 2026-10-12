@@ -19,18 +19,20 @@ import ai.timefold.solver.core.testdomain.list.TestdataListValue;
 import ai.timefold.solver.core.testdomain.list.valuerange.TestdataListEntityProvidingEntity;
 import ai.timefold.solver.core.testdomain.list.valuerange.TestdataListEntityProvidingSolution;
 import ai.timefold.solver.core.testdomain.list.valuerange.TestdataListEntityProvidingValue;
+import ai.timefold.solver.core.testutil.UndoJournalingAnswer;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class SelectorBasedListAssignMoveTest {
 
-    private final InnerScoreDirector<TestdataListSolution, ?> innerScoreDirector = mock(InnerScoreDirector.class);
+    private final InnerScoreDirector<TestdataListSolution, ?> innerScoreDirector =
+            mock(InnerScoreDirector.class, new UndoJournalingAnswer());
     private final MoveDirector<TestdataListSolution, ?> moveDirector = new MoveDirector<>(innerScoreDirector);
     private final ListVariableDescriptor<TestdataListSolution> variableDescriptor =
             TestdataListEntity.buildVariableDescriptorForValueList();
     private final InnerScoreDirector<TestdataListEntityProvidingSolution, ?> otherInnerScoreDirector =
-            mock(InnerScoreDirector.class);
+            mock(InnerScoreDirector.class, new UndoJournalingAnswer());
     private final ListVariableDescriptor<TestdataListEntityProvidingSolution> otherVariableDescriptor =
             TestdataListEntityProvidingEntity.buildVariableDescriptorForValueList();
     private final ValueRangeManager<TestdataListEntityProvidingSolution> valueRangeManager =

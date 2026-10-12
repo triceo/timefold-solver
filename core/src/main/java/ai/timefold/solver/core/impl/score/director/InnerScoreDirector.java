@@ -20,6 +20,7 @@ import ai.timefold.solver.core.impl.domain.variable.descriptor.ListVariableDescr
 import ai.timefold.solver.core.impl.domain.variable.descriptor.VariableDescriptor;
 import ai.timefold.solver.core.impl.domain.variable.supply.SupplyManager;
 import ai.timefold.solver.core.impl.move.MoveDirector;
+import ai.timefold.solver.core.impl.move.UndoJournal;
 import ai.timefold.solver.core.impl.neighborhood.MoveRepository;
 import ai.timefold.solver.core.impl.neighborhood.NeighborhoodsBasedMoveRepository;
 import ai.timefold.solver.core.impl.phase.scope.SolverLifecyclePoint;
@@ -380,6 +381,62 @@ public interface InnerScoreDirector<Solution_, Score_ extends Score<Score_>>
      *         Note: Planning models with {@link ShadowVariablesInconsistent} will always result in successful updates.
      */
     boolean isLastVariableUpdateSuccessful();
+
+    /**
+     * @return the innermost open journal; null if none is open
+     */
+    default @Nullable UndoJournal<Solution_> getUndoJournal() {
+        return null;
+    }
+
+    /**
+     * Opens a journal that records all changes until {@link #closeUndoJournal(UndoJournal)}.
+     * Open journals nest; an inner journal forwards its records to the outer one.
+     */
+    default UndoJournal<Solution_> openUndoJournal() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @param journal must be the innermost open journal
+     */
+    default void closeUndoJournal(UndoJournal<Solution_> journal) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * While true, variable events skip shadow variable processing;
+     * the score calculation is still notified.
+     */
+    default void setRestoring(boolean restoring) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @return true if a variable event happened after the last shadow variable update
+     */
+    default boolean isShadowVariableUpdatePending() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Writes back the state that {@link #openUndoJournal()} captured.
+     *
+     * @param variableSupportUndoState the shadow variable support snapshot
+     * @param lastVariableUpdateSuccessful the value for {@link #isLastVariableUpdateSuccessful()}
+     */
+    default void restoreUndoState(@Nullable Object variableSupportUndoState, boolean lastVariableUpdateSuccessful) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * In fully asserted environment modes, checks the supplies and the shadow variables after an undo journal restore.
+     *
+     * @param completedAction the restored journal, for the message
+     */
+    default void assertUndoJournalRestored(Object completedAction) {
+        // Do nothing by default.
+    }
 
     /**
      * A derived score director is created from a root score director.

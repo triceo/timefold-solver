@@ -16,6 +16,7 @@ import ai.timefold.solver.core.impl.score.director.InnerScore;
 import ai.timefold.solver.core.impl.score.director.InnerScoreDirector;
 import ai.timefold.solver.core.preview.api.move.Move;
 import ai.timefold.solver.core.testdomain.TestdataSolution;
+import ai.timefold.solver.core.testutil.UndoJournalingAnswer;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,7 +36,7 @@ class DefaultPhaseCommandContextTest {
     void setUp() {
         var solution = TestdataSolution.generateSolution(3, 2);
         move = mock(Move.class);
-        scoreDirector = mock(InnerScoreDirector.class);
+        scoreDirector = mock(InnerScoreDirector.class, new UndoJournalingAnswer());
         when(scoreDirector.getWorkingSolution()).thenReturn(solution);
         // The real InnerScoreDirector never returns null here, and executeTemporary* needs it
         // to read and restore the working solution's score around the temporary move.

@@ -142,6 +142,10 @@ final class DefaultListVariableState<Solution_> implements ListVariableState<Sol
         return stateCarrier.getUnassignedCount();
     }
 
+    int getPositionMapSize() {
+        return stateCarrier.getPositionMapSize();
+    }
+
     @Override
     public @Nullable Object getPreviousElement(Object element) {
         return stateCarrier.getPreviousElement(element);

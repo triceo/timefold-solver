@@ -15,7 +15,6 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -35,7 +34,6 @@ import ai.timefold.solver.core.impl.heuristic.selector.move.generic.RuinRecreate
 import ai.timefold.solver.core.impl.heuristic.selector.move.generic.RuinRecreateConstructionHeuristicPhaseBuilder;
 import ai.timefold.solver.core.impl.heuristic.selector.move.generic.SelectorBasedRuinRecreateMove;
 import ai.timefold.solver.core.impl.heuristic.selector.move.generic.list.SelectorBasedListAssignMove;
-import ai.timefold.solver.core.impl.heuristic.selector.move.generic.list.ruin.SelectorBasedListRuinRecreateMove;
 import ai.timefold.solver.core.impl.score.director.InnerScoreDirector;
 import ai.timefold.solver.core.impl.score.director.easy.EasyScoreDirectorFactory;
 import ai.timefold.solver.core.impl.score.director.stream.BavetConstraintStreamScoreDirector;
@@ -70,6 +68,7 @@ import ai.timefold.solver.core.testdomain.unassignedvar.TestdataAllowsUnassigned
 import ai.timefold.solver.core.testdomain.unassignedvar.TestdataAllowsUnassignedSolution;
 import ai.timefold.solver.core.testdomain.valuerange.entityproviding.TestdataEntityProvidingEntity;
 import ai.timefold.solver.core.testdomain.valuerange.entityproviding.TestdataEntityProvidingSolution;
+import ai.timefold.solver.core.testutil.UndoJournalingAnswer;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -82,7 +81,7 @@ class MoveDirectorTest {
         var variableMetaModel = solutionMetaModel.genuineEntity(TestdataEntity.class)
                 .basicVariable("value", TestdataValue.class);
 
-        var mockScoreDirector = mock(InnerScoreDirector.class);
+        var mockScoreDirector = mock(InnerScoreDirector.class, new UndoJournalingAnswer());
         var moveDirector = new MoveDirector<TestdataSolution, SimpleScore>(mockScoreDirector);
         var expectedValue = new TestdataValue("value");
         var actualValue = moveDirector.getValue(variableMetaModel, new TestdataEntity("A", expectedValue));
@@ -114,7 +113,7 @@ class MoveDirectorTest {
         var solutionMetaModel = TestdataEntityProvidingSolution.buildMetaModel();
         var variableMetaModel = solutionMetaModel.genuineEntity(TestdataEntityProvidingEntity.class).basicVariable();
 
-        var mockScoreDirector = mock(InnerScoreDirector.class);
+        var mockScoreDirector = mock(InnerScoreDirector.class, new UndoJournalingAnswer());
         var moveDirector = new MoveDirector<TestdataEntityProvidingSolution, SimpleScore>(mockScoreDirector);
 
         // The 2-arg overload only works for a solution-scoped range; this variable's range is on the entity, so it must fail loudly instead of silently checking against a null entity.
@@ -137,7 +136,8 @@ class MoveDirectorTest {
         var newValue = new TestdataValue("newValue");
 
         // Run a change and undo it.
-        var mockScoreDirector = (InnerScoreDirector<TestdataSolution, ?>) mock(InnerScoreDirector.class);
+        var mockScoreDirector =
+                (InnerScoreDirector<TestdataSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
         var moveDirector = new MoveDirector<>(mockScoreDirector).ephemeral();
         moveDirector.changeVariable(variableMetaModel, entity, newValue);
         assertThat(entity.getValue()).isEqualTo(newValue);
@@ -157,7 +157,8 @@ class MoveDirectorTest {
         var variableMetaModel = solutionMetaModel.genuineEntity(TestdataListEntity.class)
                 .listVariable("valueList", TestdataListValue.class);
 
-        var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+        var mockScoreDirector =
+                (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
         var moveDirector = new MoveDirector<>(mockScoreDirector);
         var expectedValue1 = new TestdataListValue("value1");
         var expectedValue2 = new TestdataListValue("value2");
@@ -822,7 +823,8 @@ class MoveDirectorTest {
                     .listVariable("valueList", TestdataListValue.class);
             var entity = new TestdataListEntity("A", new TestdataListValue("value1"), new TestdataListValue("value2"));
 
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector);
             assertThat(moveDirector.getFirstUnpinnedIndex(variableMetaModel, entity)).isZero();
         }
@@ -839,7 +841,8 @@ class MoveDirectorTest {
             entity.setPinIndex(2);
 
             var mockScoreDirector =
-                    (InnerScoreDirector<TestdataPinnedWithIndexListSolution, ?>) mock(InnerScoreDirector.class);
+                    (InnerScoreDirector<TestdataPinnedWithIndexListSolution, ?>) mock(InnerScoreDirector.class,
+                            new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector);
             assertThat(moveDirector.getFirstUnpinnedIndex(variableMetaModel, entity)).isEqualTo(2);
         }
@@ -864,7 +867,8 @@ class MoveDirectorTest {
             var entity = new TestdataListEntity("A", expectedValue1, expectedValue2, expectedValue3);
 
             // Move value from last to first position.
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector).ephemeral();
             moveDirector.moveValueInList(variableMetaModel, entity, 2, 0);
             assertThat(entity.getValueList()).containsExactly(expectedValue3, expectedValue1, expectedValue2);
@@ -910,7 +914,8 @@ class MoveDirectorTest {
 
             // Move value from first position to the end
             // (after removing, destination index is 2).
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector).ephemeral();
             moveDirector.moveValueInList(variableMetaModel, entity, 0, 2);
             assertThat(entity.getValueList()).containsExactly(expectedValue2, expectedValue3, expectedValue1);
@@ -942,7 +947,8 @@ class MoveDirectorTest {
 
             // Shift value2 (index 1) right by 2 positions,
             // so it ends up at index 3.
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector).ephemeral();
             var shiftedValue = moveDirector.shiftValue(variableMetaModel, entity, 1, 2);
             assertThat(shiftedValue).isEqualTo(value2);
@@ -974,7 +980,8 @@ class MoveDirectorTest {
 
             // Shift value1 (index 0) right by 1 position,
             // so it ends up at index 1.
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector).ephemeral();
             var shiftedValue = moveDirector.shiftValue(variableMetaModel, entity, 0, 1);
             assertThat(shiftedValue).isEqualTo(value1);
@@ -1007,7 +1014,8 @@ class MoveDirectorTest {
 
             // Shift value3 (index 2) left by 2 positions,
             // so it ends up at index 0.
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector).ephemeral();
             var shiftedValue = moveDirector.shiftValue(variableMetaModel, entity, 2, -2);
             assertThat(shiftedValue).isEqualTo(value3);
@@ -1039,7 +1047,8 @@ class MoveDirectorTest {
 
             // Shift value3 (index 2) left by 1 position,
             // so it ends up at index 1.
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector).ephemeral();
             var shiftedValue = moveDirector.shiftValue(variableMetaModel, entity, 2, -1);
             assertThat(shiftedValue).isEqualTo(value3);
@@ -1070,7 +1079,8 @@ class MoveDirectorTest {
             var entity = new TestdataListEntity("A", value1, value2, value3);
 
             // Shift value1 (index 0) right by 2 positions to the end of the list.
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector).ephemeral();
             var shiftedValue = moveDirector.shiftValue(variableMetaModel, entity, 0, 2);
             assertThat(shiftedValue).isEqualTo(value1);
@@ -1095,7 +1105,8 @@ class MoveDirectorTest {
             var value1 = new TestdataListValue("value1");
             var entity = new TestdataListEntity("A", value1);
 
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector);
             assertThatThrownBy(() -> moveDirector.shiftValue(variableMetaModel, entity, 0, 0))
                     .isInstanceOf(IllegalArgumentException.class)
@@ -1121,7 +1132,8 @@ class MoveDirectorTest {
             var entityB = new TestdataListEntity("B", expectedValueB1, expectedValueB2, expectedValueB3);
 
             // Move between second and last position.
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector).ephemeral();
             moveDirector.moveValueBetweenLists(variableMetaModel, entityA, 1, entityB, 2);
             assertThat(entityA.getValueList()).containsExactly(expectedValueA1, expectedValueA3);
@@ -1162,7 +1174,8 @@ class MoveDirectorTest {
             var entityB = new TestdataListEntity("B", expectedValueB1, expectedValueB2, expectedValueB3);
 
             // Move from entityA to the end of entityB.
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector).ephemeral();
             moveDirector.moveValueBetweenLists(variableMetaModel, entityA, 1, entityB, 3);
             assertThat(entityA.getValueList()).containsExactly(expectedValueA1, expectedValueA3);
@@ -1199,7 +1212,8 @@ class MoveDirectorTest {
             var entityB = new TestdataListEntity("B");
 
             // Move from entityA to the empty entityB.
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector).ephemeral();
             moveDirector.moveValueBetweenLists(variableMetaModel, entityA, 0, entityB, 0);
             assertThat(entityA.getValueList()).containsExactly(expectedValueA2);
@@ -1236,7 +1250,8 @@ class MoveDirectorTest {
 
             // Move by one step forward
             // (distance=1, triggers swap path in moveInList).
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector).ephemeral();
             var moved = moveDirector.moveValueInList(variableMetaModel, entity, 0, 1);
             assertThat(moved).isSameAs(value1);
@@ -1271,7 +1286,8 @@ class MoveDirectorTest {
 
             // Move forward: from index 0 to index 2
             // (rotate left on subList(0, 3)).
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector).ephemeral();
             var moved = moveDirector.moveValueInList(variableMetaModel, entity, 0, 2);
             assertThat(moved).isSameAs(values[0]);
@@ -1331,7 +1347,8 @@ class MoveDirectorTest {
 
             // Move the span [1, 3)
             // (value2, value3) to the end of the (post-removal) list.
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector).ephemeral();
             var movedValues = moveDirector.moveValuesInList(variableMetaModel, entity, 1, 3, 3, false);
             assertThat(movedValues).containsExactly(value2, value3);
@@ -1365,7 +1382,8 @@ class MoveDirectorTest {
 
             // Move the span [3, 5)
             // (value4, value5) to the start of the list, reversed.
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector).ephemeral();
             var movedValues = moveDirector.moveValuesInList(variableMetaModel, entity, 3, 5, 0, true);
             assertThat(movedValues).containsExactly(value5, value4);
@@ -1388,7 +1406,8 @@ class MoveDirectorTest {
                     .listVariable("valueList", TestdataListValue.class);
             var entity = new TestdataListEntity("A", new TestdataListValue("value1"), new TestdataListValue("value2"));
 
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector);
             assertThatThrownBy(() -> moveDirector.moveValuesInList(variableMetaModel, entity, 1, 1, 0, false))
                     .isInstanceOf(IllegalArgumentException.class)
@@ -1406,7 +1425,8 @@ class MoveDirectorTest {
             var value3 = new TestdataListValue("value3");
             var entity = new TestdataListEntity("A", value1, value2, value3);
 
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector);
             // The span [0, 1) has length 1; after its removal the list has 2 elements,
             // so the only valid destinationIndex values are 0, 1 and 2.
@@ -1438,7 +1458,8 @@ class MoveDirectorTest {
 
             // Move the span [1, 3)
             // (valueA2, valueA3) from A into B at index 1.
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector).ephemeral();
             var movedValues = moveDirector.moveValuesBetweenLists(variableMetaModel, entityA, 1, 3, entityB, 1, false);
             assertThat(movedValues).containsExactly(valueA2, valueA3);
@@ -1476,7 +1497,8 @@ class MoveDirectorTest {
 
             // Move the span [0, 2)
             // (valueA1, valueA2) from A to the end of B, reversed.
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector).ephemeral();
             var movedValues = moveDirector.moveValuesBetweenLists(variableMetaModel, entityA, 0, 2, entityB, 2, true);
             assertThat(movedValues).containsExactly(valueA2, valueA1);
@@ -1496,7 +1518,8 @@ class MoveDirectorTest {
                     .listVariable("valueList", TestdataListValue.class);
             var entity = new TestdataListEntity("A", new TestdataListValue("value1"), new TestdataListValue("value2"));
 
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector);
             assertThatThrownBy(() -> moveDirector.moveValuesBetweenLists(variableMetaModel, entity, 0, 1, entity, 0, false))
                     .isInstanceOf(IllegalArgumentException.class)
@@ -1513,7 +1536,8 @@ class MoveDirectorTest {
             var valueB1 = new TestdataListValue("valueB1");
             var entityB = new TestdataListEntity("B", valueB1);
 
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector);
             // entityB's list has 1 element,
             // so the only valid destinationIndex values are 0 and 1.
@@ -1534,7 +1558,8 @@ class MoveDirectorTest {
             var entityA = new TestdataListEntity("A", new TestdataListValue("value1"));
             var entityB = new TestdataListEntity("B", new TestdataListValue("value2"));
 
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector);
             assertThatThrownBy(
                     () -> moveDirector.moveValuesBetweenLists(variableMetaModel, entityA, 1, 1, entityB, 0, false))
@@ -1563,7 +1588,8 @@ class MoveDirectorTest {
             var entity = new TestdataListEntity("A", expectedValue1, expectedValue2, expectedValue3);
 
             // Swap between first and last position.
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector).ephemeral();
             moveDirector.swapValuesInList(variableMetaModel, entity, 0, 2);
             assertThat(entity.getValueList()).containsExactly(expectedValue3, expectedValue2, expectedValue1);
@@ -1607,7 +1633,8 @@ class MoveDirectorTest {
             var entity = new TestdataListEntity("A", expectedValue1, expectedValue2, expectedValue3);
 
             // Swap adjacent values (first and second).
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector).ephemeral();
             moveDirector.swapValuesInList(variableMetaModel, entity, 0, 1);
             assertThat(entity.getValueList()).containsExactly(expectedValue2, expectedValue1, expectedValue3);
@@ -1641,7 +1668,8 @@ class MoveDirectorTest {
             var entityB = new TestdataListEntity("B", expectedValueB1, expectedValueB2, expectedValueB3);
 
             // Swap between second and last position.
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector).ephemeral();
             moveDirector.swapValuesBetweenLists(variableMetaModel, entityA, 1, entityB, 2);
             assertThat(entityA.getValueList()).containsExactly(expectedValueA1, expectedValueB3, expectedValueA3);
@@ -1680,7 +1708,8 @@ class MoveDirectorTest {
             var entityB = new TestdataListEntity("B", expectedValueB1, expectedValueB2, expectedValueB3);
 
             // Swap first element of entityA with last element of entityB.
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector).ephemeral();
             moveDirector.swapValuesBetweenLists(variableMetaModel, entityA, 0, entityB, 2);
             assertThat(entityA.getValueList()).containsExactly(expectedValueB3, expectedValueA2);
@@ -1724,7 +1753,8 @@ class MoveDirectorTest {
             var entity = new TestdataListEntity("A", value1, value2, value3, value4, value5, value6);
 
             // Swap the span [1, 3) (value2, value3) with the span [4, 6) (value5, value6).
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector).ephemeral();
             moveDirector.swapValuesInList(variableMetaModel, entity, 1, 3, 4, 6, false);
             assertThat(entity.getValueList()).containsExactly(value1, value5, value6, value4, value2, value3);
@@ -1753,7 +1783,8 @@ class MoveDirectorTest {
             var entity = new TestdataListEntity("A", value1, value2, value3, value4, value5);
 
             // Swap the touching spans [0, 2) (value1, value2) and [2, 4) (value3, value4).
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector).ephemeral();
             moveDirector.swapValuesInList(variableMetaModel, entity, 0, 2, 2, 4, false);
             assertThat(entity.getValueList()).containsExactly(value3, value4, value1, value2, value5);
@@ -1777,7 +1808,8 @@ class MoveDirectorTest {
             var value6 = new TestdataListValue("value6");
             var entity = new TestdataListEntity("A", value1, value2, value3, value4, value5, value6);
 
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector).ephemeral();
             moveDirector.swapValuesInList(variableMetaModel, entity, 1, 3, 4, 6, true);
             assertThat(entity.getValueList()).containsExactly(value1, value6, value5, value4, value3, value2);
@@ -1798,7 +1830,8 @@ class MoveDirectorTest {
             }
             var entity = new TestdataListEntity("A", values);
 
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector);
             assertThatThrownBy(() -> moveDirector.swapValuesInList(variableMetaModel, entity, 2, 4, 1, 3, false))
                     .isInstanceOf(IllegalArgumentException.class)
@@ -1817,7 +1850,8 @@ class MoveDirectorTest {
             }
             var entity = new TestdataListEntity("A", values);
 
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector);
             assertThatThrownBy(() -> moveDirector.swapValuesInList(variableMetaModel, entity, 1, 1, 2, 3, false))
                     .isInstanceOf(IllegalArgumentException.class);
@@ -1843,7 +1877,8 @@ class MoveDirectorTest {
             var entityB = new TestdataListEntity("B", valueB1, valueB2, valueB3);
 
             // Swap the span [1, 3) (valueA2, valueA3) on A with the span [0, 1) (valueB1) on B.
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector).ephemeral();
             moveDirector.swapValuesBetweenLists(variableMetaModel, entityA, 1, 3, entityB, 0, 1, false);
             assertThat(entityA.getValueList()).containsExactly(valueA1, valueB1, valueA4);
@@ -1870,7 +1905,8 @@ class MoveDirectorTest {
             var entity = new TestdataListEntity("A", new TestdataListValue("value1"), new TestdataListValue("value2"),
                     new TestdataListValue("value3"), new TestdataListValue("value4"));
 
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector);
             assertThatThrownBy(
                     () -> moveDirector.swapValuesBetweenLists(variableMetaModel, entity, 0, 1, entity, 2, 3, false))
@@ -1887,7 +1923,8 @@ class MoveDirectorTest {
             var entityA = new TestdataListEntity("A", new TestdataListValue("value1"));
             var entityB = new TestdataListEntity("B", new TestdataListValue("value2"));
 
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector);
             assertThatThrownBy(
                     () -> moveDirector.swapValuesBetweenLists(variableMetaModel, entityA, 0, 0, entityB, 0, 1, false))
@@ -1915,7 +1952,8 @@ class MoveDirectorTest {
 
             // Replace at replacementIndex=2 using sourceIndex=0 (sourceIndex < replacementIndex).
             // value3 is unassigned; value1 takes its position.
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector).ephemeral();
             var replaced = moveDirector.replaceValue(variableMetaModel, entity, 0, 2);
             assertThat(replaced).isSameAs(value3);
@@ -1962,7 +2000,8 @@ class MoveDirectorTest {
             var variableMetaModel = solutionMetaModel.genuineEntity(TestdataListEntity.class)
                     .listVariable("valueList", TestdataListValue.class);
             var entity = new TestdataListEntity("A", new TestdataListValue("value1"), new TestdataListValue("value2"));
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector);
             assertThatThrownBy(() -> moveDirector.replaceValue(variableMetaModel, entity, 1, 1))
                     .isInstanceOf(IllegalArgumentException.class);
@@ -1974,7 +2013,8 @@ class MoveDirectorTest {
             var variableMetaModel = solutionMetaModel.genuineEntity(TestdataListEntity.class)
                     .listVariable("valueList", TestdataListValue.class);
             var entity = new TestdataListEntity("A", new TestdataListValue("value1"), new TestdataListValue("value2"));
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector);
             assertThatThrownBy(() -> moveDirector.replaceValue(variableMetaModel, entity, -1, 1))
                     .isInstanceOf(IndexOutOfBoundsException.class);
@@ -2000,7 +2040,8 @@ class MoveDirectorTest {
 
             // Replace valueA2 (sourceEntity index 1) with valueB3 (replacementEntity index 2).
             // valueA2 is unassigned; valueB3 moves into entityA; entityB shrinks by one.
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector).ephemeral();
             var replaced = moveDirector.replaceValue(variableMetaModel, entityB, 2, entityA, 1);
             assertThat(replaced).isSameAs(valueA2);
@@ -2048,7 +2089,8 @@ class MoveDirectorTest {
             var entity = new TestdataListEntity("A", value1, value2, value3, value4, value5);
 
             // Unassign the span [1, 4) (value2, value3, value4).
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector).ephemeral();
             var unassignedValues = moveDirector.unassignValues(variableMetaModel, entity, 1, 4);
             assertThat(unassignedValues).containsExactly(value2, value3, value4);
@@ -2075,7 +2117,8 @@ class MoveDirectorTest {
                     .listVariable("valueList", TestdataListValue.class);
             var entity = new TestdataListEntity("A", new TestdataListValue("value1"), new TestdataListValue("value2"));
 
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var moveDirector = new MoveDirector<>(mockScoreDirector);
             assertThatThrownBy(() -> moveDirector.unassignValues(variableMetaModel, entity, 1, 1))
                     .isInstanceOf(IllegalArgumentException.class)
@@ -2106,7 +2149,8 @@ class MoveDirectorTest {
             var entityB = new TestdataListEntity("B", b1, b2);
             var entityC = new TestdataListEntity("C", c1);
 
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var stateMock = mock(ListVariableState.class);
             when(stateMock.getElementPosition(a2)).thenReturn(ElementPosition.of(entityA, 1));
             when(stateMock.getElementPosition(b1)).thenReturn(ElementPosition.of(entityB, 0));
@@ -2162,7 +2206,8 @@ class MoveDirectorTest {
             var a4 = new TestdataListValue("a4");
             var entityA = new TestdataListEntity("A", a1, a2, a3, a4);
 
-            var mockScoreDirector = (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class);
+            var mockScoreDirector =
+                    (InnerScoreDirector<TestdataListSolution, ?>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
             var stateMock = mock(ListVariableState.class);
             when(stateMock.getElementPosition(a2)).thenReturn(ElementPosition.of(entityA, 1));
             when(stateMock.getElementPosition(a4)).thenReturn(ElementPosition.of(entityA, 3));
@@ -2193,7 +2238,7 @@ class MoveDirectorTest {
 
     @Test
     void lookUpWorkingObject() {
-        var mockScoreDirector = mock(InnerScoreDirector.class);
+        var mockScoreDirector = mock(InnerScoreDirector.class, new UndoJournalingAnswer());
         when(mockScoreDirector.lookUpWorkingObject(any(TestdataValue.class))).thenAnswer(invocation -> {
             var value = (TestdataValue) invocation.getArgument(0);
             return new TestdataValue(value.getCode());
@@ -2209,83 +2254,9 @@ class MoveDirectorTest {
     }
 
     @Test
-    void undoNestedPhaseMove() {
-        var innerScoreDirector = (InnerScoreDirector<TestdataListSolution, SimpleScore>) mock(InnerScoreDirector.class);
-        var moveDirector = new MoveDirector<>(innerScoreDirector);
-        var listVariableState = mock(ListVariableState.class);
-        var listVariableDescriptor = mock(ListVariableDescriptor.class);
-        var supplyManager = mock(SupplyManager.class);
-        var ruinRecreateConstructionHeuristicPhaseBuilder = mock(RuinRecreateConstructionHeuristicPhaseBuilder.class);
-        var constructionHeuristicPhase = mock(RuinRecreateConstructionHeuristicPhase.class);
-
-        // The objective is to simulate the reassignment of v1 from e1 to e2
-        // The R&R move analyzes only e1 initially,
-        // since it is impossible to know that v1 will be assigned to e2 during the nested CH phase
-        var v1 = new TestdataListValue("v1");
-        var v2 = new TestdataListValue("v2");
-        var e1 = new TestdataListEntity("e1", v1);
-        var e2 = new TestdataListEntity("e2", v2, v1);
-        var s1 = new TestdataListSolution();
-        s1.setEntityList(List.of(e1, e2));
-        s1.setValueList(List.of(v1, v2));
-        when(innerScoreDirector.getWorkingSolution()).thenReturn(s1);
-        when(innerScoreDirector.isDerived()).thenReturn(false);
-        when(innerScoreDirector.getSupplyManager()).thenReturn(supplyManager);
-        when(innerScoreDirector.getListVariableState(any(ListVariableDescriptor.class))).thenReturn(listVariableState);
-        // 1 - v1 is on e1 list
-        // 2 - v1 moves to e2 list
-        when(listVariableState.getElementPosition(any())).thenReturn(ElementPosition.of(e1, 0),
-                ElementPosition.of(e2, 1));
-        when(listVariableState.getSourceVariableDescriptor()).thenReturn(listVariableDescriptor);
-        when(listVariableDescriptor.getFirstUnpinnedIndex(any())).thenReturn(0);
-        // Answer per entity, not per invocation order, and keep getListSize consistent with getValue -
-        // the real ListVariableDescriptor.getListSize(entity) IS getValue(entity).size(), and the
-        // recorder verifies that the reported range accounts for the list's actual length change.
-        when(listVariableDescriptor.getValue(any()))
-                .thenAnswer(invocation -> invocation.<TestdataListEntity> getArgument(0).getValueList());
-        when(listVariableDescriptor.getListSize(any()))
-                .thenAnswer(invocation -> invocation.<TestdataListEntity> getArgument(0).getValueList().size());
-        // Ignore the nested phase but simulates v1 moving to e2
-        when(ruinRecreateConstructionHeuristicPhaseBuilder.withElementsToRecreate(any()))
-                .thenReturn(ruinRecreateConstructionHeuristicPhaseBuilder);
-        when(ruinRecreateConstructionHeuristicPhaseBuilder.withElementsToRuin(any()))
-                .thenReturn(ruinRecreateConstructionHeuristicPhaseBuilder);
-        when(ruinRecreateConstructionHeuristicPhaseBuilder.ensureThreadSafe(any()))
-                .thenReturn(ruinRecreateConstructionHeuristicPhaseBuilder);
-        when(ruinRecreateConstructionHeuristicPhaseBuilder.build()).thenReturn(constructionHeuristicPhase);
-        when(constructionHeuristicPhase.getMissingUpdatedElementsMap()).thenReturn(Map.of(e2, List.of(v2)));
-
-        var ephemeralMoveDirector = moveDirector.ephemeral();
-        var move = new SelectorBasedListRuinRecreateMove<TestdataListSolution>(listVariableDescriptor,
-                ruinRecreateConstructionHeuristicPhaseBuilder, new SolverScope<>(), List.of(v1),
-                new LinkedHashSet<>(Set.of(e1)), 0L);
-        move.execute(ephemeralMoveDirector);
-        var undoMove = (RecordedUndoMove<TestdataListSolution>) ephemeralMoveDirector.createUndoMove();
-        // e1 must be analyzed at the beginning of the move execution
-        assertThat(undoMove.variableChangeActionList().stream().anyMatch(action -> {
-            if (action instanceof ListVariableBeforeChangeAction<?, ?, ?> beforeChangeAction) {
-                return beforeChangeAction.entity() == e1 && beforeChangeAction.fromIndex() == 0
-                        && beforeChangeAction.originalToIndex() == 1 && beforeChangeAction.oldValue().size() == 1
-                        && beforeChangeAction.oldValue().getFirst().equals(v1);
-            }
-            return false;
-        })).isTrue();
-        // e2 is not analyzed at the beginning of move execution,
-        // but it must have a before list change event to restore the original elements.
-        assertThat(undoMove.variableChangeActionList().stream().anyMatch(action -> {
-            if (action instanceof ListVariableBeforeChangeAction<?, ?, ?> beforeChangeAction) {
-                return beforeChangeAction.entity() == e2 && beforeChangeAction.fromIndex() == 0
-                        && beforeChangeAction.originalToIndex() == 1 && beforeChangeAction.oldValue().size() == 1
-                        && beforeChangeAction.oldValue().getFirst().equals(v2);
-            }
-            return false;
-        })).isTrue();
-        ephemeralMoveDirector.close();
-    }
-
-    @Test
     void testSolverScopeNestedPhase() {
-        var innerScoreDirector = (InnerScoreDirector<TestdataSolution, SimpleScore>) mock(InnerScoreDirector.class);
+        var innerScoreDirector =
+                (InnerScoreDirector<TestdataSolution, SimpleScore>) mock(InnerScoreDirector.class, new UndoJournalingAnswer());
         var moveDirector = new MoveDirector<>(innerScoreDirector);
         var genuineVariableDescriptor = mock(GenuineVariableDescriptor.class);
         var supplyManager = mock(SupplyManager.class);

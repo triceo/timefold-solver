@@ -43,6 +43,7 @@ import ai.timefold.solver.core.impl.domain.variable.violation.TrackerResolver;
 import ai.timefold.solver.core.impl.score.director.InnerScoreDirector;
 import ai.timefold.solver.core.impl.score.director.ScoreDirector;
 import ai.timefold.solver.core.impl.util.LinkedIdentityHashSet;
+import ai.timefold.solver.core.preview.api.domain.metamodel.PositionInList;
 
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -569,6 +570,13 @@ public final class VariableSupport<Solution_> implements TrackerResolver<Solutio
         return true;
     }
 
+    /**
+     * @return true if a variable event happened after the last shadow variable update
+     */
+    public boolean isUpdatePending() {
+        return !isCurrent();
+    }
+
     private boolean isCurrent() {
         if (dirty) {
             return false;
@@ -703,6 +711,109 @@ public final class VariableSupport<Solution_> implements TrackerResolver<Solutio
                 Maybe a %s.before*() method was called without calling %s.updateShadowVariables(), \
                 before calling %s.calculateScore()."""
                 .formatted(scoreDirectorSimpleClassName, scoreDirectorSimpleClassName, scoreDirectorSimpleClassName));
+    }
+
+    /**
+     * @return true if a declarative shadow variable session exists;
+     *         undo then replays genuine changes instead of restoring shadow values
+     */
+    public boolean hasDeclarativeShadowVariables() {
+        return shadowVariableSession != null;
+    }
+
+    /**
+     * Captures the internal flags and pending state, for an undo journal.
+     *
+     * @return an opaque snapshot for {@link #restoreUndoState(Object)}; null if the state is the default
+     */
+    public @Nullable Object captureUndoState() {
+        if (!dirty && !eventSinceUpdate && updateSuccessful && listVariableChangeList.isEmpty()
+                && unassignedValueWithEmptyInverseEntitySet.isEmpty()) {
+            return null;
+        }
+        return new UndoState(dirty, eventSinceUpdate, updateSuccessful, List.copyOf(listVariableChangeList),
+                List.copyOf(unassignedValueWithEmptyInverseEntitySet));
+    }
+
+    public void restoreUndoState(@Nullable Object undoState) {
+        var state = undoState == null ? DEFAULT_UNDO_STATE : (UndoState) undoState;
+        dirty = state.dirty;
+        eventSinceUpdate = state.eventSinceUpdate;
+        updateSuccessful = state.updateSuccessful;
+        listVariableChangeList.clear();
+        listVariableChangeList.addAll(state.listVariableChangeList);
+        if (!cascadingUpdateShadowVarDescriptorList.isEmpty()) { // The set is immutable otherwise.
+            unassignedValueWithEmptyInverseEntitySet.clear();
+            unassignedValueWithEmptyInverseEntitySet.addAll(state.unassignedValueList);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private DefaultListVariableState<Solution_> getDefaultListVariableState() {
+        return (DefaultListVariableState<Solution_>) Objects.requireNonNull(listVariableState);
+    }
+
+    /**
+     * Checks supply-internal state (list positions, unassigned count, inverse sets) against the genuine variables.
+     *
+     * @return null if consistent
+     */
+    public @Nullable String createSupplyStateViolationMessage() {
+        var violationList = new ArrayList<String>();
+        if (listVariableState != null) {
+            collectListVariableViolations(Objects.requireNonNull(listVariableDescriptor), violationList);
+        }
+        for (var dispatchArray : variableDispatchArray) {
+            for (var dispatch : dispatchArray) {
+                for (var handler : dispatch.handlerList) {
+                    if (handler instanceof BasicVariableState<Solution_> basicVariableState) {
+                        basicVariableState.collectViolations(scoreDirector, violationList);
+                    }
+                }
+            }
+        }
+        if (violationList.isEmpty()) {
+            return null;
+        }
+        var shownList = violationList.subList(0, Math.min(violationList.size(), SHADOW_VARIABLE_VIOLATION_DISPLAY_LIMIT));
+        var message = "The supply state is corrupted (%d violations):%n  %s".formatted(violationList.size(),
+                String.join(System.lineSeparator() + "  ", shownList));
+        return violationList.size() > shownList.size() ? message + System.lineSeparator() + "  ..." : message;
+    }
+
+    private void collectListVariableViolations(ListVariableDescriptor<Solution_> descriptor, List<String> violationList) {
+        var state = getDefaultListVariableState();
+        var workingSolution = scoreDirector.getWorkingSolution();
+        var assignedCount = new int[1];
+        descriptor.getEntityDescriptor().visitAllEntities(workingSolution, entity -> {
+            var elementList = descriptor.getValue(entity);
+            for (var index = 0; index < elementList.size(); index++) {
+                var element = elementList.get(index);
+                assignedCount[0]++;
+                if (!(state.getElementPosition(element) instanceof PositionInList position)
+                        || position.entity() != entity || position.index() != index) {
+                    violationList.add("The element (%s) is at (%s[%d]), but the list state says (%s)."
+                            .formatted(element, entity, index, state.getElementPosition(element)));
+                }
+            }
+        });
+        var positionMapSize = state.getPositionMapSize();
+        if (positionMapSize >= 0 && positionMapSize != assignedCount[0]) {
+            violationList.add("The list state holds (%d) positions, but (%d) elements are assigned."
+                    .formatted(positionMapSize, assignedCount[0]));
+        }
+        var expectedUnassignedCount = (int) scoreDirector.getValueRangeManager()
+                .countOnSolution(descriptor.getValueRangeDescriptor(), workingSolution) - assignedCount[0];
+        if (state.getUnassignedCount() != expectedUnassignedCount) {
+            violationList.add("The list state has an unassigned count (%d) instead of (%d)."
+                    .formatted(state.getUnassignedCount(), expectedUnassignedCount));
+        }
+    }
+
+    private static final UndoState DEFAULT_UNDO_STATE = new UndoState(false, false, true, List.of(), List.of());
+
+    private record UndoState(boolean dirty, boolean eventSinceUpdate, boolean updateSuccessful,
+            List<ListVariableChange> listVariableChangeList, List<Object> unassignedValueList) {
     }
 
     private record ListVariableChange(Object entity, int fromIndex, int toIndex) {

@@ -113,6 +113,13 @@ public final class InverseRelationShadowVariableDescriptor<Solution_> extends Sh
         return sourceVariableDescriptor;
     }
 
+    /**
+     * @return false if the inverse is a collection
+     */
+    public boolean isSingleton() {
+        return singleton;
+    }
+
     @Override
     public Collection<Class<?>> getUpdaterClasses() {
         if (singleton) {

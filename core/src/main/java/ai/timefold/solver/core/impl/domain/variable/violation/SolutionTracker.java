@@ -13,7 +13,6 @@ public final class SolutionTracker<Solution_> {
     private final List<BasicVariableTracker<Solution_>> basicVariableTrackers;
     private final List<ListVariableTracker<Solution_>> listVariableTrackers;
     private List<String> missingEventsForward;
-    private List<String> missingEventsBackward;
     Solution_ beforeMoveSolution;
     VariableSnapshotTotal<Solution_> beforeVariables;
     Solution_ afterMoveSolution;
@@ -62,18 +61,13 @@ public final class SolutionTracker<Solution_> {
         if (beforeVariables != null) {
             missingEventsForward = getEntitiesMissingBeforeAfterEvents(beforeVariables, afterVariables);
         } else {
-            missingEventsBackward = Collections.emptyList();
+            missingEventsForward = Collections.emptyList();
         }
     }
 
     public void setAfterUndoSolution(Solution_ workingSolution) {
         undoVariables = VariableSnapshotTotal.takeSnapshot(solutionDescriptor, workingSolution);
         afterUndoSolution = cloneSolution(workingSolution);
-        if (beforeVariables != null) {
-            missingEventsBackward = getEntitiesMissingBeforeAfterEvents(undoVariables, afterVariables);
-        } else {
-            missingEventsBackward = Collections.emptyList();
-        }
     }
 
     public void setUndoFromScratchSolution(Solution_ workingSolution) {
@@ -157,13 +151,6 @@ public final class SolutionTracker<Solution_> {
                     Missing shadow variable update events for actual move:
                     %s
                     """.formatted(formatList(missingEventsForward)));
-        }
-
-        if (!missingEventsBackward.isEmpty()) {
-            out.append("""
-                    Missing shadow variable update events for undo move:")
-                    %s
-                    """.formatted(formatList(missingEventsBackward)));
         }
 
         var isCorrupted = !out.isEmpty();

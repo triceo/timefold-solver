@@ -28,9 +28,11 @@ import ai.timefold.solver.core.impl.domain.variable.VariableSupport;
 import ai.timefold.solver.core.impl.domain.variable.descriptor.BasicVariableDescriptor;
 import ai.timefold.solver.core.impl.domain.variable.descriptor.ListVariableDescriptor;
 import ai.timefold.solver.core.impl.domain.variable.descriptor.VariableDescriptor;
+import ai.timefold.solver.core.impl.domain.variable.inverserelation.InverseRelationShadowVariableDescriptor;
 import ai.timefold.solver.core.impl.domain.variable.supply.SupplyManager;
 import ai.timefold.solver.core.impl.domain.variable.violation.SolutionTracker;
 import ai.timefold.solver.core.impl.move.MoveDirector;
+import ai.timefold.solver.core.impl.move.UndoJournal;
 import ai.timefold.solver.core.impl.neighborhood.MoveRepository;
 import ai.timefold.solver.core.impl.neighborhood.NeighborhoodsBasedMoveRepository;
 import ai.timefold.solver.core.impl.phase.scope.SolverLifecyclePoint;
@@ -99,6 +101,9 @@ public abstract class AbstractScoreDirector<Solution_, Score_ extends Score<Scor
     protected @Nullable Solution_ workingSolution;
     private int workingInitScore = 0;
     private boolean lastVariableUpdateSuccessful = true;
+    private @Nullable UndoJournal<Solution_> undoJournal;
+    private @Nullable UndoJournal<Solution_> cachedUndoJournal;
+    private boolean restoring = false;
 
     private final boolean isStepAssertOrMore;
     private final boolean isAssertClonedSolution;
@@ -524,6 +529,76 @@ public abstract class AbstractScoreDirector<Solution_, Score_ extends Score<Scor
         return lastVariableUpdateSuccessful;
     }
 
+    @Override
+    public @Nullable UndoJournal<Solution_> getUndoJournal() {
+        return undoJournal;
+    }
+
+    @Override
+    public UndoJournal<Solution_> openUndoJournal() {
+        var current = undoJournal;
+        UndoJournal<Solution_> journal;
+        if (current != null) {
+            journal = new UndoJournal<>(current);
+        } else {
+            if (cachedUndoJournal == null) {
+                cachedUndoJournal = new UndoJournal<>(null);
+            }
+            journal = cachedUndoJournal;
+        }
+        var genuineOnly = variableSupport.hasDeclarativeShadowVariables();
+        journal.begin(genuineOnly, genuineOnly ? null : variableSupport.captureUndoState(), lastVariableUpdateSuccessful);
+        undoJournal = journal;
+        return journal;
+    }
+
+    @Override
+    public void closeUndoJournal(UndoJournal<Solution_> journal) {
+        if (undoJournal != journal) {
+            throw new IllegalStateException("Impossible state: the journal (%s) is not the innermost open journal (%s)."
+                    .formatted(journal, undoJournal));
+        }
+        undoJournal = journal.getParent();
+    }
+
+    @Override
+    public void setRestoring(boolean restoring) {
+        this.restoring = restoring;
+    }
+
+    @Override
+    public boolean isShadowVariableUpdatePending() {
+        return variableSupport.isUpdatePending();
+    }
+
+    @Override
+    public void restoreUndoState(@Nullable Object variableSupportUndoState, boolean lastVariableUpdateSuccessful) {
+        variableSupport.restoreUndoState(variableSupportUndoState);
+        this.lastVariableUpdateSuccessful = lastVariableUpdateSuccessful;
+    }
+
+    @Override
+    public void assertUndoJournalRestored(Object completedAction) {
+        if (!environmentMode.isFullyAsserted() || !environmentMode.isIntrusivelyAsserted()) {
+            return;
+        }
+        var supplyViolationMessage = variableSupport.createSupplyStateViolationMessage();
+        if (supplyViolationMessage != null) {
+            throw newUndoJournalCorruptionException(completedAction, supplyViolationMessage);
+        }
+        var shadowViolationMessage = variableSupport.createShadowVariablesViolationMessage();
+        if (shadowViolationMessage != null) {
+            throw newUndoJournalCorruptionException(completedAction, shadowViolationMessage);
+        }
+    }
+
+    private UndoScoreCorruptionException newUndoJournalCorruptionException(Object completedAction, String violationMessage) {
+        var solution = getWorkingSolution();
+        return new UndoScoreCorruptionException("""
+                Undo corruption after restoring (%s):
+                %s""".formatted(completedAction, violationMessage), solution, solution, solution);
+    }
+
     /**
      * This function clears all listener events that have been generated without triggering any of them.
      * Using this method requires caution because clearing the event queue can lead to inconsistent states.
@@ -616,7 +691,19 @@ public abstract class AbstractScoreDirector<Solution_, Score_ extends Score<Scor
             workingInitScore++;
         }
         assertInitScoreZeroOrLess();
-        variableSupport.beforeVariableChanged(variableDescriptor, entity);
+        var journal = undoJournal;
+        if (journal != null && !isCollectionInverseRelation(variableDescriptor)) {
+            journal.recordVariable(variableDescriptor, entity);
+        }
+        if (!restoring) {
+            variableSupport.beforeVariableChanged(variableDescriptor, entity);
+        }
+    }
+
+    // The collection is changed in place, so the inverse supply records it instead.
+    private static boolean isCollectionInverseRelation(VariableDescriptor<?> variableDescriptor) {
+        return variableDescriptor instanceof InverseRelationShadowVariableDescriptor<?> inverseDescriptor
+                && !inverseDescriptor.isSingleton();
     }
 
     @Override
@@ -624,7 +711,9 @@ public abstract class AbstractScoreDirector<Solution_, Score_ extends Score<Scor
         if (variableDescriptor.isGenuineAndUninitialized(entity)) {
             workingInitScore--;
         }
-        variableSupport.afterVariableChanged(variableDescriptor, entity);
+        if (!restoring) {
+            variableSupport.afterVariableChanged(variableDescriptor, entity);
+        }
         neighborhoodsElementUpdateNotifier.accept(entity);
         if (isStepAssertOrMore) {
             assertValueRangeForBasicVariables(entity);
@@ -633,6 +722,10 @@ public abstract class AbstractScoreDirector<Solution_, Score_ extends Score<Scor
 
     @Override
     public void beforeListVariableElementAssigned(ListVariableDescriptor<Solution_> variableDescriptor, Object element) {
+        var journal = undoJournal;
+        if (journal != null) {
+            journal.recordBeforeElementAssigned(variableDescriptor, element);
+        }
     }
 
     @Override
@@ -641,12 +734,19 @@ public abstract class AbstractScoreDirector<Solution_, Score_ extends Score<Scor
             workingInitScore++;
             assertInitScoreZeroOrLess();
         }
+        var journal = undoJournal;
+        if (journal != null) {
+            journal.recordAfterElementAssigned(variableDescriptor, element);
+        }
         neighborhoodsElementUpdateNotifier.accept(element);
     }
 
     @Override
     public void beforeListVariableElementUnassigned(ListVariableDescriptor<Solution_> variableDescriptor, Object element) {
-        // Do nothing
+        var journal = undoJournal;
+        if (journal != null) {
+            journal.recordBeforeElementUnassigned(variableDescriptor, element);
+        }
     }
 
     @Override
@@ -654,7 +754,13 @@ public abstract class AbstractScoreDirector<Solution_, Score_ extends Score<Scor
         if (!variableDescriptor.allowsUnassignedValues()) { // Unassigned elements don't count towards the initScore here.
             workingInitScore--;
         }
-        variableSupport.afterElementUnassigned(variableDescriptor, element);
+        var journal = undoJournal;
+        if (journal != null) {
+            journal.recordAfterElementUnassigned(variableDescriptor, element);
+        }
+        if (!restoring) {
+            variableSupport.afterElementUnassigned(variableDescriptor, element);
+        }
         neighborhoodsElementUpdateNotifier.accept(element);
     }
 
@@ -671,13 +777,25 @@ public abstract class AbstractScoreDirector<Solution_, Score_ extends Score<Scor
                             Maybe you are using an improperly implemented custom move?"""
                             .formatted(variableDescriptor, entity, fromIndex, toIndex));
         }
-        variableSupport.beforeListVariableChanged(variableDescriptor, entity, fromIndex, toIndex);
+        var journal = undoJournal;
+        if (journal != null) {
+            journal.recordList(variableDescriptor, entity, fromIndex, toIndex);
+        }
+        if (!restoring) {
+            variableSupport.beforeListVariableChanged(variableDescriptor, entity, fromIndex, toIndex);
+        }
     }
 
     @Override
     public void afterListVariableChanged(ListVariableDescriptor<Solution_> variableDescriptor, Object entity, int fromIndex,
             int toIndex) {
-        variableSupport.afterListVariableChanged(variableDescriptor, entity, fromIndex, toIndex);
+        var journal = undoJournal;
+        if (journal != null) {
+            journal.closeList(variableDescriptor, entity, fromIndex, toIndex);
+        }
+        if (!restoring) {
+            variableSupport.afterListVariableChanged(variableDescriptor, entity, fromIndex, toIndex);
+        }
         neighborhoodsElementUpdateNotifier.accept(entity);
         if (isStepAssertOrMore) {
             var valueList = variableDescriptor.getValue(entity).subList(fromIndex, toIndex);

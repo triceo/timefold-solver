@@ -9,7 +9,6 @@ import java.util.SequencedSet;
 import ai.timefold.solver.core.api.domain.common.Lookup;
 import ai.timefold.solver.core.impl.domain.variable.descriptor.GenuineVariableDescriptor;
 import ai.timefold.solver.core.impl.heuristic.move.AbstractSelectorBasedMove;
-import ai.timefold.solver.core.impl.move.VariableChangeRecordingScoreDirector;
 import ai.timefold.solver.core.impl.score.director.InnerScoreDirector;
 import ai.timefold.solver.core.impl.score.director.VariableDescriptorAwareScoreDirector;
 import ai.timefold.solver.core.impl.solver.random.DefaultRandomSource;
@@ -72,11 +71,7 @@ public final class SelectorBasedRuinRecreateMove<Solution_> extends AbstractSele
         }
         scoreDirector.updateShadowVariables();
 
-        var backingScoreDirector =
-                (scoreDirector instanceof VariableChangeRecordingScoreDirector<Solution_, ?> recordingScoreDirector)
-                        ? recordingScoreDirector.getBacking()
-                        : scoreDirector;
-        var innerScoreDirector = (InnerScoreDirector<Solution_, ?>) backingScoreDirector;
+        var innerScoreDirector = (InnerScoreDirector<Solution_, ?>) scoreDirector;
         var constructionHeuristicPhase =
                 (RuinRecreateConstructionHeuristicPhase<Solution_>) constructionHeuristicPhaseBuilder
                         .ensureThreadSafe(innerScoreDirector)

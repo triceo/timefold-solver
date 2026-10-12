@@ -3,18 +3,22 @@ package ai.timefold.solver.core.impl.domain.variable;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import ai.timefold.solver.core.impl.domain.variable.descriptor.ListVariableDescriptor;
 import ai.timefold.solver.core.impl.domain.variable.inverserelation.InverseRelationShadowVariableDescriptor;
 import ai.timefold.solver.core.impl.domain.variable.nextprev.NextElementShadowVariableDescriptor;
 import ai.timefold.solver.core.impl.domain.variable.nextprev.PreviousElementShadowVariableDescriptor;
+import ai.timefold.solver.core.impl.move.UndoableSupply;
 import ai.timefold.solver.core.impl.score.director.InnerScoreDirector;
 import ai.timefold.solver.core.impl.util.CollectionUtils;
 import ai.timefold.solver.core.preview.api.domain.metamodel.ElementPosition;
 import ai.timefold.solver.core.preview.api.domain.metamodel.PositionInList;
 
-final class ListVariableStateCarrier<Solution_> {
+import org.jspecify.annotations.Nullable;
+
+final class ListVariableStateCarrier<Solution_> implements UndoableSupply {
 
     private final ListVariableDescriptor<Solution_> sourceVariableDescriptor;
     private final Consumer<Object> notifier;
@@ -165,6 +169,9 @@ final class ListVariableStateCarrier<Solution_> {
                         "The supply for list variable (%s) is corrupted, because the element (%s) did not exist before unassigning."
                                 .formatted(sourceVariableDescriptor, element));
             }
+            recordPosition(element, oldPosition);
+        } else {
+            recordPresence(element, true);
         }
         var elementUpdateSent = false;
         if (externalizedIndexProcessor != null) {
@@ -225,12 +232,14 @@ final class ListVariableStateCarrier<Solution_> {
         if (requiresPositionMap) { // Update the position and figure out if it is different from previous.
             var oldPosition = elementPositionMap.get(element);
             if (oldPosition == null) {
+                recordPosition(element, null);
                 elementPositionMap.put(element, new MutablePosition(entity, index));
                 unassignedCount--;
                 return ChangeType.BOTH;
             }
             var changeType = comparePositions(entity, oldPosition.getEntity(), index, oldPosition.getIndex());
             if (changeType.anythingChanged) { // Replace the map value in-place, to avoid a put() on the hot path.
+                recordPosition(element, oldPosition);
                 if (changeType.entityChanged) {
                     oldPosition.setEntity(entity);
                 }
@@ -242,6 +251,7 @@ final class ListVariableStateCarrier<Solution_> {
         } else { // Read the position and figure out if it is different from previous.
             var oldEntity = getInverseSingleton(element);
             if (oldEntity == null) {
+                recordPresence(element, false);
                 unassignedCount--;
                 return ChangeType.BOTH;
             }
@@ -251,6 +261,61 @@ final class ListVariableStateCarrier<Solution_> {
             }
             return comparePositions(entity, oldEntity, index, oldIndex);
         }
+    }
+
+    private void recordPosition(Object element, @Nullable MutablePosition oldPosition) {
+        var journal = scoreDirector.getUndoJournal();
+        if (journal != null) {
+            if (oldPosition == null) {
+                journal.recordSupplyChange(this, element, null, -1);
+            } else {
+                journal.recordSupplyChange(this, element, oldPosition.getEntity(), oldPosition.getIndex());
+            }
+        }
+    }
+
+    // Without a position map, only the assigned/unassigned transition is recorded; index -1 means unassigned.
+    private void recordPresence(Object element, boolean wasAssigned) {
+        var journal = scoreDirector.getUndoJournal();
+        if (journal != null) {
+            journal.recordSupplyChange(this, element, null, wasAssigned ? 0 : -1);
+        }
+    }
+
+    /**
+     * Restores the position of an element, and the unassigned count if the element was (un)assigned.
+     *
+     * @param element the element
+     * @param oldEntity the old entity; null if there is no position map, or if the element was unassigned
+     * @param oldIndex -1 if the element was unassigned
+     */
+    @Override
+    public void undo(Object element, @Nullable Object oldEntity, int oldIndex) {
+        if (!requiresPositionMap) {
+            recordPresence(element, oldIndex < 0);
+            unassignedCount += oldIndex < 0 ? 1 : -1;
+            return;
+        }
+        var currentPosition = elementPositionMap.get(element);
+        recordPosition(element, currentPosition);
+        if (oldIndex < 0) {
+            elementPositionMap.remove(element);
+            unassignedCount++;
+        } else if (currentPosition == null) {
+            elementPositionMap.put(element, new MutablePosition(Objects.requireNonNull(oldEntity), oldIndex));
+            unassignedCount--;
+        } else {
+            currentPosition.setEntity(Objects.requireNonNull(oldEntity));
+            currentPosition.setIndex(oldIndex);
+        }
+        notifier.accept(element);
+    }
+
+    /**
+     * @return the number of elements in the position map; -1 if there is no map
+     */
+    int getPositionMapSize() {
+        return requiresPositionMap ? elementPositionMap.size() : -1;
     }
 
     private static ChangeType comparePositions(Object entity, Object otherEntity, int index, int otherIndex) {

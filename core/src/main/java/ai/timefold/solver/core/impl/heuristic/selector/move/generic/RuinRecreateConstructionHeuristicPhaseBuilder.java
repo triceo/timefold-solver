@@ -1,7 +1,6 @@
 package ai.timefold.solver.core.impl.heuristic.selector.move.generic;
 
 import java.util.List;
-import java.util.Set;
 
 import ai.timefold.solver.core.config.constructionheuristic.ConstructionHeuristicPhaseConfig;
 import ai.timefold.solver.core.config.constructionheuristic.placer.QueuedEntityPlacerConfig;
@@ -47,7 +46,6 @@ public final class RuinRecreateConstructionHeuristicPhaseBuilder<Solution_>
     private final RuinRecreateConstructionHeuristicPhaseFactory<Solution_> constructionHeuristicPhaseFactory;
     private final PhaseTermination<Solution_> phaseTermination;
 
-    Set<Object> elementsToRuin;
     List<Object> elementsToRecreate;
     private boolean multithreaded = false;
 
@@ -82,11 +80,6 @@ public final class RuinRecreateConstructionHeuristicPhaseBuilder<Solution_>
 
     public RuinRecreateConstructionHeuristicPhaseBuilder<Solution_> withElementsToRecreate(List<Object> elements) {
         this.elementsToRecreate = elements;
-        return this;
-    }
-
-    public RuinRecreateConstructionHeuristicPhaseBuilder<Solution_> withElementsToRuin(Set<Object> elements) {
-        this.elementsToRuin = elements;
         return this;
     }
 

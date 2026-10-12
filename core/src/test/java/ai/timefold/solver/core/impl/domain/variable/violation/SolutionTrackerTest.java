@@ -117,10 +117,7 @@ class SolutionTrackerTest {
                         "Entity (Generated Entity 1) is missing a beforeVariableChanged call for variable (value).",
                         "Entity (Generated Entity 1) is missing a afterVariableChanged call for variable (value).",
                         "Entity (Generated Entity 0) is missing a beforeVariableChanged call for variable (value).",
-                        "Entity (Generated Entity 0) is missing a afterVariableChanged call for variable (value).",
-                        "Missing shadow variable update events for undo move",
-                        "Entity (Generated Entity 1) is missing a beforeVariableChanged call for variable (value).",
-                        "Entity (Generated Entity 1) is missing a afterVariableChanged call for variable (value).");
+                        "Entity (Generated Entity 0) is missing a afterVariableChanged call for variable (value).");
     }
 
     @Test
@@ -230,10 +227,7 @@ class SolutionTrackerTest {
                         "Actual value (Generated Value 1) of variable value on TestdataEntity entity (Generated Entity 1) differs from expected (null)",
                         "Actual value (Generated Value 0) of variable value on TestdataEntity entity (Generated Entity 0) differs from expected (null)",
                         "Variables that are different between from scratch and undo",
-                        "Actual value (Generated Value 1) of variable value on TestdataEntity entity (Generated Entity 1) differs from expected (null)",
-                        "Missing shadow variable update events for undo move",
-                        "Entity (Generated Entity 1) is missing a beforeVariableChanged call for variable (value).",
-                        "Entity (Generated Entity 1) is missing a afterVariableChanged call for variable (value).")
+                        "Actual value (Generated Value 1) of variable value on TestdataEntity entity (Generated Entity 1) differs from expected (null)")
                 .doesNotContain("Missing shadow variable update events for actual move",
                         "Entity (Generated Entity 0) is missing a beforeVariableChanged call for variable (value).",
                         "Entity (Generated Entity 0) is missing a afterVariableChanged call for variable (value).");

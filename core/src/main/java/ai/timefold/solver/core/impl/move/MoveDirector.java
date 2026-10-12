@@ -43,19 +43,7 @@ public sealed class MoveDirector<Solution_, Score_ extends Score<Score_>>
 
     public MoveDirector(InnerScoreDirector<Solution_, Score_> scoreDirector) {
         this.backingScoreDirector = Objects.requireNonNull(scoreDirector);
-        if (EphemeralMoveDirector.class.isAssignableFrom(getClass())) {
-            // Ephemeral move director records operations for a later undo,
-            // and the external director is no longer an instance of InnerScoreDirector.
-            // However, some pieces of code need methods from InnerScoreDirector,
-            // in which case we turn to the backing score director.
-            // This is only safe for operations that do not need to be undone,
-            // such as calculateScore().
-            // Operations which need undo must go through the external score director,
-            // which is recording in this case.
-            this.externalScoreDirector = new VariableChangeRecordingScoreDirector<>(scoreDirector);
-        } else {
-            this.externalScoreDirector = scoreDirector;
-        }
+        this.externalScoreDirector = scoreDirector;
     }
 
     @Override
@@ -896,16 +884,7 @@ public sealed class MoveDirector<Solution_, Score_ extends Score<Score_>>
      * Moves that are to be undone later need to be run with the instance returned by this method.
      * To undo the move, remember to call {@link EphemeralMoveDirector#close()}.
      * <p>
-     * Each call returns a fresh recorder over the backing score director, never a nested one.
-     * A nested <i>temporary</i> move is therefore safe:
-     * it records into its own recorder and is fully undone before control returns,
-     * so the outer recorder not seeing it changes nothing.
-     * A nested <i>permanent</i> {@link #execute(Move)} is not:
-     * the outer recorder does not see it either,
-     * and its changes consequently survive the outer undo.
-     * A move which runs a nested phase must re-record whatever that phase kept;
-     * see {@code SelectorBasedListRuinRecreateMove} and
-     * {@link VariableChangeRecordingScoreDirector#getNonDelegating()}.
+     * Each call opens a nested {@link UndoJournal}; the outer journal also records nested permanent changes.
      *
      * @return never null
      */
