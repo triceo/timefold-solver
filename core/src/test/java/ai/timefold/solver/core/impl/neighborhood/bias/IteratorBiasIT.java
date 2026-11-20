@@ -12,8 +12,8 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import ai.timefold.solver.core.impl.bavet.common.index.CompositeKey;
+import ai.timefold.solver.core.impl.bavet.common.index.DefaultIndexerFactory;
 import ai.timefold.solver.core.impl.bavet.common.index.Indexer;
-import ai.timefold.solver.core.impl.bavet.common.index.IndexerFactory;
 import ai.timefold.solver.core.impl.bavet.common.index.RepeatingRandomIterator;
 import ai.timefold.solver.core.impl.bavet.common.index.RetiringRandomIterator;
 import ai.timefold.solver.core.impl.bavet.common.index.UniqueRandomIterator;
@@ -93,7 +93,7 @@ class IteratorBiasIT extends AbstractBiasIT {
         var joiner = (DefaultBiNeighborhoodsJoiner<TestPerson, TestPerson>) (joinerType == JoinerType.LESS_THAN_OR_EQUAL
                 ? NeighborhoodsJoiners.lessThanOrEqual(TestPerson::age)
                 : NeighborhoodsJoiners.greaterThanOrEqual(TestPerson::age));
-        Indexer<UniTuple<String>> indexer = new IndexerFactory<>(joiner).buildIndexer(true);
+        Indexer<UniTuple<String>> indexer = new DefaultIndexerFactory<>(joiner).buildIndexer(true);
         // Three buckets, all matching the query, with sizes 1, 3, and 6 (weight 0.1 / 0.3 / 0.6).
         putBucket(indexer, 10, 1);
         putBucket(indexer, 20, 3);
@@ -123,7 +123,7 @@ class IteratorBiasIT extends AbstractBiasIT {
         var trialCount = 200_000;
         var joiner = new DefaultBiNeighborhoodsJoiner<>(TestSkilledPerson::skills, JoinerType.CONTAINING_ANY_OF,
                 TestSkilledPerson::skills);
-        Indexer<UniTuple<String>> indexer = new IndexerFactory<>(joiner).buildIndexer(true);
+        Indexer<UniTuple<String>> indexer = new DefaultIndexerFactory<>(joiner).buildIndexer(true);
 
         // Bucket X = {t1, t2}, bucket Y = {t2, t3}: t2 is reachable under both keys.
         var t1 = UniTuple.of("t1", 0);
@@ -284,7 +284,7 @@ class IteratorBiasIT extends AbstractBiasIT {
             Indexer<UniTuple<String>> buildIndexer() {
                 var joiner = (DefaultBiNeighborhoodsJoiner<TestPerson, TestPerson>) NeighborhoodsJoiners
                         .lessThanOrEqual(TestPerson::age);
-                Indexer<UniTuple<String>> indexer = new IndexerFactory<>(joiner).buildIndexer(true);
+                Indexer<UniTuple<String>> indexer = new DefaultIndexerFactory<>(joiner).buildIndexer(true);
                 putBucket(indexer, 10, 1);
                 putBucket(indexer, 20, 3);
                 putBucket(indexer, 30, 6);
@@ -304,7 +304,7 @@ class IteratorBiasIT extends AbstractBiasIT {
             Indexer<UniTuple<String>> buildIndexer() {
                 var joiner = new DefaultBiNeighborhoodsJoiner<TestWorker, TestJob>(TestWorker::skills,
                         JoinerType.CONTAINED_IN, TestJob::skill);
-                Indexer<UniTuple<String>> indexer = new IndexerFactory<>(joiner).buildIndexer(true);
+                Indexer<UniTuple<String>> indexer = new DefaultIndexerFactory<>(joiner).buildIndexer(true);
                 putContainedInBucket(indexer, 10, 1);
                 putContainedInBucket(indexer, 20, 3);
                 putContainedInBucket(indexer, 30, 6);

@@ -39,7 +39,7 @@ class ComparisonIndexerTest extends AbstractIndexerTest {
     @Test
     void leftBridgeLessThan() {
         // Left bridge keeps LESS_THAN: a stored tuple matches query Q iff its key < Q.
-        Indexer<UniTuple<String>> indexer = new IndexerFactory<>(lessThanAge).buildIndexer(true);
+        Indexer<UniTuple<String>> indexer = new DefaultIndexerFactory<>(lessThanAge).buildIndexer(true);
         var age30 = newTuple("age30");
         indexer.put(30, age30);
         var age40 = newTuple("age40");
@@ -58,7 +58,7 @@ class ComparisonIndexerTest extends AbstractIndexerTest {
     @Test
     void rightBridgeLessThanFlipsToGreaterThan() {
         // Right bridge flips LESS_THAN to GREATER_THAN: a stored tuple matches query Q iff its key > Q.
-        Indexer<UniTuple<String>> indexer = new IndexerFactory<>(lessThanAge).buildIndexer(false);
+        Indexer<UniTuple<String>> indexer = new DefaultIndexerFactory<>(lessThanAge).buildIndexer(false);
         var age30 = newTuple("age30");
         indexer.put(30, age30);
         var age40 = newTuple("age40");
@@ -73,7 +73,7 @@ class ComparisonIndexerTest extends AbstractIndexerTest {
 
     @Test
     void putRemoveSize() {
-        Indexer<UniTuple<String>> indexer = new IndexerFactory<>(lessThanAge).buildIndexer(true);
+        Indexer<UniTuple<String>> indexer = new DefaultIndexerFactory<>(lessThanAge).buildIndexer(true);
         assertThat(indexer.isRemovable()).isTrue();
         var age40 = newTuple("age40");
         var entry40 = indexer.put(40, age40);
@@ -95,7 +95,7 @@ class ComparisonIndexerTest extends AbstractIndexerTest {
     void treeifiesPastArrayThreshold() {
         // Below-threshold storage is a sorted array; crossing ARRAY_THRESHOLD must treeify without
         // changing LESS_THAN match sets or order (see ScalingNavigableMap's arrayBased/treeify()).
-        Indexer<UniTuple<String>> indexer = new IndexerFactory<>(lessThanAge).buildIndexer(true);
+        Indexer<UniTuple<String>> indexer = new DefaultIndexerFactory<>(lessThanAge).buildIndexer(true);
         var threshold = ScalingNavigableMap.ARRAY_THRESHOLD;
         var tuplesByAge = new LinkedHashMap<Integer, UniTuple<String>>();
         for (var age = 0; age <= threshold; age++) { // threshold + 1 puts: crosses the threshold on the last one.
@@ -130,7 +130,7 @@ class ComparisonIndexerTest extends AbstractIndexerTest {
     void treeifyIsOneWayNoDemotionOnRemove() {
         // Once treeified, removing back below ARRAY_THRESHOLD must still behave correctly.
         // (The one-way-ness of the underlying switch is verified directly in ScalingNavigableMapTest.)
-        // Constructed directly (rather than via IndexerFactory) to reach comparisonMap.arrayBased below:
+        // Constructed directly (rather than via DefaultIndexerFactory) to reach comparisonMap.arrayBased below:
         // filling 0..threshold then removing keys 1..threshold only arms the churn counter once
         // (only the first removal leaves size >= threshold; every later one is already below it),
         // so real interleaved churn is needed here to actually force and verify tree mode.
@@ -372,7 +372,7 @@ class ComparisonIndexerTest extends AbstractIndexerTest {
     void randomIteratorRightBridgeFlipReachesReverseWalk() {
         // buildIndexer(false) is the path production actually uses to reach GT/GTE;
         // this pins that the flip lands on the reverse walk.
-        Indexer<UniTuple<String>> indexer = new IndexerFactory<>(neighborhoodsLessThanAge).buildIndexer(false);
+        Indexer<UniTuple<String>> indexer = new DefaultIndexerFactory<>(neighborhoodsLessThanAge).buildIndexer(false);
         indexer.put(10, newTuple("age10"));
         indexer.put(20, newTuple("age20a"));
         indexer.put(20, newTuple("age20b"));

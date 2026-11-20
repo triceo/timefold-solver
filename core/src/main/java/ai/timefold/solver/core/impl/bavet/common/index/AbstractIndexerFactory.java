@@ -30,7 +30,7 @@ import ai.timefold.solver.core.impl.util.Triple;
 /**
  * Builds the key extractors and the indexes of the indexed join and ifExists nodes.
  * Subclasses decide which {@link JoinIndex} a node gets;
- * {@link IndexerFactory} is the default, and {@link #of(AbstractJoiner)} selects the subclass.
+ * {@link DefaultIndexerFactory} is the default, and {@link #of(AbstractJoiner)} selects the subclass.
  * The level layout assumes that the joiner combers put all {@link JoinerType#EQUAL} joiners first.
  * <p>
  * {@link Indexer Indexers} form a parent-child hierarchy,
@@ -102,7 +102,7 @@ public abstract class AbstractIndexerFactory<Right_> {
 
         private static final Function<AbstractJoiner<?>, AbstractIndexerFactory<?>> FACTORY_CREATOR =
                 TimefoldSolverEnterpriseService.loadOrDefault(service -> service::buildIndexerFactory,
-                        () -> IndexerFactory::new);
+                        () -> DefaultIndexerFactory::new);
 
     }
 

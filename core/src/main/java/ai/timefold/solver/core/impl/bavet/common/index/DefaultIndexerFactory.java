@@ -9,9 +9,9 @@ import ai.timefold.solver.core.impl.bavet.common.tuple.InTupleStorePositionTrack
  *
  * @param <Right_>
  */
-public final class IndexerFactory<Right_> extends AbstractIndexerFactory<Right_> {
+public final class DefaultIndexerFactory<Right_> extends AbstractIndexerFactory<Right_> {
 
-    public IndexerFactory(AbstractJoiner<Right_> joiner) {
+    public DefaultIndexerFactory(AbstractJoiner<Right_> joiner) {
         super(joiner);
     }
 

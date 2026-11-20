@@ -28,13 +28,13 @@ class ContainedInIndexerTest extends AbstractIndexerTest {
 
     @Test
     void isRemovable() {
-        var indexer = new IndexerFactory<>(joiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(joiner).buildIndexer(true);
         assertThat(indexer.isRemovable()).isTrue();
     }
 
     @Test
     void size() {
-        var indexer = new IndexerFactory<>(joiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(joiner).buildIndexer(true);
 
         assertSize(indexer, List.of("X"), "1").isEqualTo(0);
 
@@ -66,7 +66,7 @@ class ContainedInIndexerTest extends AbstractIndexerTest {
 
     @Test
     void removeTwice() {
-        var indexer = new IndexerFactory<>(joiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(joiner).buildIndexer(true);
         var annEntry = indexer.put(CompositeKey.ofMany("X", "1"), UniTuple.of("Ann", 0));
 
         indexer.remove(CompositeKey.ofMany("X", "1"), annEntry);
@@ -76,7 +76,7 @@ class ContainedInIndexerTest extends AbstractIndexerTest {
 
     @Test
     void forEach() {
-        var indexer = new IndexerFactory<>(joiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(joiner).buildIndexer(true);
 
         var annX1 = putTuple(indexer, "X", "1");
         var bethY1 = putTuple(indexer, "Y", "1");
@@ -103,7 +103,7 @@ class ContainedInIndexerTest extends AbstractIndexerTest {
 
     @Test
     void forEach_containCombo() {
-        var indexer = new IndexerFactory<>(containComboJoiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(containComboJoiner).buildIndexer(true);
 
         var annX12 = putTuple(indexer, "X", List.of("1", "2"));
         var bethY13 = putTuple(indexer, "Y", List.of("1", "2"));
@@ -118,7 +118,7 @@ class ContainedInIndexerTest extends AbstractIndexerTest {
 
     @Test
     void uniqueRandomIterator() {
-        var indexer = new IndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
 
         var annX1 = putContainedInIndexer(indexer, "X");
         var annY1 = putContainedInIndexer(indexer, "Y");
@@ -143,7 +143,7 @@ class ContainedInIndexerTest extends AbstractIndexerTest {
 
     @Test
     void uniqueRandomIteratorDrainsEachMatchExactlyOnce() {
-        var indexer = new IndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
 
         putContainedInIndexer(indexer, "X");
         putContainedInIndexer(indexer, "Y");
@@ -155,7 +155,7 @@ class ContainedInIndexerTest extends AbstractIndexerTest {
 
     @Test
     void duplicateQueryKeyIsVisitedOnce() {
-        var indexer = new IndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
 
         var annX = putContainedInIndexer(indexer, "X");
         var bethX = putContainedInIndexer(indexer, "X");
@@ -172,7 +172,7 @@ class ContainedInIndexerTest extends AbstractIndexerTest {
 
     @Test
     void uniqueRandomIteratorUnmatchedQueryKey() {
-        var indexer = new IndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
         putContainedInIndexer(indexer, "X");
 
         // Already guarded (DefaultIterator.hasNext() skips a null downstreamIndexer); locking it in.
@@ -184,7 +184,7 @@ class ContainedInIndexerTest extends AbstractIndexerTest {
 
     @Test
     void randomIteratorNeverEnds() {
-        var indexer = new IndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
 
         putContainedInIndexer(indexer, "X");
         putContainedInIndexer(indexer, "Y");
@@ -198,7 +198,7 @@ class ContainedInIndexerTest extends AbstractIndexerTest {
 
     @Test
     void uniqueRandomIteratorFirstDrawIsNotBiasedToFirstBucket() {
-        var indexer = new IndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
         var xTuple = putContainedInIndexer(indexer, "X");
         var yTuple = putContainedInIndexer(indexer, "Y");
 

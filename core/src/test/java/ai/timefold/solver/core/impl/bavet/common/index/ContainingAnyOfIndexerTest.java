@@ -33,7 +33,7 @@ class ContainingAnyOfIndexerTest extends AbstractIndexerTest {
 
     @Test
     void isRemovable() {
-        var indexer = new IndexerFactory<>(multiJoiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(multiJoiner).buildIndexer(true);
 
         assertThat(indexer.isRemovable()).isTrue();
 
@@ -44,7 +44,7 @@ class ContainingAnyOfIndexerTest extends AbstractIndexerTest {
 
     @Test
     void size() {
-        var indexer = new IndexerFactory<>(multiJoiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(multiJoiner).buildIndexer(true);
 
         assertSize(indexer, List.of(), "1").isEqualTo(0);
         assertSize(indexer, List.of("X", "Y"), "1").isEqualTo(0);
@@ -80,7 +80,7 @@ class ContainingAnyOfIndexerTest extends AbstractIndexerTest {
 
     @Test
     void removeTwice() {
-        var indexer = new IndexerFactory<>(multiJoiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(multiJoiner).buildIndexer(true);
         var annEntry = indexer.put(CompositeKey.ofMany(List.of("X", "Y"), "1"), UniTuple.of("Ann", 0));
 
         indexer.remove(CompositeKey.ofMany(List.of("X", "Y"), "1"), annEntry);
@@ -90,7 +90,7 @@ class ContainingAnyOfIndexerTest extends AbstractIndexerTest {
 
     @Test
     void removeLastTupleThenReuseKeys() {
-        var indexer = new IndexerFactory<>(multiJoiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(multiJoiner).buildIndexer(true);
         var annEntry = indexer.put(CompositeKey.ofMany(List.of("X", "Y"), "1"), UniTuple.of("Ann", 0));
 
         indexer.remove(CompositeKey.ofMany(List.of("X", "Y"), "1"), annEntry);
@@ -106,7 +106,7 @@ class ContainingAnyOfIndexerTest extends AbstractIndexerTest {
 
     @Test
     void forEach() {
-        var indexer = new IndexerFactory<>(multiJoiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(multiJoiner).buildIndexer(true);
 
         var annXY1 = putTuple(indexer, List.of("X", "Y"), "1");
         var bethXZ1 = putTuple(indexer, List.of("X", "Z"), "1");
@@ -132,7 +132,7 @@ class ContainingAnyOfIndexerTest extends AbstractIndexerTest {
 
     @Test
     void forEachDuplicates() {
-        var indexer = new IndexerFactory<>(singleJoiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(singleJoiner).buildIndexer(true);
         var key = List.of("X");
 
         var duplicate = putContainingIndexer(indexer, key);
@@ -144,7 +144,7 @@ class ContainingAnyOfIndexerTest extends AbstractIndexerTest {
 
     @Test
     void uniqueRandomIterator() {
-        var indexer = new IndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
 
         var annXY1 = putContainingIndexer(indexer, List.of("X", "Y"));
         var bethXZ1 = putContainingIndexer(indexer, List.of("X", "Z"));
@@ -166,7 +166,7 @@ class ContainingAnyOfIndexerTest extends AbstractIndexerTest {
 
     @Test
     void uniqueRandomIteratorDedupesAcrossBuckets() {
-        var indexer = new IndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
 
         putContainingIndexer(indexer, List.of("X", "Y")); // Reachable through both the X and the Y bucket.
         putContainingIndexer(indexer, List.of("X", "Z"));
@@ -178,7 +178,7 @@ class ContainingAnyOfIndexerTest extends AbstractIndexerTest {
 
     @Test
     void uniqueRandomIteratorSingleDrawNeedsNoDedupe() {
-        var indexer = new IndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
 
         var annXY = putContainingIndexer(indexer, List.of("X", "Y"));
         var bethXZ = putContainingIndexer(indexer, List.of("X", "Z"));
@@ -192,7 +192,7 @@ class ContainingAnyOfIndexerTest extends AbstractIndexerTest {
 
     @Test
     void uniqueRandomIteratorDuplicateQueryKeys() {
-        var indexer = new IndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
 
         putContainingIndexer(indexer, List.of("X", "Y"));
         putContainingIndexer(indexer, List.of("X", "Z"));
@@ -205,7 +205,7 @@ class ContainingAnyOfIndexerTest extends AbstractIndexerTest {
 
     @Test
     void uniqueRandomIteratorUnmatchedQueryKey() {
-        var indexer = new IndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
         putContainingIndexer(indexer, List.of("X", "Y"));
 
         // A key with zero matches must not throw; it becomes a dead bucket of weight 0.
@@ -214,14 +214,14 @@ class ContainingAnyOfIndexerTest extends AbstractIndexerTest {
         var noMatchIterator = indexer.uniqueRandomIterator(List.of("Q"), new Random(0));
         assertThat(noMatchIterator.hasNext()).isFalse();
 
-        var emptyIndexer = new IndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
+        var emptyIndexer = new DefaultIndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
         var emptyIterator = emptyIndexer.uniqueRandomIterator(List.of("X"), new Random(0));
         assertThat(emptyIterator.hasNext()).isFalse();
     }
 
     @Test
     void uniqueRandomIteratorCompositeJoiner() {
-        var indexer = new IndexerFactory<>(randomAccessMultiJoiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(randomAccessMultiJoiner).buildIndexer(true);
 
         putTuple(indexer, List.of("X", "Y"), "1");
         putTuple(indexer, List.of("X", "Z"), "1");
@@ -234,7 +234,7 @@ class ContainingAnyOfIndexerTest extends AbstractIndexerTest {
 
     @Test
     void randomIteratorNeverEnds() {
-        var indexer = new IndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
 
         putContainingIndexer(indexer, List.of("X", "Y"));
         putContainingIndexer(indexer, List.of("X", "Z"));

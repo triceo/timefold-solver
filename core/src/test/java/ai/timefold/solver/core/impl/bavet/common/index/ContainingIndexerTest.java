@@ -25,7 +25,7 @@ class ContainingIndexerTest extends AbstractIndexerTest {
 
     @Test
     void isRemovable() {
-        var indexer = new IndexerFactory<>(joiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(joiner).buildIndexer(true);
 
         assertThat(indexer.isRemovable()).isTrue();
 
@@ -36,7 +36,7 @@ class ContainingIndexerTest extends AbstractIndexerTest {
 
     @Test
     void size() {
-        var indexer = new IndexerFactory<>(joiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(joiner).buildIndexer(true);
 
         assertSize(indexer, "X", "1").isEqualTo(0);
 
@@ -64,7 +64,7 @@ class ContainingIndexerTest extends AbstractIndexerTest {
 
     @Test
     void removeTwice() {
-        var indexer = new IndexerFactory<>(joiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(joiner).buildIndexer(true);
         var annEntry = indexer.put(CompositeKey.ofMany(List.of("X", "Y"), "1"), UniTuple.of("Ann", 0));
 
         indexer.remove(CompositeKey.ofMany(List.of("X", "Y"), "1"), annEntry);
@@ -74,7 +74,7 @@ class ContainingIndexerTest extends AbstractIndexerTest {
 
     @Test
     void removeLastTupleThenReuseKeys() {
-        var indexer = new IndexerFactory<>(joiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(joiner).buildIndexer(true);
         var annEntry = indexer.put(CompositeKey.ofMany(List.of("X", "Y"), "1"), UniTuple.of("Ann", 0));
 
         indexer.remove(CompositeKey.ofMany(List.of("X", "Y"), "1"), annEntry);
@@ -90,7 +90,7 @@ class ContainingIndexerTest extends AbstractIndexerTest {
 
     @Test
     void forEach() {
-        var indexer = new IndexerFactory<>(joiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(joiner).buildIndexer(true);
 
         var annXY1 = putTuple(indexer, List.of("X", "Y"), "1");
         var bethXZ1 = putTuple(indexer, List.of("X", "Z"), "1");
@@ -117,7 +117,7 @@ class ContainingIndexerTest extends AbstractIndexerTest {
 
     @Test
     void forEach_containedInCombo() {
-        var indexer = new IndexerFactory<>(containedInComboJoiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(containedInComboJoiner).buildIndexer(true);
 
         var annXY1 = putTuple(indexer, List.of("X", "Y"), "1");
         var bethXY2 = putTuple(indexer, List.of("X", "Y"), "2");
@@ -132,7 +132,7 @@ class ContainingIndexerTest extends AbstractIndexerTest {
 
     @Test
     void uniqueRandomIterator() {
-        var indexer = new IndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
 
         var annXY1 = putContainingIndexer(indexer, List.of("X", "Y"));
         var bethXZ1 = putContainingIndexer(indexer, List.of("X", "Z"));
@@ -157,7 +157,7 @@ class ContainingIndexerTest extends AbstractIndexerTest {
 
     @Test
     void uniqueRandomIteratorUnmatchedQueryKey() {
-        var indexer = new IndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
         putContainingIndexer(indexer, List.of("X", "Y"));
 
         var noMatchIterator = indexer.uniqueRandomIterator("Q", new Random(0));
@@ -166,7 +166,7 @@ class ContainingIndexerTest extends AbstractIndexerTest {
 
     @Test
     void randomIteratorNeverEnds() {
-        var indexer = new IndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
+        var indexer = new DefaultIndexerFactory<>(randomAccessSingleJoiner).buildIndexer(true);
 
         putContainingIndexer(indexer, List.of("X", "Y"));
         putContainingIndexer(indexer, List.of("X", "Z"));

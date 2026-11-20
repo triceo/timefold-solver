@@ -21,13 +21,13 @@ class TwoIndexerJoinIndexTest {
 
     @Test
     void defaultFactoryIsCommunity() {
-        assertThat(AbstractIndexerFactory.of(equalGenderLessThanAge)).isInstanceOf(IndexerFactory.class);
+        assertThat(AbstractIndexerFactory.of(equalGenderLessThanAge)).isInstanceOf(DefaultIndexerFactory.class);
     }
 
     @Test
     void reservesNoTupleStoreSlots() {
         var tracker = new CountingTracker();
-        var joinIndex = new IndexerFactory<>(equalGenderLessThanAge).buildJoinIndex(tracker);
+        var joinIndex = new DefaultIndexerFactory<>(equalGenderLessThanAge).buildJoinIndex(tracker);
         assertThat(joinIndex).isInstanceOf(TwoIndexerJoinIndex.class);
         assertThat(tracker.reservationCount).isZero();
     }
@@ -35,7 +35,7 @@ class TwoIndexerJoinIndexTest {
     @Test
     void putQueryUpdateRemove() {
         JoinIndex<UniTuple<String>, UniTuple<String>> joinIndex =
-                new IndexerFactory<>(equalGenderLessThanAge).buildJoinIndex(new CountingTracker());
+                new DefaultIndexerFactory<>(equalGenderLessThanAge).buildJoinIndex(new CountingTracker());
         var left30 = UniTuple.of("left30", 0);
         var left30Entry = joinIndex.putLeft(left30, CompositeKey.ofMany("F", 30), left30);
         var left50 = UniTuple.of("left50", 0);
