@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import ai.timefold.solver.core.api.domain.solution.PlanningSolution;
@@ -19,22 +20,25 @@ import org.jspecify.annotations.Nullable;
 /**
  * Feeds facts into the root nodes of a node network.
  * Inserts and retracts reach the nodes immediately.
- * Updates of facts with for-each nodes are deferred to {@link #settle()},
- * so that each fact reaches each for-each node at most once per settle,
- * no matter how many times it was updated.
- * Each such fact has one {@link FactHandle}, which holds its tuple in every for-each node,
+ * Each fact with for-each nodes has one {@link FactHandle}, which holds its tuple in every for-each node,
  * so that one map lookup serves all for-each nodes.
+ * Updates of facts of the deferred classes wait until {@link #settle()},
+ * so that each fact reaches each for-each node at most once per settle;
+ * these are the classes which typically receive many updates per fact between two settles,
+ * such as entities with declarative shadow variables.
+ * Deferral costs a second pass over the facts, so updates of other classes reach the nodes immediately.
  */
 @NullMarked
 public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork> {
 
     protected final Network_ nodeNetwork;
+    private final Set<Class<?>> deferredUpdateClassSet;
     private final Map<Class<?>, ClassPlan> classPlanMap;
     private final List<FactHandle> dirtyHandleList = new ArrayList<>();
     private @Nullable Class<?> lastClass;
     private @Nullable ClassPlan lastClassPlan;
     /**
-     * Consecutive updates of one fact need no lookup.
+     * The last fact of a deferred class that was updated; consecutive updates of it need no lookup.
      * Must be reset whenever an update could otherwise be lost: on settle, insert and retract.
      */
     private @Nullable Object lastUpdatedFact;
@@ -42,7 +46,15 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
     private boolean settled = false;
 
     protected AbstractSession(Network_ nodeNetwork) {
+        this(nodeNetwork, Set.of());
+    }
+
+    /**
+     * @param deferredUpdateClassSet updates of facts of these classes and their subclasses wait until settle
+     */
+    protected AbstractSession(Network_ nodeNetwork, Set<Class<?>> deferredUpdateClassSet) {
         this.nodeNetwork = nodeNetwork;
+        this.deferredUpdateClassSet = deferredUpdateClassSet;
         this.classPlanMap = HashMap.newHashMap(nodeNetwork.forEachNodeCount());
     }
 
@@ -89,6 +101,10 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
             throw new IllegalStateException("The fact (%s) was never inserted."
                     .formatted(fact));
         }
+        if (!plan.deferUpdates) {
+            updateForEachNodes(handle);
+            return;
+        }
         lastUpdatedFact = fact;
         if (!handle.dirty) {
             handle.dirty = true;
@@ -125,7 +141,8 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
             // Map.computeIfAbsent() would have created lambdas on the hot path, this will not.
             var plan = classPlanMap.get(factClass);
             if (plan == null) {
-                plan = new ClassPlan(nodeNetwork.getRootNodesAcceptingType(factClass).toList());
+                var deferUpdates = deferredUpdateClassSet.stream().anyMatch(clazz -> clazz.isAssignableFrom(factClass));
+                plan = new ClassPlan(nodeNetwork.getRootNodesAcceptingType(factClass).toList(), deferUpdates);
                 classPlanMap.put(factClass, plan);
             }
             lastClassPlan = plan;
@@ -155,19 +172,22 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
         for (var handleIndex = 0; handleIndex < dirtyHandleList.size(); handleIndex++) {
             var handle = dirtyHandleList.get(handleIndex);
             handle.dirty = false;
-            if (handle.retracted) {
-                continue;
-            }
-            var plan = handle.plan;
-            var forEachNodes = plan.forEachNodes;
-            var tuples = handle.tuples;
-            for (var i = 0; i < forEachNodes.length; i++) {
-                if (plan.forEachActive[i]) {
-                    tuples[i] = forEachNodes[i].updateFact(handle.fact, tuples[i]);
-                }
+            if (!handle.retracted) {
+                updateForEachNodes(handle);
             }
         }
         dirtyHandleList.clear();
+    }
+
+    private static void updateForEachNodes(FactHandle handle) {
+        var plan = handle.plan;
+        var forEachNodes = plan.forEachNodes;
+        var tuples = handle.tuples;
+        for (var i = 0; i < forEachNodes.length; i++) {
+            if (plan.forEachActive[i]) {
+                tuples[i] = forEachNodes[i].updateFact(handle.fact, tuples[i]);
+            }
+        }
     }
 
     public Network_ getNodeNetwork() {
@@ -187,10 +207,12 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
          */
         private final AbstractForEachUniNode<Object>[] forEachNodes;
         private final boolean[] forEachActive;
+        private final boolean deferUpdates;
         private AbstractPrecomputeNode<?>[] otherNodes;
 
         @SuppressWarnings("unchecked")
-        private ClassPlan(List<AbstractRootNode<?>> rootNodeList) {
+        private ClassPlan(List<AbstractRootNode<?>> rootNodeList, boolean deferUpdates) {
+            this.deferUpdates = deferUpdates;
             var forEachNodeList = new ArrayList<AbstractForEachUniNode<Object>>();
             var otherNodeList = new ArrayList<AbstractPrecomputeNode<?>>();
             for (var node : rootNodeList) {

@@ -15,6 +15,7 @@ import ai.timefold.solver.core.api.score.Score;
 import ai.timefold.solver.core.api.score.stream.Constraint;
 import ai.timefold.solver.core.api.score.stream.ConstraintMetaModel;
 import ai.timefold.solver.core.enterprise.TimefoldSolverEnterpriseService;
+import ai.timefold.solver.core.impl.bavet.AbstractSession;
 import ai.timefold.solver.core.impl.bavet.common.AbstractRootNode;
 import ai.timefold.solver.core.impl.bavet.common.BavetAbstractConstraintStream;
 import ai.timefold.solver.core.impl.bavet.common.InnerConstraintProfiler;
@@ -117,7 +118,18 @@ public final class BavetConstraintSessionFactory<Solution_, Score_ extends Score
         }
         return new BavetConstraintSession<>(scoreInliner,
                 buildNodeNetwork(workingSolution, consistencyTracker, constraintStreamSet, scoreInliner, constraintProfiler,
-                        constraintMatchPolicy.isIndictmentsEnabled(), scoreDirectorDerived));
+                        constraintMatchPolicy.isIndictmentsEnabled(), scoreDirectorDerived),
+                getDeferredUpdateClassSet());
+    }
+
+    /**
+     * Entities with declarative shadow variables receive many updates per move,
+     * so the session defers their updates; see {@link AbstractSession}.
+     */
+    private Set<Class<?>> getDeferredUpdateClassSet() {
+        return solutionDescriptor.getDeclarativeShadowVariableDescriptors().stream()
+                .map(descriptor -> descriptor.getEntityDescriptor().getEntityClass())
+                .collect(Collectors.toSet());
     }
 
     private ConstraintStreamsBavetNodeNetwork buildNodeNetwork(Solution_ workingSolution,

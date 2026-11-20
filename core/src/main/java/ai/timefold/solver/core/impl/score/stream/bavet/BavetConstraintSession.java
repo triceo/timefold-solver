@@ -1,6 +1,7 @@
 package ai.timefold.solver.core.impl.score.stream.bavet;
 
 import java.util.Map;
+import java.util.Set;
 
 import ai.timefold.solver.core.api.score.Score;
 import ai.timefold.solver.core.api.score.stream.ConstraintRef;
@@ -30,11 +31,12 @@ public final class BavetConstraintSession<Score_ extends Score<Score_>>
     private final AbstractScoreInliner<Score_> scoreInliner;
 
     BavetConstraintSession(AbstractScoreInliner<Score_> scoreInliner) {
-        this(scoreInliner, ConstraintStreamsBavetNodeNetwork.EMPTY);
+        this(scoreInliner, ConstraintStreamsBavetNodeNetwork.EMPTY, Set.of());
     }
 
-    BavetConstraintSession(AbstractScoreInliner<Score_> scoreInliner, ConstraintStreamsBavetNodeNetwork nodeNetwork) {
-        super(nodeNetwork);
+    BavetConstraintSession(AbstractScoreInliner<Score_> scoreInliner, ConstraintStreamsBavetNodeNetwork nodeNetwork,
+            Set<Class<?>> deferredUpdateClassSet) {
+        super(nodeNetwork, deferredUpdateClassSet);
         this.scoreInliner = scoreInliner;
     }
 
