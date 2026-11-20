@@ -27,6 +27,8 @@ import ai.timefold.solver.core.config.heuristic.selector.value.ValueSelectorConf
 import ai.timefold.solver.core.config.partitionedsearch.PartitionedSearchPhaseConfig;
 import ai.timefold.solver.core.config.solver.EnvironmentMode;
 import ai.timefold.solver.core.impl.bavet.common.InnerConstraintProfiler;
+import ai.timefold.solver.core.impl.bavet.common.index.AbstractIndexerFactory;
+import ai.timefold.solver.core.impl.bavet.common.joiner.AbstractJoiner;
 import ai.timefold.solver.core.impl.constructionheuristic.decider.ConstructionHeuristicDecider;
 import ai.timefold.solver.core.impl.constructionheuristic.decider.forager.ConstructionHeuristicForager;
 import ai.timefold.solver.core.impl.domain.entity.descriptor.EntityDescriptor;
@@ -189,6 +191,11 @@ public interface TimefoldSolverEnterpriseService {
      * @return never null
      */
     ConstraintProviderNodeSharer createNodeSharer();
+
+    /**
+     * Builds the factory of the indexes of the indexed join and ifExists nodes.
+     */
+    <Right_> AbstractIndexerFactory<Right_> buildIndexerFactory(AbstractJoiner<Right_> joiner);
 
     <Solution_> ConstructionHeuristicDecider<Solution_> buildConstructionHeuristic(PhaseTermination<Solution_> termination,
             ConstructionHeuristicForager<Solution_> forager, HeuristicConfigPolicy<Solution_> configPolicy);

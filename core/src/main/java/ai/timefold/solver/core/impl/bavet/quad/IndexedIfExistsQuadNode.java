@@ -2,7 +2,7 @@ package ai.timefold.solver.core.impl.bavet.quad;
 
 import ai.timefold.solver.core.api.function.PentaPredicate;
 import ai.timefold.solver.core.impl.bavet.common.AbstractIndexedIfExistsNode;
-import ai.timefold.solver.core.impl.bavet.common.index.IndexerFactory;
+import ai.timefold.solver.core.impl.bavet.common.index.AbstractIndexerFactory;
 import ai.timefold.solver.core.impl.bavet.common.tuple.InTupleStorePositionTracker;
 import ai.timefold.solver.core.impl.bavet.common.tuple.QuadTuple;
 import ai.timefold.solver.core.impl.bavet.common.tuple.TupleLifecycle;
@@ -12,13 +12,13 @@ public final class IndexedIfExistsQuadNode<A, B, C, D, E> extends AbstractIndexe
 
     private final PentaPredicate<A, B, C, D, E> filtering;
 
-    public IndexedIfExistsQuadNode(boolean shouldExist, IndexerFactory<E> indexerFactory,
+    public IndexedIfExistsQuadNode(boolean shouldExist, AbstractIndexerFactory<E> indexerFactory,
             TupleLifecycle<QuadTuple<A, B, C, D>> nextNodesTupleLifecycle,
             InTupleStorePositionTracker tupleStorePositionTracker) {
         this(shouldExist, indexerFactory, nextNodesTupleLifecycle, null, tupleStorePositionTracker);
     }
 
-    public IndexedIfExistsQuadNode(boolean shouldExist, IndexerFactory<E> indexerFactory,
+    public IndexedIfExistsQuadNode(boolean shouldExist, AbstractIndexerFactory<E> indexerFactory,
             TupleLifecycle<QuadTuple<A, B, C, D>> nextNodesTupleLifecycle, PentaPredicate<A, B, C, D, E> filtering,
             InTupleStorePositionTracker tupleStorePositionTracker) {
         super(shouldExist, indexerFactory.buildQuadLeftKeysExtractor(), indexerFactory, nextNodesTupleLifecycle,

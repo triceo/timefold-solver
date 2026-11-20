@@ -2,7 +2,7 @@ package ai.timefold.solver.core.impl.neighborhood.stream.enumerating.uni;
 
 import java.util.Objects;
 
-import ai.timefold.solver.core.impl.bavet.common.index.IndexerFactory;
+import ai.timefold.solver.core.impl.bavet.common.index.AbstractIndexerFactory;
 import ai.timefold.solver.core.impl.neighborhood.stream.enumerating.common.AbstractRightDataset;
 import ai.timefold.solver.core.impl.neighborhood.stream.joiner.BiNeighborhoodsJoinerComber;
 
@@ -21,7 +21,7 @@ public final class UniRightDataset<Solution_, A, B> extends AbstractRightDataset
 
     @Override
     public UniRightDatasetInstance<Solution_, A, B> instantiate(int compositeKeyStoreIndex, int entryStoreIndex) {
-        var indexerFactory = new IndexerFactory<>(joinerComber.mergedJoiner());
+        var indexerFactory = AbstractIndexerFactory.of(joinerComber.mergedJoiner());
         return new UniRightDatasetInstance<>(this, indexerFactory, joinerComber.mergedFiltering(), compositeKeyStoreIndex,
                 entryStoreIndex);
     }

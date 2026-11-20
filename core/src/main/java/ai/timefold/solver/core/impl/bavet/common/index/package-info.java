@@ -7,8 +7,9 @@
  * <ol>
  * <li><b>Comber</b> ({@code Bi/Tri/Quad/PentaJoinerComber}, {@code BiNeighborhoodsJoinerComber}):
  * separates indexing and filtering joiners, enforces indexing-before-filtering, and keeps indexing joiners equal-first.</li>
- * <li><b>{@link ai.timefold.solver.core.impl.bavet.common.index.IndexerFactory}</b>:
- * creates key extractors and index structures used by both sides of the node.</li>
+ * <li><b>{@link ai.timefold.solver.core.impl.bavet.common.index.AbstractIndexerFactory}</b>:
+ * creates key extractors and the {@link ai.timefold.solver.core.impl.bavet.common.index.JoinIndex}
+ * used by both sides of the node.</li>
  * <li><b>Indexed node</b> ({@code AbstractIndexed{Join,IfExists}Node}):
  * indexes tuples on insert/update/retract, queries the opposite side, and propagates results downstream.</li>
  * </ol>
@@ -30,15 +31,9 @@
  *
  * A tuple is always looked up against the opposite side using its own key.
  *
- * <ul>
- * <li><b>Unified path:</b> if there is an equal prefix and random access is not required,
- * {@link ai.timefold.solver.core.impl.bavet.common.index.IndexerFactory} builds a shared
- * {@link ai.timefold.solver.core.impl.bavet.common.index.FusedEqualIndex}.
- * Matching left/right tuples co-locate in the same
- * {@link ai.timefold.solver.core.impl.bavet.common.index.FusedEqualIndex.Bucket} and communicate there.</li>
- * <li><b>Non-unified path:</b> otherwise each side has its own index chain;
- * communication happens by querying the opposite chain.</li>
- * </ul>
+ * The node reaches both sides through one {@link ai.timefold.solver.core.impl.bavet.common.index.JoinIndex}.
+ * {@link ai.timefold.solver.core.impl.bavet.common.index.TwoIndexerJoinIndex} gives each side its own index chain;
+ * communication happens by querying the opposite chain.
  *
  * <h2>4. Node lifecycle interaction</h2>
  *
@@ -48,12 +43,13 @@
  * <h2>5. Neighborhood integration</h2>
  *
  * Neighborhood streams reuse the same join/ifExists indexing pipeline after converting neighborhood joiners to regular
- * bi joiners. Random-iterator datasets use random-access index backends and stay on the non-unified path.
+ * bi joiners. Random-iterator datasets use random-access index backends, built by
+ * {@link ai.timefold.solver.core.impl.bavet.common.index.AbstractIndexerFactory#buildIndexer(boolean)}.
  *
  * <h2>6. Extension points</h2>
  *
  * When adding a new {@code JoinerType} or {@link ai.timefold.solver.core.impl.bavet.common.index.Indexer}, update:
- * matching semantics, indexer creation in {@link ai.timefold.solver.core.impl.bavet.common.index.IndexerFactory}, and
+ * matching semantics, indexer creation in {@link ai.timefold.solver.core.impl.bavet.common.index.AbstractIndexerFactory}, and
  * indexed/unindexed node pairs where behavior must stay aligned.
  */
 package ai.timefold.solver.core.impl.bavet.common.index;

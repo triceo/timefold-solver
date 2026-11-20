@@ -4,7 +4,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import ai.timefold.solver.core.impl.bavet.common.AbstractIfExistsNode;
-import ai.timefold.solver.core.impl.bavet.common.index.IndexerFactory;
+import ai.timefold.solver.core.impl.bavet.common.index.AbstractIndexerFactory;
 import ai.timefold.solver.core.impl.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.bavet.common.tuple.UniTuple;
 import ai.timefold.solver.core.impl.bavet.uni.IndexedIfExistsUniNode;
@@ -54,12 +54,12 @@ final class IfExistsUniEnumeratingStream<Solution_, A, B>
     @Override
     public void buildNode(DataNodeBuildHelper<Solution_> buildHelper) {
         TupleLifecycle<UniTuple<A>> downstream = buildHelper.getAggregatedTupleLifecycle(childStreamList);
-        var indexerFactory = new IndexerFactory<>(joiner.toBiJoiner());
+        var indexerFactory = AbstractIndexerFactory.of(joiner.toBiJoiner());
         var node = getNode(indexerFactory, buildHelper, downstream);
         buildHelper.addNode(node, this, this, parentBridgeB);
     }
 
-    private AbstractIfExistsNode<UniTuple<A>, B> getNode(IndexerFactory<B> indexerFactory,
+    private AbstractIfExistsNode<UniTuple<A>, B> getNode(AbstractIndexerFactory<B> indexerFactory,
             DataNodeBuildHelper<Solution_> buildHelper, TupleLifecycle<UniTuple<A>> downstream) {
         var sessionContext = buildHelper.getSessionContext();
         var isFiltering = filtering != null;

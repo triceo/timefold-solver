@@ -2,7 +2,7 @@ package ai.timefold.solver.core.impl.neighborhood.stream.enumerating.uni;
 
 import java.util.function.Function;
 
-import ai.timefold.solver.core.impl.bavet.common.index.IndexerFactory;
+import ai.timefold.solver.core.impl.bavet.common.index.AbstractIndexerFactory;
 import ai.timefold.solver.core.impl.bavet.common.tuple.UniTuple;
 import ai.timefold.solver.core.impl.neighborhood.stream.enumerating.common.AbstractDataset;
 import ai.timefold.solver.core.impl.neighborhood.stream.enumerating.common.AbstractRightDatasetInstance;
@@ -18,7 +18,7 @@ public final class UniRightDatasetInstance<Solution_, A, B>
     private final Function<@Nullable A, Object> leftFactCompositeKeyExtractor;
     private final @Nullable BiNeighborhoodsPredicate<Solution_, A, B> filter;
 
-    public UniRightDatasetInstance(AbstractDataset<Solution_> parent, IndexerFactory<B> indexerFactory,
+    public UniRightDatasetInstance(AbstractDataset<Solution_> parent, AbstractIndexerFactory<B> indexerFactory,
             @Nullable BiNeighborhoodsPredicate<Solution_, A, B> filter, int compositeKeyStoreIndex,
             int entryStoreIndex) {
         super(parent, indexerFactory.buildRightKeysExtractor(), compositeKeyStoreIndex, entryStoreIndex,

@@ -12,6 +12,15 @@ For models making intensive use of xref:domain-modeling/modeling-planning-proble
 
 This is enabled by default and doesn't require any special considerations.
 
+[#fasterJoins]
+== Faster joins
+
+include::./_only-enterprise.adoc[]
+
+With Timefold Solver Enterprise, constraint streams use faster indexes for `join(...)`, `ifExists(...)`, and `ifNotExists(...)` with equal joiners (`Joiners.equal(...)`) or comparison joiners (such as `Joiners.lessThan(...)`, `Joiners.greaterThan(...)`, or `Joiners.overlapping(...)`).
+Models that use many of these joins can expect higher move evaluation speed.
+Timefold Solver Enterprise with a valid license enables faster joins by default, without configuration.
+
 [#automaticNodeSharing]
 == Node sharing
 

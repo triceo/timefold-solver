@@ -6,7 +6,7 @@ import java.util.Set;
 import ai.timefold.solver.core.api.function.PentaPredicate;
 import ai.timefold.solver.core.api.score.Score;
 import ai.timefold.solver.core.impl.bavet.common.BavetAbstractConstraintStream;
-import ai.timefold.solver.core.impl.bavet.common.index.IndexerFactory;
+import ai.timefold.solver.core.impl.bavet.common.index.AbstractIndexerFactory;
 import ai.timefold.solver.core.impl.bavet.common.tuple.QuadTuple;
 import ai.timefold.solver.core.impl.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.bavet.penta.joiner.DefaultPentaJoiner;
@@ -65,7 +65,7 @@ final class BavetIfExistsQuadConstraintStream<Solution_, A, B, C, D, E>
     @Override
     public <Score_ extends Score<Score_>> void buildNode(ConstraintNodeBuildHelper<Solution_, Score_> buildHelper) {
         TupleLifecycle<QuadTuple<A, B, C, D>> downstream = buildHelper.getAggregatedTupleLifecycle(childStreamList);
-        IndexerFactory<E> indexerFactory = new IndexerFactory<>(joiner);
+        AbstractIndexerFactory<E> indexerFactory = AbstractIndexerFactory.of(joiner);
         var positionTracker =
                 buildHelper.getTupleStorePositionTracker(this, parentABCD.getTupleSource(), parentBridgeE.getTupleSource());
         var node = indexerFactory.hasJoiners()

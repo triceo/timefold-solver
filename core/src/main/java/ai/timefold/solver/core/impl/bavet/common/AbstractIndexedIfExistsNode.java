@@ -1,8 +1,8 @@
 package ai.timefold.solver.core.impl.bavet.common;
 
-import ai.timefold.solver.core.impl.bavet.common.index.IndexerFactory;
-import ai.timefold.solver.core.impl.bavet.common.index.IndexerFactory.KeysExtractor;
-import ai.timefold.solver.core.impl.bavet.common.index.IndexerFactory.UniKeysExtractor;
+import ai.timefold.solver.core.impl.bavet.common.index.AbstractIndexerFactory;
+import ai.timefold.solver.core.impl.bavet.common.index.AbstractIndexerFactory.KeysExtractor;
+import ai.timefold.solver.core.impl.bavet.common.index.AbstractIndexerFactory.UniKeysExtractor;
 import ai.timefold.solver.core.impl.bavet.common.index.JoinIndex;
 import ai.timefold.solver.core.impl.bavet.common.tuple.InTupleStorePositionTracker;
 import ai.timefold.solver.core.impl.bavet.common.tuple.LeftTupleLifecycle;
@@ -39,7 +39,8 @@ public abstract class AbstractIndexedIfExistsNode<LeftTuple_ extends Tuple, Righ
     private final JoinIndex<ExistsCounter<LeftTuple_>, UniTuple<Right_>> joinIndex;
 
     protected AbstractIndexedIfExistsNode(boolean shouldExist, KeysExtractor<LeftTuple_> keysExtractorLeft,
-            IndexerFactory<Right_> indexerFactory, TupleLifecycle<LeftTuple_> nextNodesTupleLifecycle, boolean isFiltering,
+            AbstractIndexerFactory<Right_> indexerFactory, TupleLifecycle<LeftTuple_> nextNodesTupleLifecycle,
+            boolean isFiltering,
             InTupleStorePositionTracker tupleStorePositionTracker) {
         super(shouldExist, nextNodesTupleLifecycle, isFiltering, tupleStorePositionTracker);
         this.keysExtractorLeft = keysExtractorLeft;

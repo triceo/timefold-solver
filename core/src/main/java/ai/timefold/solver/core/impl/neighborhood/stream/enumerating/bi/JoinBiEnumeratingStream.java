@@ -5,7 +5,7 @@ import java.util.Set;
 
 import ai.timefold.solver.core.impl.bavet.bi.IndexedJoinBiNode;
 import ai.timefold.solver.core.impl.bavet.bi.UnindexedJoinBiNode;
-import ai.timefold.solver.core.impl.bavet.common.index.IndexerFactory;
+import ai.timefold.solver.core.impl.bavet.common.index.AbstractIndexerFactory;
 import ai.timefold.solver.core.impl.bavet.common.tuple.BiTuple;
 import ai.timefold.solver.core.impl.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.neighborhood.stream.enumerating.EnumeratingStreamFactory;
@@ -50,7 +50,7 @@ public final class JoinBiEnumeratingStream<Solution_, A, B> extends AbstractBiEn
         var solutionView = buildHelper.getSessionContext().solutionView();
         var filteringDataJoiner = this.filtering == null ? null : this.filtering.toBiPredicate(solutionView);
         TupleLifecycle<BiTuple<A, B>> downstream = buildHelper.getAggregatedTupleLifecycle(childStreamList);
-        var indexerFactory = new IndexerFactory<>(joiner.toBiJoiner());
+        var indexerFactory = AbstractIndexerFactory.of(joiner.toBiJoiner());
         var positionTracker =
                 buildHelper.getTupleStorePositionTracker(this, leftParent.getTupleSource(), rightParent.getTupleSource());
         var node = indexerFactory.hasJoiners()

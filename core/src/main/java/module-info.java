@@ -186,6 +186,9 @@ module ai.timefold.solver.core {
 
     // enterprise-specific exports
     exports ai.timefold.solver.core.impl.bavet.common to ai.timefold.solver.enterprise.core;
+    exports ai.timefold.solver.core.impl.bavet.common.index to ai.timefold.solver.enterprise.core;
+    exports ai.timefold.solver.core.impl.bavet.common.joiner to ai.timefold.solver.enterprise.core;
+    exports ai.timefold.solver.core.impl.bavet.common.tuple to ai.timefold.solver.enterprise.core;
     exports ai.timefold.solver.core.impl.bavet.uni to ai.timefold.solver.enterprise.core;
     exports ai.timefold.solver.core.impl.constructionheuristic to ai.timefold.solver.enterprise.core;
     exports ai.timefold.solver.core.impl.constructionheuristic.decider to ai.timefold.solver.enterprise.core;

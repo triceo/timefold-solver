@@ -3,7 +3,7 @@ package ai.timefold.solver.core.impl.bavet.bi;
 import java.util.function.BiPredicate;
 
 import ai.timefold.solver.core.impl.bavet.common.AbstractIndexedJoinNode;
-import ai.timefold.solver.core.impl.bavet.common.index.IndexerFactory;
+import ai.timefold.solver.core.impl.bavet.common.index.AbstractIndexerFactory;
 import ai.timefold.solver.core.impl.bavet.common.tuple.BiTuple;
 import ai.timefold.solver.core.impl.bavet.common.tuple.InOutTupleStorePositionTracker;
 import ai.timefold.solver.core.impl.bavet.common.tuple.TupleLifecycle;
@@ -13,7 +13,7 @@ public final class IndexedJoinBiNode<A, B> extends AbstractIndexedJoinNode<UniTu
 
     private final BiPredicate<A, B> filtering;
 
-    public IndexedJoinBiNode(IndexerFactory<B> indexerFactory, TupleLifecycle<BiTuple<A, B>> nextNodesTupleLifecycle,
+    public IndexedJoinBiNode(AbstractIndexerFactory<B> indexerFactory, TupleLifecycle<BiTuple<A, B>> nextNodesTupleLifecycle,
             BiPredicate<A, B> filtering, InOutTupleStorePositionTracker tupleStorePositionTracker) {
         super(indexerFactory.buildUniLeftKeysExtractor(), indexerFactory, nextNodesTupleLifecycle, filtering != null,
                 tupleStorePositionTracker);

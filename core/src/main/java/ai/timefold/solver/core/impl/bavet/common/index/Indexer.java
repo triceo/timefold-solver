@@ -30,9 +30,7 @@ import org.jspecify.annotations.NullMarked;
  *        For example for {@code Bi<A, B>.join(C)}, the tuple is {@code BiTuple<A, B>} xor {@code UniTuple<C>}.
  */
 @NullMarked
-public sealed interface Indexer<T>
-        permits EqualIndexer, ComparisonIndexer, ContainingIndexer, ContainedInIndexer, ContainingAnyOfIndexer, LeafIndexer,
-        SortedBlockIndexer {
+public interface Indexer<T> {
 
     /**
      * Modify operation.

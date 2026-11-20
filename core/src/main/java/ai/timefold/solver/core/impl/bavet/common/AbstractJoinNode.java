@@ -64,7 +64,7 @@ public abstract class AbstractJoinNode<LeftTuple_ extends Tuple, Right_, OutTupl
      * so {@code innerUpdateLeft}'s own "no existing out-tuple ⇒
      * insert" branch handles it.
      * Implemented by each subclass because only it knows how to walk the opposite side
-     * (indexed: the shared index/bucket; unindexed: the plain tuple list).
+     * (indexed: the join index; unindexed: the plain tuple list).
      */
     @Override
     protected abstract void reconcilePendingLeft(LeftTuple_ leftTuple);

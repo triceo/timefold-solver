@@ -252,7 +252,7 @@ public abstract class AbstractCrossMatchNode<LeftTuple_ extends Tuple, Right_>
      * Reusing that logic is what makes this correct for a tuple that was actually a fresh insert too:
      * with nothing recorded for it yet, every match it finds is necessarily new.
      * Implemented further down because only the subclass knows both what to walk
-     * (indexed: the shared index/bucket; unindexed: the plain tuple list)
+     * (indexed: the join index; unindexed: the plain tuple list)
      * and what to do with a match.
      */
     protected abstract void reconcilePendingLeft(LeftTuple_ leftTuple);

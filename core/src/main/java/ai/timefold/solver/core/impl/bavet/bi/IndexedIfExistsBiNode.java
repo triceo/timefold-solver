@@ -2,7 +2,7 @@ package ai.timefold.solver.core.impl.bavet.bi;
 
 import ai.timefold.solver.core.api.function.TriPredicate;
 import ai.timefold.solver.core.impl.bavet.common.AbstractIndexedIfExistsNode;
-import ai.timefold.solver.core.impl.bavet.common.index.IndexerFactory;
+import ai.timefold.solver.core.impl.bavet.common.index.AbstractIndexerFactory;
 import ai.timefold.solver.core.impl.bavet.common.tuple.BiTuple;
 import ai.timefold.solver.core.impl.bavet.common.tuple.InTupleStorePositionTracker;
 import ai.timefold.solver.core.impl.bavet.common.tuple.TupleLifecycle;
@@ -12,12 +12,12 @@ public final class IndexedIfExistsBiNode<A, B, C> extends AbstractIndexedIfExist
 
     private final TriPredicate<A, B, C> filtering;
 
-    public IndexedIfExistsBiNode(boolean shouldExist, IndexerFactory<C> indexerFactory,
+    public IndexedIfExistsBiNode(boolean shouldExist, AbstractIndexerFactory<C> indexerFactory,
             TupleLifecycle<BiTuple<A, B>> nextNodesTupleLifecycle, InTupleStorePositionTracker tupleStorePositionTracker) {
         this(shouldExist, indexerFactory, nextNodesTupleLifecycle, null, tupleStorePositionTracker);
     }
 
-    public IndexedIfExistsBiNode(boolean shouldExist, IndexerFactory<C> indexerFactory,
+    public IndexedIfExistsBiNode(boolean shouldExist, AbstractIndexerFactory<C> indexerFactory,
             TupleLifecycle<BiTuple<A, B>> nextNodesTupleLifecycle, TriPredicate<A, B, C> filtering,
             InTupleStorePositionTracker tupleStorePositionTracker) {
         super(shouldExist, indexerFactory.buildBiLeftKeysExtractor(), indexerFactory, nextNodesTupleLifecycle,

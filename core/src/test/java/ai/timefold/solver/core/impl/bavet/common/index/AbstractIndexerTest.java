@@ -19,27 +19,27 @@ import ai.timefold.solver.core.impl.util.ElementAwareArrayList;
 import org.assertj.core.api.AbstractIntegerAssert;
 import org.assertj.core.api.ListAssert;
 
-abstract class AbstractIndexerTest {
+public abstract class AbstractIndexerTest {
 
     private static final AtomicLong tupleId = new AtomicLong();
 
-    static <T> ElementAwareArrayList<T> toEntries(List<T> elements) {
+    public static <T> ElementAwareArrayList<T> toEntries(List<T> elements) {
         var list = new ElementAwareArrayList<T>();
         list.addAll(elements);
         return list;
     }
 
-    protected static UniTuple<String> putTuple(Indexer<Object> indexer, Object... keys) {
+    public static UniTuple<String> putTuple(Indexer<Object> indexer, Object... keys) {
         var tuple = UniTuple.of("Tuple " + tupleId.getAndIncrement(), 0);
         indexer.put(CompositeKey.ofMany(keys), tuple);
         return tuple;
     }
 
-    protected static AbstractIntegerAssert<?> assertSize(Indexer<Object> indexer, Object... keys) {
+    public static AbstractIntegerAssert<?> assertSize(Indexer<Object> indexer, Object... keys) {
         return assertThat(indexer.size(CompositeKey.ofMany(keys)));
     }
 
-    protected static ListAssert<Object> assertForEach(Indexer<Object> indexer, Object... keys) {
+    public static ListAssert<Object> assertForEach(Indexer<Object> indexer, Object... keys) {
         var properties = switch (keys.length) {
             case 0 -> CompositeKey.none();
             case 1 -> CompositeKey.of(keys[0]);
@@ -50,7 +50,7 @@ abstract class AbstractIndexerTest {
         return assertThat(result);
     }
 
-    protected static <T> List<T> forEachToTuples(Indexer<T> indexer, Object... objectProperties) {
+    public static <T> List<T> forEachToTuples(Indexer<T> indexer, Object... objectProperties) {
         var properties = switch (objectProperties.length) {
             case 0 -> CompositeKey.none();
             case 1 -> CompositeKey.of(objectProperties[0]);
@@ -61,7 +61,7 @@ abstract class AbstractIndexerTest {
         return result;
     }
 
-    static Iterable<Object> uniqueRandomIterableForQuery(Indexer<Object> indexer, String key) {
+    public static Iterable<Object> uniqueRandomIterableForQuery(Indexer<Object> indexer, String key) {
         return uniqueRandomIterableForQuery(indexer, 0, key);
     }
 
@@ -69,13 +69,13 @@ abstract class AbstractIndexerTest {
         return () -> indexer.uniqueRandomIterator(key, new Random(seed));
     }
 
-    static List<Object> uniqueRandomListForQuery(Indexer<Object> indexer, long seed, String key) {
+    public static List<Object> uniqueRandomListForQuery(Indexer<Object> indexer, long seed, String key) {
         var iterable = uniqueRandomIterableForQuery(indexer, seed, key);
         return StreamSupport.stream(iterable.spliterator(), false)
                 .toList();
     }
 
-    static Iterable<Object> uniqueRandomIterableForCollectionQuery(Indexer<Object> indexer, String... keys) {
+    public static Iterable<Object> uniqueRandomIterableForCollectionQuery(Indexer<Object> indexer, String... keys) {
         return uniqueRandomIterableForCollectionQuery(indexer, 0, keys);
     }
 
@@ -84,19 +84,19 @@ abstract class AbstractIndexerTest {
         return () -> indexer.uniqueRandomIterator(List.of(keys), new Random(seed));
     }
 
-    static List<Object> uniqueRandomListForCollectionQuery(Indexer<Object> indexer, long seed, String... keys) {
+    public static List<Object> uniqueRandomListForCollectionQuery(Indexer<Object> indexer, long seed, String... keys) {
         var iterable = uniqueRandomIterableForCollectionQuery(indexer, seed, keys);
         return StreamSupport.stream(iterable.spliterator(), false)
                 .toList();
     }
 
-    static UniTuple<String> putContainingIndexer(Indexer<Object> indexer, List<String> keys) {
+    public static UniTuple<String> putContainingIndexer(Indexer<Object> indexer, List<String> keys) {
         var tuple = UniTuple.of("Tuple " + tupleId.getAndIncrement(), 0);
         indexer.put(keys, tuple);
         return tuple;
     }
 
-    static UniTuple<String> putContainedInIndexer(Indexer<Object> indexer, String key) {
+    public static UniTuple<String> putContainedInIndexer(Indexer<Object> indexer, String key) {
         var tuple = UniTuple.of("Tuple " + tupleId.getAndIncrement(), 0);
         indexer.put(key, tuple);
         return tuple;
@@ -107,7 +107,7 @@ abstract class AbstractIndexerTest {
      * as {@link Indexer#forEach(Object, Consumer)}, without caller cooperation, and then ends.
      * Repeats across several seeds, since bucket sampling is seed-dependent.
      */
-    static <T> void assertUniqueRandomDrainMatchesForEach(Indexer<T> indexer, Object queryCompositeKey) {
+    public static <T> void assertUniqueRandomDrainMatchesForEach(Indexer<T> indexer, Object queryCompositeKey) {
         var expectedList = new ArrayList<T>();
         indexer.forEach(queryCompositeKey, expectedList::add);
         for (var seed = 0; seed < 10; seed++) {
@@ -134,7 +134,7 @@ abstract class AbstractIndexerTest {
      * if a caller's {@code drawCount} does not reach every match,
      * raise it there rather than here.
      */
-    static <T> void assertRepeatingRandomNeverEnds(Indexer<T> indexer, Object queryCompositeKey, int drawCount) {
+    public static <T> void assertRepeatingRandomNeverEnds(Indexer<T> indexer, Object queryCompositeKey, int drawCount) {
         var expectedList = new ArrayList<T>();
         indexer.forEach(queryCompositeKey, expectedList::add);
         var iterator = indexer.randomIterator(queryCompositeKey, new Random(0));

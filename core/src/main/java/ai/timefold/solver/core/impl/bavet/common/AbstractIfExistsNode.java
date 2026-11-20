@@ -50,7 +50,7 @@ public abstract class AbstractIfExistsNode<LeftTuple_ extends Tuple, Right_>
      * Reusing that logic is what makes this correct for a tuple that was actually a fresh insert too:
      * a brand-new counter has an empty tracker list, so every match found is necessarily new.
      * Implemented by each subclass because only it knows how to walk the opposite side
-     * (indexed: the shared index/bucket; unindexed: the plain tuple list).
+     * (indexed: the join index; unindexed: the plain tuple list).
      */
     @Override
     protected abstract void reconcilePendingLeft(LeftTuple_ leftTuple);

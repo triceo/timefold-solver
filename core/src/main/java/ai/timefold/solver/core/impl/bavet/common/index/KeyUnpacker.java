@@ -13,7 +13,7 @@ import org.jspecify.annotations.Nullable;
  * @param <Key_>
  */
 @FunctionalInterface
-interface KeyUnpacker<Key_> extends Function<Object, Key_> {
+public interface KeyUnpacker<Key_> extends Function<Object, Key_> {
 
     static <Key_> KeyUnpacker<Key_> single() {
         return a -> (Key_) a;

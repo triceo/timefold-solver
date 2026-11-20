@@ -8,7 +8,7 @@ import ai.timefold.solver.core.api.score.Score;
 import ai.timefold.solver.core.impl.bavet.bi.IndexedIfExistsBiNode;
 import ai.timefold.solver.core.impl.bavet.bi.UnindexedIfExistsBiNode;
 import ai.timefold.solver.core.impl.bavet.common.BavetAbstractConstraintStream;
-import ai.timefold.solver.core.impl.bavet.common.index.IndexerFactory;
+import ai.timefold.solver.core.impl.bavet.common.index.AbstractIndexerFactory;
 import ai.timefold.solver.core.impl.bavet.common.tuple.BiTuple;
 import ai.timefold.solver.core.impl.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.bavet.tri.joiner.DefaultTriJoiner;
@@ -65,7 +65,7 @@ final class BavetIfExistsBiConstraintStream<Solution_, A, B, C>
     @Override
     public <Score_ extends Score<Score_>> void buildNode(ConstraintNodeBuildHelper<Solution_, Score_> buildHelper) {
         TupleLifecycle<BiTuple<A, B>> downstream = buildHelper.getAggregatedTupleLifecycle(childStreamList);
-        IndexerFactory<C> indexerFactory = new IndexerFactory<>(joiner);
+        AbstractIndexerFactory<C> indexerFactory = AbstractIndexerFactory.of(joiner);
         var positionTracker =
                 buildHelper.getTupleStorePositionTracker(this, parentAB.getTupleSource(), parentBridgeC.getTupleSource());
         var node = indexerFactory.hasJoiners()

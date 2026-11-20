@@ -20,11 +20,8 @@ import ai.timefold.solver.core.preview.api.neighborhood.stream.joiner.Neighborho
 import org.junit.jupiter.api.Test;
 
 /**
- * Covers the NON-unified (two parallel indexer) path:
- * joins whose indexing joiners contain no equal joiner,
- * so {@link IndexerFactory#isFusedEqualIndexEligible()} is false and the node keeps two comparison indexers.
- * Comparison is otherwise only exercised alongside a leading equal (see {@link EqualsAndComparisonIndexerTest});
- * a pure-comparison join takes the {@code useJoinIndex == false} branch and must still join correctly.
+ * Covers joins whose indexing joiners contain no equal joiner.
+ * Comparison is otherwise only exercised alongside a leading equal (see {@link EqualsAndComparisonIndexerTest}).
  * <p>
  * A single comparison joiner uses a {@link KeyUnpacker#single()},
  * so the index key is the raw (comparable) key, not a {@link CompositeKey};
@@ -38,16 +35,6 @@ class ComparisonIndexerTest extends AbstractIndexerTest {
     // A NeighborhoodsJoiners variant is needed for randomIterator/uniqueRandomIterator coverage:
     private final DefaultBiNeighborhoodsJoiner<TestPerson, TestPerson> neighborhoodsLessThanAge =
             (DefaultBiNeighborhoodsJoiner<TestPerson, TestPerson>) NeighborhoodsJoiners.lessThan(TestPerson::age);
-
-    @Test
-    void joinIndexEligibilityRouting() {
-        // No equal joiner ⇒ NOT eligible ⇒ the non-unified two-indexer path.
-        assertThat(new IndexerFactory<>(lessThanAge).isFusedEqualIndexEligible()).isFalse();
-        assertThat(new IndexerFactory<>(twoComparisons()).isFusedEqualIndexEligible()).isFalse();
-        // A leading equal ⇒ eligible (boundary sanity check).
-        assertThat(new IndexerFactory<>(equalGender()).isFusedEqualIndexEligible()).isTrue();
-        assertThat(new IndexerFactory<>(equalThenLessThan()).isFusedEqualIndexEligible()).isTrue();
-    }
 
     @Test
     void leftBridgeLessThan() {
@@ -425,20 +412,6 @@ class ComparisonIndexerTest extends AbstractIndexerTest {
             // to exercise the sign-flip for GT/GTE without relying on subtraction-based compareTo() tricks elsewhere.
             return value < other.value ? Integer.MIN_VALUE : Integer.MAX_VALUE;
         }
-    }
-
-    private static DefaultBiJoiner<TestPerson, TestPerson> twoComparisons() {
-        return (DefaultBiJoiner<TestPerson, TestPerson>) Joiners.lessThan(TestPerson::age)
-                .and(Joiners.greaterThan(TestPerson::age));
-    }
-
-    private static DefaultBiJoiner<TestPerson, TestPerson> equalGender() {
-        return (DefaultBiJoiner<TestPerson, TestPerson>) Joiners.equal(TestPerson::gender);
-    }
-
-    private static DefaultBiJoiner<TestPerson, TestPerson> equalThenLessThan() {
-        return (DefaultBiJoiner<TestPerson, TestPerson>) Joiners.equal(TestPerson::gender)
-                .and(Joiners.lessThan(TestPerson::age));
     }
 
 }

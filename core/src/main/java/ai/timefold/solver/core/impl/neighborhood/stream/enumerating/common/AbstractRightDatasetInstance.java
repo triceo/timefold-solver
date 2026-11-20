@@ -5,8 +5,8 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.random.RandomGenerator;
 
+import ai.timefold.solver.core.impl.bavet.common.index.AbstractIndexerFactory;
 import ai.timefold.solver.core.impl.bavet.common.index.Indexer;
-import ai.timefold.solver.core.impl.bavet.common.index.IndexerFactory;
 import ai.timefold.solver.core.impl.bavet.common.index.UniqueRandomIterator;
 import ai.timefold.solver.core.impl.bavet.common.tuple.UniTuple;
 import ai.timefold.solver.core.impl.neighborhood.stream.FilteringIterator;
@@ -18,7 +18,7 @@ import org.jspecify.annotations.NullMarked;
 public abstract class AbstractRightDatasetInstance<Solution_, Right_>
         extends AbstractDatasetInstance<Solution_, UniTuple<Right_>> {
 
-    private final IndexerFactory.KeysExtractor<UniTuple<Right_>> compositeKeyExtractor;
+    private final AbstractIndexerFactory.KeysExtractor<UniTuple<Right_>> compositeKeyExtractor;
     private final int compositeKeyStoreIndex;
     private final Indexer<UniTuple<Right_>> indexer;
 
@@ -30,7 +30,7 @@ public abstract class AbstractRightDatasetInstance<Solution_, Right_>
     private int totalSize;
 
     protected AbstractRightDatasetInstance(AbstractDataset<Solution_> parent,
-            IndexerFactory.KeysExtractor<UniTuple<Right_>> compositeKeyExtractor, int compositeKeyStoreIndex,
+            AbstractIndexerFactory.KeysExtractor<UniTuple<Right_>> compositeKeyExtractor, int compositeKeyStoreIndex,
             int entryStoreIndex, Indexer<UniTuple<Right_>> indexer) {
         super(parent, entryStoreIndex);
         this.compositeKeyExtractor = compositeKeyExtractor;
