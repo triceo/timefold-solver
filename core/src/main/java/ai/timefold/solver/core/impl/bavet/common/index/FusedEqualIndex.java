@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import ai.timefold.solver.core.impl.bavet.common.tuple.Tuple;
 import ai.timefold.solver.core.impl.util.ListEntry;
 
 import org.jspecify.annotations.NullMarked;
@@ -34,7 +35,7 @@ import org.jspecify.annotations.Nullable;
  * @param <R> the right element type (a right {@code UniTuple})
  */
 @NullMarked
-public final class FusedEqualIndex<L, R> {
+public final class FusedEqualIndex<L, R> implements JoinIndex<L, R> {
 
     // See EqualIndexer for the rationale behind the initial capacity and load factor.
     private final Map<Object, Bucket<L, R>> bucketMap = new HashMap<>(16, 0.5f);
@@ -43,12 +44,94 @@ public final class FusedEqualIndex<L, R> {
     private final Supplier<Indexer<L>> leftDownstreamSupplier;
     private final Supplier<Indexer<R>> rightDownstreamSupplier;
 
+    // Tuple-store slots that cache the bucket of each stored tuple; -1 when used without a node.
+    private final int leftBucketStoreIndex;
+    private final int rightBucketStoreIndex;
+
     FusedEqualIndex(KeyUnpacker<Object> topEqualKeyUnpacker, boolean hasSuffix, Supplier<Indexer<L>> leftDownstreamSupplier,
             Supplier<Indexer<R>> rightDownstreamSupplier) {
+        this(topEqualKeyUnpacker, hasSuffix, leftDownstreamSupplier, rightDownstreamSupplier, -1, -1);
+    }
+
+    FusedEqualIndex(KeyUnpacker<Object> topEqualKeyUnpacker, boolean hasSuffix, Supplier<Indexer<L>> leftDownstreamSupplier,
+            Supplier<Indexer<R>> rightDownstreamSupplier, int leftBucketStoreIndex, int rightBucketStoreIndex) {
         this.topEqualKeyUnpacker = topEqualKeyUnpacker;
         this.hasSuffix = hasSuffix;
         this.leftDownstreamSupplier = leftDownstreamSupplier;
         this.rightDownstreamSupplier = rightDownstreamSupplier;
+        this.leftBucketStoreIndex = leftBucketStoreIndex;
+        this.rightBucketStoreIndex = rightBucketStoreIndex;
+    }
+
+    @Override
+    public ListEntry<L> putLeft(Tuple leftOwner, Object leftCompositeKey, L element) {
+        var bucket = getOrCreateBucket(leftCompositeKey);
+        leftOwner.setStore(leftBucketStoreIndex, bucket);
+        return bucket.putLeft(leftCompositeKey, element);
+    }
+
+    @Override
+    public ListEntry<L> updateLeft(Tuple leftOwner, Object oldLeftCompositeKey, Object newLeftCompositeKey,
+            ListEntry<L> entry) {
+        Bucket<L, R> bucket = leftOwner.getStore(leftBucketStoreIndex);
+        bucket.removeLeft(oldLeftCompositeKey, entry);
+        if (hasSuffix && isSameBucket(oldLeftCompositeKey, newLeftCompositeKey)) {
+            // Equal prefix unchanged: stay in the cached bucket, no lookup and no drop/recreate.
+            return bucket.putLeft(newLeftCompositeKey, entry.element());
+        }
+        removeBucketIfEmpty(oldLeftCompositeKey, bucket);
+        return putLeft(leftOwner, newLeftCompositeKey, entry.element());
+    }
+
+    @Override
+    public void removeLeft(Tuple leftOwner, Object leftCompositeKey, ListEntry<L> entry) {
+        Bucket<L, R> bucket = leftOwner.removeStore(leftBucketStoreIndex);
+        bucket.removeLeft(leftCompositeKey, entry);
+        removeBucketIfEmpty(leftCompositeKey, bucket);
+    }
+
+    @Override
+    public void forEachLeft(Tuple rightOwner, Object rightCompositeKey, Consumer<L> consumer) {
+        Bucket<L, R> bucket = rightOwner.getStore(rightBucketStoreIndex);
+        bucket.forEachLeft(rightCompositeKey, consumer);
+    }
+
+    @Override
+    public ListEntry<R> putRight(Tuple rightOwner, Object rightCompositeKey, R element) {
+        var bucket = getOrCreateBucket(rightCompositeKey);
+        rightOwner.setStore(rightBucketStoreIndex, bucket);
+        return bucket.putRight(rightCompositeKey, element);
+    }
+
+    @Override
+    public ListEntry<R> updateRight(Tuple rightOwner, Object oldRightCompositeKey, Object newRightCompositeKey,
+            ListEntry<R> entry) {
+        Bucket<L, R> bucket = rightOwner.getStore(rightBucketStoreIndex);
+        bucket.removeRight(oldRightCompositeKey, entry);
+        if (hasSuffix && isSameBucket(oldRightCompositeKey, newRightCompositeKey)) {
+            return bucket.putRight(newRightCompositeKey, entry.element());
+        }
+        removeBucketIfEmpty(oldRightCompositeKey, bucket);
+        return putRight(rightOwner, newRightCompositeKey, entry.element());
+    }
+
+    @Override
+    public void removeRight(Tuple rightOwner, Object rightCompositeKey, ListEntry<R> entry) {
+        Bucket<L, R> bucket = rightOwner.removeStore(rightBucketStoreIndex);
+        bucket.removeRight(rightCompositeKey, entry);
+        removeBucketIfEmpty(rightCompositeKey, bucket);
+    }
+
+    @Override
+    public void forEachRight(Tuple leftOwner, Object leftCompositeKey, Consumer<R> consumer) {
+        Bucket<L, R> bucket = leftOwner.getStore(leftBucketStoreIndex);
+        bucket.forEachRight(leftCompositeKey, consumer);
+    }
+
+    @Override
+    public int sizeRight(Tuple leftOwner, Object leftCompositeKey) {
+        Bucket<L, R> bucket = leftOwner.getStore(leftBucketStoreIndex);
+        return bucket.sizeRight(leftCompositeKey);
     }
 
     /**

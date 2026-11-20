@@ -13,6 +13,7 @@ import ai.timefold.solver.core.impl.bavet.bi.joiner.DefaultBiJoiner;
 import ai.timefold.solver.core.impl.bavet.common.joiner.AbstractJoiner;
 import ai.timefold.solver.core.impl.bavet.common.joiner.JoinerType;
 import ai.timefold.solver.core.impl.bavet.common.tuple.BiTuple;
+import ai.timefold.solver.core.impl.bavet.common.tuple.InTupleStorePositionTracker;
 import ai.timefold.solver.core.impl.bavet.common.tuple.QuadTuple;
 import ai.timefold.solver.core.impl.bavet.common.tuple.TriTuple;
 import ai.timefold.solver.core.impl.bavet.common.tuple.Tuple;
@@ -642,18 +643,36 @@ public final class IndexerFactory<Right_> {
      * @param <R> the right element type (a right {@code UniTuple})
      */
     public <L, R> FusedEqualIndex<L, R> buildFusedEqualIndex() {
+        return buildFusedEqualIndex(-1, -1);
+    }
+
+    /**
+     * Builds the index of a node with two inputs, for both of its sides.
+     * It may reserve tuple-store slots from the tracker.
+     */
+    public <L, R> JoinIndex<L, R> buildJoinIndex(InTupleStorePositionTracker tupleStorePositionTracker) {
+        if (isFusedEqualIndexEligible()) {
+            return buildFusedEqualIndex(tupleStorePositionTracker.reserveNextLeft(),
+                    tupleStorePositionTracker.reserveNextRight());
+        }
+        return new TwoIndexerJoinIndex<>(buildIndexer(true), buildIndexer(false));
+    }
+
+    private <L, R> FusedEqualIndex<L, R> buildFusedEqualIndex(int leftBucketStoreIndex, int rightBucketStoreIndex) {
         var joinerCount = joiner.getJoinerCount();
         // Pure-equal ⇒ the composite key IS the equal key (KeyUnpacker.single());
         // otherwise it is component 0.
         var topEqualKeyUnpacker = equalPrefixLength == joinerCount ? KeyUnpacker.single() : KeyUnpacker.composite(0);
         if (equalPrefixLength == joinerCount) {
             // Pure equal: the per-side downstream is just the tuple list; the bucket is the equal-key group.
-            return new FusedEqualIndex<>(topEqualKeyUnpacker, false, LinkedListLeafIndexer::new, LinkedListLeafIndexer::new);
+            return new FusedEqualIndex<>(topEqualKeyUnpacker, false, LinkedListLeafIndexer::new, LinkedListLeafIndexer::new,
+                    leftBucketStoreIndex, rightBucketStoreIndex);
         } else {
             // Equal prefix + suffix: build the per-side suffix sub-chain (the right side flips comparisons).
             var leftDownstreamSupplier = this.<L> buildIndexerChain(true, 1, LinkedListLeafIndexer::new);
             var rightDownstreamSupplier = this.<R> buildIndexerChain(false, 1, LinkedListLeafIndexer::new);
-            return new FusedEqualIndex<>(topEqualKeyUnpacker, true, leftDownstreamSupplier, rightDownstreamSupplier);
+            return new FusedEqualIndex<>(topEqualKeyUnpacker, true, leftDownstreamSupplier, rightDownstreamSupplier,
+                    leftBucketStoreIndex, rightBucketStoreIndex);
         }
     }
 
