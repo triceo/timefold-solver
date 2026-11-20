@@ -31,7 +31,8 @@ import org.jspecify.annotations.NullMarked;
  */
 @NullMarked
 public sealed interface Indexer<T>
-        permits EqualIndexer, ComparisonIndexer, ContainingIndexer, ContainedInIndexer, ContainingAnyOfIndexer, LeafIndexer {
+        permits EqualIndexer, ComparisonIndexer, ContainingIndexer, ContainedInIndexer, ContainingAnyOfIndexer, LeafIndexer,
+        SortedBlockIndexer {
 
     /**
      * Modify operation.

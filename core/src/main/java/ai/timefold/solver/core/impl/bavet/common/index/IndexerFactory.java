@@ -552,6 +552,15 @@ public final class IndexerFactory<Right_> {
      * <p>
      * {@code buildIndexer(isLeftBridge)} is {@code buildIndexerChain(isLeftBridge, 0, backendSupplier)};
      * {@link #buildFusedEqualIndex()} uses {@code fromLevelInclusive == 1} to build the per-side suffix sub-chains.
+     * <p>
+     * When {@link #isSortedBlockEligible() eligible},
+     * all comparison levels become one {@link SortedBlockIndexer}, which stores the tuples itself,
+     * instead of one nested {@link ComparisonIndexer} per level.
+     * All other joins keep the nested chain:
+     * <ul>
+     * <li>Random access (Neighborhoods datasets): {@link SortedBlockIndexer} does not implement the random iterators.</li>
+     * <li>A containing, containedIn or containingAnyOf level: {@link SortedBlockIndexer} only tests comparisons.</li>
+     * </ul>
      */
     private <T> Supplier<Indexer<T>> buildIndexerChain(boolean isLeftBridge, int fromLevelInclusive,
             Supplier<Indexer<T>> backendSupplier) {
@@ -559,7 +568,21 @@ public final class IndexerFactory<Right_> {
         // A level's joiner type is the type of any joiner it spans; the merged equal prefix (level 0) is EQUAL.
         var endIndices = levelEndIndices();
         var downstreamIndexerSupplier = backendSupplier;
-        for (var indexPropertyId = endIndices.length - 1; indexPropertyId >= fromLevelInclusive; indexPropertyId--) {
+        var topIndexPropertyId = endIndices.length - 1;
+        if (isSortedBlockEligible()) {
+            var firstComparisonId = Math.max(equalPrefixLength == 0 ? 0 : 1, fromLevelInclusive);
+            var joinerTypes = new ArrayList<JoinerType>();
+            var keyUnpackers = new ArrayList<KeyUnpacker<?>>();
+            for (var indexPropertyId = firstComparisonId; indexPropertyId < endIndices.length; indexPropertyId++) {
+                joinerTypes.add(joiner.getJoinerType(endIndices[indexPropertyId] - 1));
+                // Single only when the whole chain is this one level; same rule as the loop below.
+                keyUnpackers.add(endIndices.length == 1 ? KeyUnpacker.single() : KeyUnpacker.composite(indexPropertyId));
+            }
+            var layout = new SortedBlockIndexer.Layout(isLeftBridge, joinerTypes, keyUnpackers);
+            downstreamIndexerSupplier = () -> new SortedBlockIndexer<>(layout);
+            topIndexPropertyId = firstComparisonId - 1;
+        }
+        for (var indexPropertyId = topIndexPropertyId; indexPropertyId >= fromLevelInclusive; indexPropertyId--) {
             var joinerType = joiner.getJoinerType(endIndices[indexPropertyId] - 1);
             if (downstreamIndexerSupplier == backendSupplier && indexPropertyId == 0) {
                 // Leaf-most level whose index key equals the whole composite key: no KeyUnpacker indirection.
@@ -579,6 +602,23 @@ public final class IndexerFactory<Right_> {
             }
         }
         return downstreamIndexerSupplier;
+    }
+
+    /**
+     * Whether the levels after the equal prefix become one {@link SortedBlockIndexer}:
+     * random access is not required, and there is at least one such level, and all of them are comparisons.
+     */
+    boolean isSortedBlockEligible() {
+        var joinerCount = joiner.getJoinerCount();
+        if (joiner.requiresRandomAccess() || equalPrefixLength == joinerCount) {
+            return false;
+        }
+        for (var i = equalPrefixLength; i < joinerCount; i++) {
+            if (!SortedBlockIndexer.isComparison(joiner.getJoinerType(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
