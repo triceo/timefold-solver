@@ -1,9 +1,5 @@
 package ai.timefold.solver.core.impl.bavet.uni;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import ai.timefold.solver.core.api.domain.solution.PlanningSolution;
 import ai.timefold.solver.core.impl.bavet.common.AbstractRootNode;
 import ai.timefold.solver.core.impl.bavet.common.Propagator;
 import ai.timefold.solver.core.impl.bavet.common.StaticPropagationQueue;
@@ -33,7 +29,6 @@ public abstract sealed class AbstractForEachUniNode<A>
     private final int outputStoreSize;
     private final StaticPropagationQueue<UniTuple<A>> propagationQueue;
     private final boolean indictmentsEnabled;
-    protected final Map<A, UniTuple<A>> tupleMap = HashMap.newHashMap(1000);
 
     protected AbstractForEachUniNode(Class<A> forEachClass, TupleLifecycle<UniTuple<A>> nextNodesTupleLifecycle,
             boolean indictmentsEnabled, int outputStoreSize) {
@@ -58,21 +53,29 @@ public abstract sealed class AbstractForEachUniNode<A>
         return new Class[] { forEachClass };
     }
 
-    @Override
-    public void insert(@Nullable A a) {
+    /**
+     * @return the tuple of the fact, or null if this node does not hold one for it
+     */
+    public abstract @Nullable UniTuple<A> insertFact(@Nullable A a);
+
+    /**
+     * @param tuple the tuple which {@link #insertFact(Object)} or a previous call of this method returned
+     * @return the tuple to keep for the fact from now on
+     */
+    public abstract @Nullable UniTuple<A> updateFact(@Nullable A a, @Nullable UniTuple<A> tuple);
+
+    /**
+     * @param tuple the tuple which {@link #insertFact(Object)} or {@link #updateFact(Object, UniTuple)} last returned
+     */
+    public abstract void retractFact(@Nullable A a, @Nullable UniTuple<A> tuple);
+
+    protected final UniTuple<A> insertTuple(@Nullable A a) {
         var tuple = UniTuple.of(a, outputStoreSize);
         if (indictmentsEnabled) {
             tuple.setIndictmentSource(IndictmentSource.of(a));
         }
-        var old = tupleMap.put(a, tuple);
-        if (old != null) {
-            throw new IllegalStateException("""
-                    The fact (%s) was already inserted.
-                    Maybe your entities mistakenly equal each other?
-                    Maybe your @%s's collection properties contain duplicates?"""
-                    .formatted(a, PlanningSolution.class.getSimpleName()));
-        }
         propagationQueue.insert(tuple);
+        return tuple;
     }
 
     protected final void updateExisting(@Nullable A a, UniTuple<A> tuple) {
@@ -86,16 +89,6 @@ public abstract sealed class AbstractForEachUniNode<A>
         } else {
             propagationQueue.update(tuple);
         }
-    }
-
-    @Override
-    public void retract(@Nullable A a) {
-        var tuple = tupleMap.remove(a);
-        if (tuple == null) {
-            throw new IllegalStateException("The fact (%s) was never inserted."
-                    .formatted(a));
-        }
-        retractExisting(a, tuple);
     }
 
     protected void retractExisting(@Nullable A a, UniTuple<A> tuple) {

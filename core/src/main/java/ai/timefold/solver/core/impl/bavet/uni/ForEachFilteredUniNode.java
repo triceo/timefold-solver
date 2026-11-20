@@ -18,8 +18,8 @@ public final class ForEachFilteredUniNode<A>
     private final Predicate<A> filter;
     /**
      * Counts every fact currently inserted into this node, including those which do not pass the filter.
-     * Only {@link #insert(Object)} and {@link #retract(Object)} may mutate it;
-     * the filter transitions inside {@link #update(Object)} concern facts already counted.
+     * Only {@link #insertFact(Object)} and {@link #retractFact(Object, UniTuple)} may mutate it;
+     * the filter transitions inside {@link #updateFact(Object, UniTuple)} concern facts already counted.
      */
     private int tupleCountWithoutFiltering = 0;
 
@@ -45,42 +45,30 @@ public final class ForEachFilteredUniNode<A>
     }
 
     @Override
-    public void insert(@Nullable A a) {
+    public @Nullable UniTuple<A> insertFact(@Nullable A a) {
         tupleCountWithoutFiltering++;
-        insertIfPassing(a);
-    }
-
-    private void insertIfPassing(@Nullable A a) {
-        if (!filter.test(a)) { // Skip inserting the tuple as it does not pass the filter.
-            return;
-        }
-        super.insert(a);
+        return filter.test(a) ? insertTuple(a) : null;
     }
 
     @Override
-    public void update(@Nullable A a) {
-        var tuple = tupleMap.get(a);
-        if (tuple == null) { // The tuple was never inserted because it did not pass the filter.
-            insertIfPassing(a);
+    public @Nullable UniTuple<A> updateFact(@Nullable A a, @Nullable UniTuple<A> tuple) {
+        if (tuple == null) { // The fact did not pass the filter before.
+            return filter.test(a) ? insertTuple(a) : null;
         } else if (filter.test(a)) {
             updateExisting(a, tuple);
+            return tuple;
         } else { // Tuple no longer passes the filter; the fact itself remains inserted.
-            retractIfPresent(a);
+            retractExisting(a, tuple);
+            return null;
         }
     }
 
     @Override
-    public void retract(@Nullable A a) {
+    public void retractFact(@Nullable A a, @Nullable UniTuple<A> tuple) {
         tupleCountWithoutFiltering--;
-        retractIfPresent(a);
-    }
-
-    private void retractIfPresent(@Nullable A a) {
-        var tuple = tupleMap.remove(a);
-        if (tuple == null) { // The tuple was never inserted because it did not pass the filter.
-            return;
+        if (tuple != null) {
+            retractExisting(a, tuple);
         }
-        super.retractExisting(a, tuple);
     }
 
     @Override

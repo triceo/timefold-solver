@@ -13,6 +13,7 @@ public final class ForEachUnfilteredUniNode<A>
 
     private final TupleLifecycle<UniTuple<A>> nextNodesTupleLifecycle;
     private boolean isActive;
+    private int factCount = 0;
 
     public ForEachUnfilteredUniNode(Class<A> forEachClass, TupleLifecycle<UniTuple<A>> nextNodesTupleLifecycle,
             boolean indictmentsEnabled, int outputStoreSize) {
@@ -22,7 +23,7 @@ public final class ForEachUnfilteredUniNode<A>
 
     @Override
     public void afterAllFactsInserted(boolean unused) {
-        isActive = !tupleMap.isEmpty();
+        isActive = factCount > 0;
         nextNodesTupleLifecycle.afterAllFactsInserted(isActive);
     }
 
@@ -32,13 +33,29 @@ public final class ForEachUnfilteredUniNode<A>
     }
 
     @Override
-    public void update(@Nullable A a) {
-        var tuple = tupleMap.get(a);
+    public UniTuple<A> insertFact(@Nullable A a) {
+        factCount++;
+        return insertTuple(a);
+    }
+
+    @Override
+    public UniTuple<A> updateFact(@Nullable A a, @Nullable UniTuple<A> tuple) {
         if (tuple == null) {
             throw new IllegalStateException("The fact (%s) was never inserted."
                     .formatted(a));
         }
         updateExisting(a, tuple);
+        return tuple;
+    }
+
+    @Override
+    public void retractFact(@Nullable A a, @Nullable UniTuple<A> tuple) {
+        if (tuple == null) {
+            throw new IllegalStateException("The fact (%s) was never inserted."
+                    .formatted(a));
+        }
+        factCount--;
+        retractExisting(a, tuple);
     }
 
     @Override

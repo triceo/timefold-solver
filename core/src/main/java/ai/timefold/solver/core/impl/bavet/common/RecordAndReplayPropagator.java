@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 import ai.timefold.solver.core.impl.bavet.AbstractBavetNodeNetwork;
+import ai.timefold.solver.core.impl.bavet.AbstractSession;
 import ai.timefold.solver.core.impl.bavet.common.tuple.RecordingTupleLifecycle;
 import ai.timefold.solver.core.impl.bavet.common.tuple.Tuple;
 import ai.timefold.solver.core.impl.bavet.common.tuple.TupleLifecycle;
@@ -113,8 +114,7 @@ public final class RecordAndReplayPropagator<Tuple_ extends Tuple>
     public void propagateRetracts() {
         if (!retractQueue.isEmpty() || !insertQueue.isEmpty()) {
             var precomputeBuildHelper = precomputeBuildHelperSupplier.get();
-            var internalNodeNetwork = precomputeBuildHelper.getNodeNetwork();
-            var objectClassToRootNodes = new HashMap<Class<?>, List<AbstractRootNode<?>>>();
+            var internalSession = new InternalSession(precomputeBuildHelper.getNodeNetwork());
             var recordingTupleLifecycle = precomputeBuildHelper.getRecordingTupleLifecycle();
 
             invalidateCache();
@@ -122,15 +122,11 @@ public final class RecordAndReplayPropagator<Tuple_ extends Tuple>
             seenFactSet.removeAll(retractQueue);
 
             for (var entity : seenEntitySet) {
-                for (var rootNode : getRootNodes(entity, internalNodeNetwork, objectClassToRootNodes)) {
-                    rootNode.insert(entity);
-                }
+                internalSession.insert(entity);
             }
 
             for (var fact : seenFactSet) {
-                for (var rootNode : getRootNodes(fact, internalNodeNetwork, objectClassToRootNodes)) {
-                    rootNode.insert(fact);
-                }
+                internalSession.insert(fact);
             }
 
             // Do not remove queued retracts from inserts; if a fact property
@@ -142,9 +138,7 @@ public final class RecordAndReplayPropagator<Tuple_ extends Tuple>
                 } else {
                     seenFactSet.add(object);
                 }
-                for (var rootNode : getRootNodes(object, internalNodeNetwork, objectClassToRootNodes)) {
-                    rootNode.insert(object);
-                }
+                internalSession.insert(object);
             }
 
             retractQueue.clear();
@@ -152,21 +146,11 @@ public final class RecordAndReplayPropagator<Tuple_ extends Tuple>
 
             // settle the inner node network, so the inserts/retracts do not interfere
             // with the recording of the first object's tuples
-            internalNodeNetwork.settle();
-            recalculateTuples(internalNodeNetwork, objectClassToRootNodes, recordingTupleLifecycle);
+            internalSession.settle();
+            recalculateTuples(internalSession, recordingTupleLifecycle);
 
             propagationQueue.propagateRetracts();
         }
-    }
-
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static <A> List<AbstractRootNode<A>> getRootNodes(Object object, AbstractBavetNodeNetwork internalNodeNetwork,
-            Map<Class<?>, List<AbstractRootNode<?>>> objectClassToRootNodes) {
-        return (List) objectClassToRootNodes.computeIfAbsent(object.getClass(), clazz -> {
-            var out = new ArrayList<AbstractRootNode<?>>();
-            internalNodeNetwork.getRootNodesAcceptingType(object.getClass()).forEach(out::add);
-            return out;
-        });
     }
 
     @Override
@@ -212,8 +196,7 @@ public final class RecordAndReplayPropagator<Tuple_ extends Tuple>
         factOutputTupleList.clear();
     }
 
-    private void recalculateTuples(AbstractBavetNodeNetwork internalNodeNetwork,
-            Map<Class<?>, List<AbstractRootNode<?>>> classToRootNodeList,
+    private void recalculateTuples(InternalSession internalSession,
             RecordingTupleLifecycle<Tuple_> recordingTupleLifecycle) {
         var internalTupleToOutputTupleMap =
                 new IdentityHashMap<Tuple_, Tuple_>(seenEntitySet.size() + seenFactSet.size());
@@ -223,9 +206,8 @@ public final class RecordAndReplayPropagator<Tuple_ extends Tuple>
                     new TupleRecorder<>(mappedTuples, internalTupleToOutputTupleMapper, internalTupleToOutputTupleMap))) {
                 // Do a fake update on the object and settle the network; this will update precisely the
                 // tuples mapped to this node, which will then be recorded
-                classToRootNodeList.get(invalidated.getClass())
-                        .forEach(node -> ((AbstractRootNode<Object>) node).update(invalidated));
-                internalNodeNetwork.settle();
+                internalSession.update(invalidated);
+                internalSession.settle();
             }
             if (mappedTuples.isEmpty()) {
                 objectToOutputTuplesMap.remove(invalidated);
@@ -248,13 +230,20 @@ public final class RecordAndReplayPropagator<Tuple_ extends Tuple>
                     recordingTupleLifecycle.recordInto(new TupleRecorder<>(factOutputTupleList,
                             internalTupleToOutputTupleMapper, internalTupleToOutputTupleMap))) {
                 for (var fact : seenFactSet) {
-                    classToRootNodeList.get(fact.getClass())
-                            .forEach(node -> ((AbstractRootNode<Object>) node).update(fact));
+                    internalSession.update(fact);
                 }
-                internalNodeNetwork.settle();
+                internalSession.settle();
             }
             factOutputTupleList.forEach(this::insertIfAbsent);
         }
+    }
+
+    private static final class InternalSession extends AbstractSession<AbstractBavetNodeNetwork> {
+
+        private InternalSession(AbstractBavetNodeNetwork nodeNetwork) {
+            super(nodeNetwork);
+        }
+
     }
 
     private static final class RecordedTupleList<Tuple_> extends ArrayList<Tuple_> {

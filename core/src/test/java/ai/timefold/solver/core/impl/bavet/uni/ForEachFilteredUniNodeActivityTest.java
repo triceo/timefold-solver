@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 /**
  * See {@link ActivitySupport}.
  * The node must count every fact it has ever seen, regardless of filter outcome;
- * filter transitions during update() must not corrupt that count.
+ * filter transitions during updateFact() must not corrupt that count.
  * Updates can arrive before the activation check runs,
  * because shadow variable initialization happens between fact insertion and the first settle.
  */
@@ -41,9 +41,9 @@ class ForEachFilteredUniNodeActivityTest {
         var downstream = mockDownstream(true);
         var node = node(downstream);
         passing.add("A");
-        node.insert("A");
+        var tuple = node.insertFact("A");
         passing.remove("A");
-        node.update("A"); // Retracts the tuple downstream, but the fact itself is still inserted.
+        node.updateFact("A", tuple); // Retracts the tuple downstream, but the fact itself is still inserted.
         node.afterAllFactsInserted(true);
         assertThat(node.isActive()).isTrue();
         verify(downstream).afterAllFactsInserted(true);
@@ -53,10 +53,10 @@ class ForEachFilteredUniNodeActivityTest {
     void deactivatesWhenAllFactsRetractedAfterFilterTransition() {
         var downstream = mockDownstream(true);
         var node = node(downstream);
-        node.insert("A"); // Does not pass the filter.
+        var tuple = node.insertFact("A"); // Does not pass the filter.
         passing.add("A");
-        node.update("A"); // Now passes; the fact was already counted at insert.
-        node.retract("A");
+        tuple = node.updateFact("A", tuple); // Now passes; the fact was already counted at insert.
+        node.retractFact("A", tuple);
         node.afterAllFactsInserted(true);
         assertThat(node.isActive()).isFalse();
         verify(downstream).afterAllFactsInserted(false);
@@ -66,7 +66,7 @@ class ForEachFilteredUniNodeActivityTest {
     void staysActiveWhenFactNeverPassedFilter() {
         var downstream = mockDownstream(true);
         var node = node(downstream);
-        node.insert("A"); // Does not pass the filter, but a later update might.
+        node.insertFact("A"); // Does not pass the filter, but a later update might.
         node.afterAllFactsInserted(true);
         assertThat(node.isActive()).isTrue();
         verify(downstream).afterAllFactsInserted(true);

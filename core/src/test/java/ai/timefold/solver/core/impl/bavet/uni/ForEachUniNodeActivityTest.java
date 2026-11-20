@@ -34,7 +34,7 @@ class ForEachUniNodeActivityTest {
     void unfilteredActiveWhenFactsExist() {
         var downstream = mockDownstream(true);
         var node = new ForEachUnfilteredUniNode<>(String.class, downstream, false, 1);
-        node.insert("a");
+        node.insertFact("a");
         node.afterAllFactsInserted(true);
         assertThat(node.isActive()).isTrue();
     }
@@ -43,7 +43,7 @@ class ForEachUniNodeActivityTest {
     void unfilteredInactiveWhenDownstreamInactive() {
         var downstream = mockDownstream(false);
         var node = new ForEachUnfilteredUniNode<>(String.class, downstream, false, 1);
-        node.insert("a");
+        node.insertFact("a");
         node.afterAllFactsInserted(true);
         assertThat(node.isActive()).isFalse();
     }
@@ -60,7 +60,7 @@ class ForEachUniNodeActivityTest {
     void filteredActiveWhenFactInsertedEvenIfFilteredOut() {
         var downstream = mockDownstream(true);
         var node = new ForEachFilteredUniNode<>(String.class, s -> false, downstream, false, 1);
-        node.insert("a");
+        node.insertFact("a");
         node.afterAllFactsInserted(true);
         assertThat(node.isActive()).isTrue();
     }
@@ -69,7 +69,7 @@ class ForEachUniNodeActivityTest {
     void filteredInactiveWhenDownstreamInactive() {
         var downstream = mockDownstream(false);
         var node = new ForEachFilteredUniNode<>(String.class, s -> true, downstream, false, 1);
-        node.insert("a");
+        node.insertFact("a");
         node.afterAllFactsInserted(true);
         assertThat(node.isActive()).isFalse();
     }

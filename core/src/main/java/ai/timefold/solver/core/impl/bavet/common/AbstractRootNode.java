@@ -3,18 +3,11 @@ package ai.timefold.solver.core.impl.bavet.common;
 import ai.timefold.solver.core.impl.bavet.common.tuple.ActivitySupport;
 
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
 
 @NullMarked
 public abstract non-sealed class AbstractRootNode<A>
         extends AbstractNode
         implements ActivitySupport {
-
-    public abstract void insert(@Nullable A a);
-
-    public abstract void update(@Nullable A a);
-
-    public abstract void retract(@Nullable A a);
 
     public abstract boolean allowsInstancesOf(Class<?> clazz);
 
