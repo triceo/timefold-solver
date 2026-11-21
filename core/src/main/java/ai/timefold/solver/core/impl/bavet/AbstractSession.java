@@ -13,6 +13,7 @@ import ai.timefold.solver.core.impl.bavet.common.AbstractPrecomputeNode;
 import ai.timefold.solver.core.impl.bavet.common.AbstractRootNode;
 import ai.timefold.solver.core.impl.bavet.common.tuple.UniTuple;
 import ai.timefold.solver.core.impl.bavet.uni.AbstractForEachUniNode;
+import ai.timefold.solver.core.impl.domain.variable.descriptor.VariableDescriptor;
 
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -33,8 +34,10 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
     private final Set<Class<?>> deferredUpdateClassSet;
     private final Map<Class<?>, ClassPlan> classPlanMap;
     private final List<FactHandle> dirtyHandleList = new ArrayList<>();
-    private @Nullable Class<?> lastClass;
-    private @Nullable ClassPlan lastClassPlan;
+    /**
+     * Index is the ordinal of the entity descriptor; avoids the map lookup in {@link #update(Object, VariableDescriptor)}.
+     */
+    private @Nullable ClassPlan[] entityClassPlans = new ClassPlan[0];
     private boolean initialized = false;
     private boolean settled = false;
 
@@ -84,10 +87,40 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
         }
     }
 
-    @SuppressWarnings("unchecked")
     public final void update(Object fact) {
+        updatePlan(getClassPlan(fact.getClass()), fact);
+    }
+
+    /**
+     * As {@link #update(Object)}, but finds the root nodes by the ordinal of the entity descriptor.
+     */
+    public final void update(Object entity, VariableDescriptor<?> variableDescriptor) {
+        var entityOrdinal = variableDescriptor.getEntityDescriptor().getOrdinal();
+        var plans = entityClassPlans;
+        if (entityOrdinal < plans.length) {
+            var plan = plans[entityOrdinal];
+            if (plan != null && plan.factClass == entity.getClass()) {
+                updatePlan(plan, entity);
+                return;
+            }
+        }
+        updatePlan(getEntityClassPlan(entity, entityOrdinal), entity);
+    }
+
+    private ClassPlan getEntityClassPlan(Object entity, int entityOrdinal) {
+        var plan = getClassPlan(entity.getClass());
+        if (entityOrdinal >= entityClassPlans.length) {
+            entityClassPlans = Arrays.copyOf(entityClassPlans, entityOrdinal + 1);
+        }
+        if (entityClassPlans[entityOrdinal] == null) { // The first class wins; its subclasses use the map.
+            entityClassPlans[entityOrdinal] = plan;
+        }
+        return plan;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void updatePlan(ClassPlan plan, Object fact) {
         settled = false;
-        var plan = getClassPlan(fact.getClass());
         for (var node : plan.otherNodes) {
             node.update(fact);
         }
@@ -170,17 +203,14 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
     }
 
     private ClassPlan getClassPlan(Class<?> factClass) {
-        if (factClass != lastClass) {
-            var plan = classPlanMap.get(factClass);
-            if (plan == null) {
-                var deferred = deferredUpdateClassSet.stream().anyMatch(clazz -> clazz.isAssignableFrom(factClass));
-                plan = new ClassPlan(nodeNetwork.getRootNodesAcceptingType(factClass).toList(), deferred);
-                classPlanMap.put(factClass, plan);
-            }
-            lastClassPlan = plan;
-            lastClass = factClass;
+        // Map.computeIfAbsent() would have created lambdas on the hot path, this will not.
+        var plan = classPlanMap.get(factClass);
+        if (plan == null) {
+            var deferred = deferredUpdateClassSet.stream().anyMatch(clazz -> clazz.isAssignableFrom(factClass));
+            plan = new ClassPlan(factClass, nodeNetwork.getRootNodesAcceptingType(factClass).toList(), deferred);
+            classPlanMap.put(factClass, plan);
         }
-        return lastClassPlan;
+        return plan;
     }
 
     public final void settle() {
@@ -231,6 +261,7 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
      */
     private static final class ClassPlan {
 
+        private final Class<?> factClass;
         private final boolean deferred;
         private AbstractForEachUniNode<Object>[] forEachNodes;
         private Map<Object, Object>[] maps;
@@ -239,7 +270,8 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
         private AbstractPrecomputeNode<?>[] otherNodes;
 
         @SuppressWarnings("unchecked")
-        private ClassPlan(List<AbstractRootNode<?>> rootNodeList, boolean deferred) {
+        private ClassPlan(Class<?> factClass, List<AbstractRootNode<?>> rootNodeList, boolean deferred) {
+            this.factClass = factClass;
             var forEachNodeList = new ArrayList<AbstractForEachUniNode<Object>>();
             var otherNodeList = new ArrayList<AbstractPrecomputeNode<?>>();
             for (var node : rootNodeList) {

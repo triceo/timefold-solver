@@ -143,14 +143,14 @@ public final class BavetConstraintStreamScoreDirector<Solution_, Score_ extends 
 
     @Override
     public void afterVariableChanged(VariableDescriptor<Solution_> variableDescriptor, Object entity) {
-        session.update(entity);
+        session.update(entity, variableDescriptor);
         super.afterVariableChanged(variableDescriptor, entity);
     }
 
     @Override
     public void afterListVariableChanged(ListVariableDescriptor<Solution_> variableDescriptor, Object entity, int fromIndex,
             int toIndex) {
-        session.update(entity);
+        session.update(entity, variableDescriptor);
         super.afterListVariableChanged(variableDescriptor, entity, fromIndex, toIndex);
     }
 
