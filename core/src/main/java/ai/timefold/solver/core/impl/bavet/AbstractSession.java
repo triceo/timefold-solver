@@ -19,8 +19,29 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Feeds facts into the root nodes; updates of the deferred classes wait until {@link #settle()}.
- * Other classes keep the update path of the nodes small; see {@link ClassPlan}.
+ * Feeds facts into the root nodes of a node network.
+ *
+ * <p>
+ * Each concrete fact class has one {@link ClassPlan}: the root nodes which accept the class,
+ * and the tuple which each for-each node holds for each fact of the class.
+ * Inserts, retracts and {@link #update(Object)} find the plan by class in {@link #classPlanMap}.
+ * Entity updates from the score director, {@link #update(Object, VariableDescriptor)}, are the hot path;
+ * they find the plan by the ordinal of the entity descriptor in {@link #entityClassPlans}, with no map lookup.
+ *
+ * <p>
+ * A plan keeps its tuples in one of two ways:
+ * <ul>
+ * <li>Immediate, the default and the only way for problem facts:
+ * one fact-to-tuple map for each for-each node.
+ * An update looks the fact up in each map and updates each node at once.</li>
+ * <li>Deferred, for the classes in {@link #deferredUpdateClassSet}, such as entities with declarative shadow
+ * variables: one {@link FactHandle} for each fact, with the tuples of all its for-each nodes.
+ * An update only marks the handle dirty, and {@link #settle()} updates each dirty fact once in each node.
+ * This pays off when a fact receives many updates between two settles,
+ * but costs a second pass over the facts.</li>
+ * </ul>
+ * The two ways have separate code paths, because one shared path measurably slowed down immediate updates.
+ * Precompute nodes are not for-each nodes; they receive every insert, update and retract at once.
  */
 @NullMarked
 public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork> {
@@ -255,17 +276,24 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
     }
 
     /**
-     * Root nodes of one concrete fact class.
-     * A deferred class keeps one {@link FactHandle} per fact; other classes keep one fact map per node,
-     * because sharing the deferred path measurably slows down their updates.
+     * Root nodes of one concrete fact class, and the tuples of its facts; see {@link AbstractSession}.
      */
     private static final class ClassPlan {
 
         private final Class<?> factClass;
         private final boolean deferred;
         private AbstractForEachUniNode<Object>[] forEachNodes;
+        /**
+         * Immediate classes only; index matches {@link #forEachNodes}, value is the tuple or {@link #NO_TUPLE}.
+         */
         private Map<Object, Object>[] maps;
+        /**
+         * Deferred classes only.
+         */
         private final Map<Object, FactHandle> handleMap;
+        /**
+         * Deferred classes only; inactive nodes keep their position, because handles address nodes by position.
+         */
         private final boolean[] active;
         private AbstractPrecomputeNode<?>[] otherNodes;
 
@@ -325,6 +353,9 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
 
     }
 
+    /**
+     * The tuples of one fact of a deferred class, by position in {@link ClassPlan#forEachNodes}.
+     */
     private static final class FactHandle {
 
         private final Object fact;
