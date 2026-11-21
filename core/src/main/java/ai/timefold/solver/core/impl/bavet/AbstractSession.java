@@ -27,9 +27,17 @@ import org.jspecify.annotations.Nullable;
  * these are the classes which typically receive many updates per fact between two settles,
  * such as entities with declarative shadow variables.
  * Deferral costs a second pass over the facts, so updates of other classes reach the nodes immediately.
+ * A class with only one for-each node and no deferral needs no handle;
+ * its map holds the tuple directly, which saves pointer loads on every update.
  */
 @NullMarked
 public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork> {
+
+    /**
+     * Value of {@link ClassPlan#directMap} for a fact which its node holds no tuple for.
+     */
+    private static final Object NO_TUPLE = new Object();
+    private static final int INITIAL_FACT_MAP_SIZE = 1000;
 
     protected final Network_ nodeNetwork;
     private final Set<Class<?>> deferredUpdateClassSet;
@@ -68,6 +76,18 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
         if (!plan.hasForEachNodes()) {
             return;
         }
+        var directNode = plan.directNode;
+        if (directNode != null) {
+            var tuple = plan.forEachActive[0] ? directNode.insertFact(fact) : null;
+            if (plan.directMap.putIfAbsent(fact, tuple == null ? NO_TUPLE : tuple) != null) {
+                throw new IllegalStateException("""
+                        The fact (%s) was already inserted.
+                        Maybe your entities mistakenly equal each other?
+                        Maybe your @%s's collection properties contain duplicates?"""
+                        .formatted(fact, PlanningSolution.class.getSimpleName()));
+            }
+            return;
+        }
         var handle = new FactHandle(fact, plan);
         if (plan.handleMap.putIfAbsent(fact, handle) != null) {
             throw new IllegalStateException("""
@@ -84,6 +104,7 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
         }
     }
 
+    @SuppressWarnings("unchecked")
     public final void update(Object fact) {
         settled = false;
         if (fact == lastUpdatedFact) {
@@ -94,6 +115,22 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
             node.update(fact);
         }
         if (!plan.hasForEachNodes()) {
+            return;
+        }
+        var directNode = plan.directNode;
+        if (directNode != null) {
+            var stored = plan.directMap.get(fact);
+            if (stored == null) {
+                throw new IllegalStateException("The fact (%s) was never inserted."
+                        .formatted(fact));
+            }
+            if (plan.forEachActive[0]) {
+                var tuple = stored == NO_TUPLE ? null : (UniTuple<Object>) stored;
+                var updated = directNode.updateFact(fact, tuple);
+                if (updated != tuple) {
+                    plan.directMap.put(fact, updated == null ? NO_TUPLE : updated);
+                }
+            }
             return;
         }
         var handle = plan.handleMap.get(fact);
@@ -112,6 +149,7 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
         }
     }
 
+    @SuppressWarnings("unchecked")
     public final void retract(Object fact) {
         lastUpdatedFact = null;
         settled = false;
@@ -120,6 +158,18 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
             node.retract(fact);
         }
         if (!plan.hasForEachNodes()) {
+            return;
+        }
+        var directNode = plan.directNode;
+        if (directNode != null) {
+            var stored = plan.directMap.remove(fact);
+            if (stored == null) {
+                throw new IllegalStateException("The fact (%s) was never inserted."
+                        .formatted(fact));
+            }
+            if (plan.forEachActive[0]) {
+                directNode.retractFact(fact, stored == NO_TUPLE ? null : (UniTuple<Object>) stored);
+            }
             return;
         }
         var handle = plan.handleMap.remove(fact);
@@ -208,6 +258,11 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
         private final AbstractForEachUniNode<Object>[] forEachNodes;
         private final boolean[] forEachActive;
         private final boolean deferUpdates;
+        /**
+         * Set for a class with one for-each node and no deferral; then {@link #directMap} holds its tuples.
+         */
+        private final @Nullable AbstractForEachUniNode<Object> directNode;
+        private final Map<Object, Object> directMap;
         private AbstractPrecomputeNode<?>[] otherNodes;
 
         @SuppressWarnings("unchecked")
@@ -228,7 +283,11 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
             this.forEachActive = new boolean[forEachNodes.length];
             Arrays.fill(forEachActive, true);
             this.otherNodes = otherNodeList.toArray(AbstractPrecomputeNode[]::new);
-            this.handleMap = forEachNodes.length == 0 ? Map.of() : new HashMap<>();
+            this.directNode = !deferUpdates && forEachNodes.length == 1 ? forEachNodes[0] : null;
+            // A sparse table measurably speeds up lookups in small maps which are hit on every move.
+            this.directMap = directNode == null ? Map.of() : HashMap.newHashMap(INITIAL_FACT_MAP_SIZE);
+            this.handleMap = forEachNodes.length == 0 || directNode != null ? Map.of()
+                    : HashMap.newHashMap(INITIAL_FACT_MAP_SIZE);
         }
 
         private boolean hasForEachNodes() {
