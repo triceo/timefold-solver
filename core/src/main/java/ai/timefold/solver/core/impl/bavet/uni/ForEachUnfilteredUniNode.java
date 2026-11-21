@@ -1,6 +1,5 @@
 package ai.timefold.solver.core.impl.bavet.uni;
 
-import ai.timefold.solver.core.impl.bavet.common.AbstractRootNode;
 import ai.timefold.solver.core.impl.bavet.common.tuple.TupleLifecycle;
 import ai.timefold.solver.core.impl.bavet.common.tuple.UniTuple;
 
@@ -40,27 +39,14 @@ public final class ForEachUnfilteredUniNode<A>
 
     @Override
     public UniTuple<A> updateFact(@Nullable A a, @Nullable UniTuple<A> tuple) {
-        if (tuple == null) {
-            throw new IllegalStateException("The fact (%s) was never inserted."
-                    .formatted(a));
-        }
         updateExisting(a, tuple);
         return tuple;
     }
 
     @Override
     public void retractFact(@Nullable A a, @Nullable UniTuple<A> tuple) {
-        if (tuple == null) {
-            throw new IllegalStateException("The fact (%s) was never inserted."
-                    .formatted(a));
-        }
         factCount--;
         retractExisting(a, tuple);
-    }
-
-    @Override
-    public boolean supports(AbstractRootNode.LifecycleOperation lifecycleOperation) {
-        return true;
     }
 
 }

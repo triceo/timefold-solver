@@ -24,10 +24,8 @@ import ai.timefold.solver.core.impl.bavet.uni.ForEachUnfilteredUniNode;
 import org.junit.jupiter.api.Test;
 
 /**
- * Covers the three update paths of {@link AbstractSession}:
- * the direct path (one for-each node, no deferral),
- * the handle path with immediate updates (several for-each nodes, no deferral),
- * and the deferred path.
+ * Covers the immediate update path of {@link AbstractSession} (one fact map per node)
+ * and the deferred path (one handle per fact).
  */
 class AbstractSessionTest {
 
@@ -36,7 +34,7 @@ class AbstractSessionTest {
     private final TupleLifecycle<UniTuple<Fact>> unfilteredDownstream = mockDownstream();
 
     @Test
-    void directPathFollowsFilterTransitions() {
+    void immediatePathFollowsFilterTransitions() {
         var session = session(false, filteredNode());
         var fact = new Fact("A", true);
         session.insert(fact);
@@ -55,7 +53,7 @@ class AbstractSessionTest {
     }
 
     @Test
-    void directPathAcceptsEqualInstanceOnUpdate() {
+    void immediatePathAcceptsEqualInstanceOnUpdate() {
         var session = session(false, filteredNode());
         session.insert(new Fact("A", true));
         session.settle();
@@ -66,7 +64,7 @@ class AbstractSessionTest {
     }
 
     @Test
-    void directPathRejectsDuplicateAndUnknownFacts() {
+    void immediatePathRejectsDuplicateAndUnknownFacts() {
         var session = session(false, filteredNode());
         session.insert(new Fact("A", true));
 
@@ -79,7 +77,7 @@ class AbstractSessionTest {
     }
 
     @Test
-    void handlePathUpdatesImmediately() {
+    void immediatePathWithSeveralNodesUpdatesAtOnce() {
         var session = session(false, filteredNode(), unfilteredNode());
         var fact = new Fact("A", true);
         session.insert(fact);

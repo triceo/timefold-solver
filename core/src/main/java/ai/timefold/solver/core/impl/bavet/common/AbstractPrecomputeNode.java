@@ -62,11 +62,6 @@ public abstract class AbstractPrecomputeNode<Tuple_ extends Tuple>
         return sourceClasses;
     }
 
-    @Override
-    public final boolean supports(AbstractRootNode.LifecycleOperation lifecycleOperation) {
-        return true;
-    }
-
     public final void insert(@Nullable Object a) {
         if (a == null) {
             return;

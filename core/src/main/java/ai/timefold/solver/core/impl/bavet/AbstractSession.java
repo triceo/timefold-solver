@@ -18,26 +18,16 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Feeds facts into the root nodes of a node network.
- * Inserts and retracts reach the nodes immediately.
- * Each fact with for-each nodes has one {@link FactHandle}, which holds its tuple in every for-each node,
- * so that one map lookup serves all for-each nodes.
- * Updates of facts of the deferred classes wait until {@link #settle()},
- * so that each fact reaches each for-each node at most once per settle;
- * these are the classes which typically receive many updates per fact between two settles,
- * such as entities with declarative shadow variables.
- * Deferral costs a second pass over the facts, so updates of other classes reach the nodes immediately.
- * A class with only one for-each node and no deferral needs no handle;
- * its map holds the tuple directly, which saves pointer loads on every update.
+ * Feeds facts into the root nodes; updates of the deferred classes wait until {@link #settle()}.
+ * Other classes keep the update path of the nodes small; see {@link ClassPlan}.
  */
 @NullMarked
 public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork> {
 
     /**
-     * Value of {@link ClassPlan#directMap} for a fact which its node holds no tuple for.
+     * Value of a fact map for a fact which its node holds no tuple for.
      */
     private static final Object NO_TUPLE = new Object();
-    private static final int INITIAL_FACT_MAP_SIZE = 1000;
 
     protected final Network_ nodeNetwork;
     private final Set<Class<?>> deferredUpdateClassSet;
@@ -45,11 +35,6 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
     private final List<FactHandle> dirtyHandleList = new ArrayList<>();
     private @Nullable Class<?> lastClass;
     private @Nullable ClassPlan lastClassPlan;
-    /**
-     * The last fact of a deferred class that was updated; consecutive updates of it need no lookup.
-     * Must be reset whenever an update could otherwise be lost: on settle, insert and retract.
-     */
-    private @Nullable Object lastUpdatedFact;
     private boolean initialized = false;
     private boolean settled = false;
 
@@ -58,7 +43,8 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
     }
 
     /**
-     * @param deferredUpdateClassSet updates of facts of these classes and their subclasses wait until settle
+     * @param deferredUpdateClassSet updates of facts of these classes and their subclasses wait until settle;
+     *        worth it for classes whose facts receive many updates between two settles
      */
     protected AbstractSession(Network_ nodeNetwork, Set<Class<?>> deferredUpdateClassSet) {
         this.nodeNetwork = nodeNetwork;
@@ -67,39 +53,33 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
     }
 
     public final void insert(Object fact) {
-        lastUpdatedFact = null;
         settled = false;
         var plan = getClassPlan(fact.getClass());
         for (var node : plan.otherNodes) {
             node.insert(fact);
         }
-        if (!plan.hasForEachNodes()) {
+        if (plan.deferred) {
+            insertDeferred(plan, fact);
             return;
         }
-        var directNode = plan.directNode;
-        if (directNode != null) {
-            var tuple = plan.forEachActive[0] ? directNode.insertFact(fact) : null;
-            if (plan.directMap.putIfAbsent(fact, tuple == null ? NO_TUPLE : tuple) != null) {
-                throw new IllegalStateException("""
-                        The fact (%s) was already inserted.
-                        Maybe your entities mistakenly equal each other?
-                        Maybe your @%s's collection properties contain duplicates?"""
-                        .formatted(fact, PlanningSolution.class.getSimpleName()));
+        var nodes = plan.forEachNodes;
+        for (var i = 0; i < nodes.length; i++) {
+            var tuple = nodes[i].insertFact(fact);
+            if (plan.maps[i].putIfAbsent(fact, tuple == null ? NO_TUPLE : tuple) != null) {
+                throw alreadyInserted(fact);
             }
-            return;
         }
+    }
+
+    private static void insertDeferred(ClassPlan plan, Object fact) {
         var handle = new FactHandle(fact, plan);
         if (plan.handleMap.putIfAbsent(fact, handle) != null) {
-            throw new IllegalStateException("""
-                    The fact (%s) was already inserted.
-                    Maybe your entities mistakenly equal each other?
-                    Maybe your @%s's collection properties contain duplicates?"""
-                    .formatted(fact, PlanningSolution.class.getSimpleName()));
+            throw alreadyInserted(fact);
         }
-        var forEachNodes = plan.forEachNodes;
-        for (var i = 0; i < forEachNodes.length; i++) {
-            if (plan.forEachActive[i]) {
-                handle.tuples[i] = forEachNodes[i].insertFact(fact);
+        var nodes = plan.forEachNodes;
+        for (var i = 0; i < nodes.length; i++) {
+            if (plan.active[i]) {
+                handle.tuples[i] = nodes[i].insertFact(fact);
             }
         }
     }
@@ -107,42 +87,34 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
     @SuppressWarnings("unchecked")
     public final void update(Object fact) {
         settled = false;
-        if (fact == lastUpdatedFact) {
-            return;
-        }
         var plan = getClassPlan(fact.getClass());
         for (var node : plan.otherNodes) {
             node.update(fact);
         }
-        if (!plan.hasForEachNodes()) {
+        if (plan.deferred) {
+            updateDeferred(plan, fact);
             return;
         }
-        var directNode = plan.directNode;
-        if (directNode != null) {
-            var stored = plan.directMap.get(fact);
+        var nodes = plan.forEachNodes;
+        var maps = plan.maps;
+        for (var i = 0; i < nodes.length; i++) {
+            var stored = maps[i].get(fact);
             if (stored == null) {
-                throw new IllegalStateException("The fact (%s) was never inserted."
-                        .formatted(fact));
+                throw neverInserted(fact);
             }
-            if (plan.forEachActive[0]) {
-                var tuple = stored == NO_TUPLE ? null : (UniTuple<Object>) stored;
-                var updated = directNode.updateFact(fact, tuple);
-                if (updated != tuple) {
-                    plan.directMap.put(fact, updated == null ? NO_TUPLE : updated);
-                }
+            var tuple = stored == NO_TUPLE ? null : (UniTuple<Object>) stored;
+            var updated = nodes[i].updateFact(fact, tuple);
+            if (updated != tuple) {
+                maps[i].put(fact, updated == null ? NO_TUPLE : updated);
             }
-            return;
         }
+    }
+
+    private void updateDeferred(ClassPlan plan, Object fact) {
         var handle = plan.handleMap.get(fact);
         if (handle == null) {
-            throw new IllegalStateException("The fact (%s) was never inserted."
-                    .formatted(fact));
+            throw neverInserted(fact);
         }
-        if (!plan.deferUpdates) {
-            updateForEachNodes(handle);
-            return;
-        }
-        lastUpdatedFact = fact;
         if (!handle.dirty) {
             handle.dirty = true;
             dirtyHandleList.add(handle);
@@ -151,48 +123,58 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
 
     @SuppressWarnings("unchecked")
     public final void retract(Object fact) {
-        lastUpdatedFact = null;
         settled = false;
         var plan = getClassPlan(fact.getClass());
         for (var node : plan.otherNodes) {
             node.retract(fact);
         }
-        if (!plan.hasForEachNodes()) {
+        if (plan.deferred) {
+            retractDeferred(plan, fact);
             return;
         }
-        var directNode = plan.directNode;
-        if (directNode != null) {
-            var stored = plan.directMap.remove(fact);
+        var nodes = plan.forEachNodes;
+        for (var i = 0; i < nodes.length; i++) {
+            var stored = plan.maps[i].remove(fact);
             if (stored == null) {
-                throw new IllegalStateException("The fact (%s) was never inserted."
-                        .formatted(fact));
+                throw neverInserted(fact);
             }
-            if (plan.forEachActive[0]) {
-                directNode.retractFact(fact, stored == NO_TUPLE ? null : (UniTuple<Object>) stored);
-            }
-            return;
+            nodes[i].retractFact(fact, stored == NO_TUPLE ? null : (UniTuple<Object>) stored);
         }
+    }
+
+    private static void retractDeferred(ClassPlan plan, Object fact) {
         var handle = plan.handleMap.remove(fact);
         if (handle == null) {
-            throw new IllegalStateException("The fact (%s) was never inserted."
-                    .formatted(fact));
+            throw neverInserted(fact);
         }
-        handle.retracted = true; // A pending update of this handle is skipped.
-        var forEachNodes = plan.forEachNodes;
-        for (var i = 0; i < forEachNodes.length; i++) {
-            if (plan.forEachActive[i]) {
-                forEachNodes[i].retractFact(fact, handle.tuples[i]);
+        handle.retracted = true;
+        var nodes = plan.forEachNodes;
+        for (var i = 0; i < nodes.length; i++) {
+            if (plan.active[i]) {
+                nodes[i].retractFact(fact, handle.tuples[i]);
             }
         }
     }
 
+    private static IllegalStateException alreadyInserted(Object fact) {
+        return new IllegalStateException("""
+                The fact (%s) was already inserted.
+                Maybe your entities mistakenly equal each other?
+                Maybe your @%s's collection properties contain duplicates?"""
+                .formatted(fact, PlanningSolution.class.getSimpleName()));
+    }
+
+    private static IllegalStateException neverInserted(Object fact) {
+        return new IllegalStateException("The fact (%s) was never inserted."
+                .formatted(fact));
+    }
+
     private ClassPlan getClassPlan(Class<?> factClass) {
         if (factClass != lastClass) {
-            // Map.computeIfAbsent() would have created lambdas on the hot path, this will not.
             var plan = classPlanMap.get(factClass);
             if (plan == null) {
-                var deferUpdates = deferredUpdateClassSet.stream().anyMatch(clazz -> clazz.isAssignableFrom(factClass));
-                plan = new ClassPlan(nodeNetwork.getRootNodesAcceptingType(factClass).toList(), deferUpdates);
+                var deferred = deferredUpdateClassSet.stream().anyMatch(clazz -> clazz.isAssignableFrom(factClass));
+                plan = new ClassPlan(nodeNetwork.getRootNodesAcceptingType(factClass).toList(), deferred);
                 classPlanMap.put(factClass, plan);
             }
             lastClassPlan = plan;
@@ -205,7 +187,9 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
         if (settled) {
             return;
         }
-        flushUpdates();
+        if (!dirtyHandleList.isEmpty()) {
+            flushUpdates();
+        }
         nodeNetwork.settle();
         if (!initialized && nodeNetwork.isActivationCheckComplete()) {
             var activeNodeSet = nodeNetwork.getActiveNodes();
@@ -218,26 +202,22 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
     }
 
     private void flushUpdates() {
-        lastUpdatedFact = null;
         for (var handleIndex = 0; handleIndex < dirtyHandleList.size(); handleIndex++) {
             var handle = dirtyHandleList.get(handleIndex);
             handle.dirty = false;
-            if (!handle.retracted) {
-                updateForEachNodes(handle);
+            if (handle.retracted) {
+                continue;
+            }
+            var plan = handle.plan;
+            var nodes = plan.forEachNodes;
+            var tuples = handle.tuples;
+            for (var i = 0; i < nodes.length; i++) {
+                if (plan.active[i]) {
+                    tuples[i] = nodes[i].updateFact(handle.fact, tuples[i]);
+                }
             }
         }
         dirtyHandleList.clear();
-    }
-
-    private static void updateForEachNodes(FactHandle handle) {
-        var plan = handle.plan;
-        var forEachNodes = plan.forEachNodes;
-        var tuples = handle.tuples;
-        for (var i = 0; i < forEachNodes.length; i++) {
-            if (plan.forEachActive[i]) {
-                tuples[i] = forEachNodes[i].updateFact(handle.fact, tuples[i]);
-            }
-        }
     }
 
     public Network_ getNodeNetwork() {
@@ -245,29 +225,21 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
     }
 
     /**
-     * The root nodes of one concrete fact class, and the handles of its facts.
-     * Handles are kept for each concrete class,
-     * so that equal facts of unrelated classes do not collide.
+     * Root nodes of one concrete fact class.
+     * A deferred class keeps one {@link FactHandle} per fact; other classes keep one fact map per node,
+     * because sharing the deferred path measurably slows down their updates.
      */
     private static final class ClassPlan {
 
+        private final boolean deferred;
+        private AbstractForEachUniNode<Object>[] forEachNodes;
+        private Map<Object, Object>[] maps;
         private final Map<Object, FactHandle> handleMap;
-        /**
-         * Positions never change, because {@link FactHandle#tuples} uses them.
-         */
-        private final AbstractForEachUniNode<Object>[] forEachNodes;
-        private final boolean[] forEachActive;
-        private final boolean deferUpdates;
-        /**
-         * Set for a class with one for-each node and no deferral; then {@link #directMap} holds its tuples.
-         */
-        private final @Nullable AbstractForEachUniNode<Object> directNode;
-        private final Map<Object, Object> directMap;
+        private final boolean[] active;
         private AbstractPrecomputeNode<?>[] otherNodes;
 
         @SuppressWarnings("unchecked")
-        private ClassPlan(List<AbstractRootNode<?>> rootNodeList, boolean deferUpdates) {
-            this.deferUpdates = deferUpdates;
+        private ClassPlan(List<AbstractRootNode<?>> rootNodeList, boolean deferred) {
             var forEachNodeList = new ArrayList<AbstractForEachUniNode<Object>>();
             var otherNodeList = new ArrayList<AbstractPrecomputeNode<?>>();
             for (var node : rootNodeList) {
@@ -280,23 +252,39 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
                 }
             }
             this.forEachNodes = forEachNodeList.toArray(AbstractForEachUniNode[]::new);
-            this.forEachActive = new boolean[forEachNodes.length];
-            Arrays.fill(forEachActive, true);
+            this.deferred = deferred && forEachNodes.length > 0;
+            this.active = new boolean[forEachNodes.length];
+            Arrays.fill(active, true);
+            if (this.deferred) {
+                this.maps = new Map[0];
+                this.handleMap = HashMap.newHashMap(1000);
+            } else {
+                this.maps = new Map[forEachNodes.length];
+                for (var i = 0; i < maps.length; i++) {
+                    maps[i] = HashMap.newHashMap(1000);
+                }
+                this.handleMap = Map.of();
+            }
             this.otherNodes = otherNodeList.toArray(AbstractPrecomputeNode[]::new);
-            this.directNode = !deferUpdates && forEachNodes.length == 1 ? forEachNodes[0] : null;
-            // A sparse table measurably speeds up lookups in small maps which are hit on every move.
-            this.directMap = directNode == null ? Map.of() : HashMap.newHashMap(INITIAL_FACT_MAP_SIZE);
-            this.handleMap = forEachNodes.length == 0 || directNode != null ? Map.of()
-                    : HashMap.newHashMap(INITIAL_FACT_MAP_SIZE);
         }
 
-        private boolean hasForEachNodes() {
-            return forEachNodes.length != 0;
-        }
-
+        @SuppressWarnings("unchecked")
         private void removeInactiveNodes(Predicate<Object> isActive) {
-            for (var i = 0; i < forEachNodes.length; i++) {
-                forEachActive[i] = forEachActive[i] && isActive.test(forEachNodes[i]);
+            if (deferred) { // Handles address nodes by position, so positions stay.
+                for (var i = 0; i < forEachNodes.length; i++) {
+                    active[i] = isActive.test(forEachNodes[i]);
+                }
+            } else {
+                var keptNodes = new ArrayList<AbstractForEachUniNode<Object>>();
+                var keptMaps = new ArrayList<Map<Object, Object>>();
+                for (var i = 0; i < forEachNodes.length; i++) {
+                    if (isActive.test(forEachNodes[i])) {
+                        keptNodes.add(forEachNodes[i]);
+                        keptMaps.add(maps[i]);
+                    }
+                }
+                forEachNodes = keptNodes.toArray(AbstractForEachUniNode[]::new);
+                maps = keptMaps.toArray(Map[]::new);
             }
             otherNodes = Arrays.stream(otherNodes)
                     .filter(isActive)
@@ -309,9 +297,6 @@ public abstract class AbstractSession<Network_ extends AbstractBavetNodeNetwork>
 
         private final Object fact;
         private final ClassPlan plan;
-        /**
-         * Index i belongs to {@link ClassPlan#forEachNodes}[i]; null if that node holds no tuple for the fact.
-         */
         private final @Nullable UniTuple<Object>[] tuples;
         private boolean dirty = false;
         private boolean retracted = false;

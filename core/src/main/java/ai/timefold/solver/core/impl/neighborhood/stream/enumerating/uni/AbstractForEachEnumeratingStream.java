@@ -1,7 +1,5 @@
 package ai.timefold.solver.core.impl.neighborhood.stream.enumerating.uni;
 
-import static ai.timefold.solver.core.impl.bavet.common.AbstractRootNode.LifecycleOperation;
-
 import java.util.Objects;
 import java.util.Set;
 
@@ -42,7 +40,7 @@ abstract sealed class AbstractForEachEnumeratingStream<Solution_, A>
         TupleLifecycle<UniTuple<A>> tupleLifecycle = buildHelper.getAggregatedTupleLifecycle(childStreamList);
         var outputStoreSize = buildHelper.extractTupleStoreSize(this);
         var node = new ForEachUnfilteredUniNode<>(forEachClass, tupleLifecycle, false, outputStoreSize);
-        if (shouldIncludeNull && node.supports(LifecycleOperation.INSERT)) {
+        if (shouldIncludeNull) {
             node.insertFact(null);
         }
         buildHelper.addNode(node, this, null);
